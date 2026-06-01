@@ -1,0 +1,50 @@
+---
+description: Arquitectura full-stack para Webflow Cloud, Next.js, SQLite, KV y n8n
+alwaysApply: true
+---
+
+# Arquitectura
+
+Usar:
+
+- Next.js App Router.
+- React.
+- TypeScript.
+- Webflow Cloud.
+- Webflow Code Components.
+- GitHub.
+- SQLite.
+- KV Store.
+- n8n.
+- API routes en app/api.
+
+No usar Supabase, Firebase, MongoDB, Prisma, Express ni backend externo salvo que sea estrictamente necesario y primero se explique por qué.
+
+## Separación por módulo
+
+Usar estructura modular:
+
+```txt
+app/
+  diagnostico-marketing-digital/
+  calendario/
+  calculadora-roi/
+  api/
+    quiz/
+    calendar/
+    roi/
+
+components/
+  code-components/
+  quiz/
+  calendar/
+  roi/
+  shared/
+
+lib/
+  quiz/
+  calendar/
+  roi/
+  db/
+  n8n/
+  shared/

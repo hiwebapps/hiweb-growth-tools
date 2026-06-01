@@ -1,0 +1,86 @@
+---
+description: Reglas para crear componentes compatibles con Webflow Code Components
+alwaysApply: true
+---
+
+# Webflow Code Components
+
+El flujo principal es:
+
+Cursor / React / TypeScript
+→ Code Components
+→ Webflow Designer
+→ Webflow Cloud
+
+Los módulos interactivos deben poder usarse como Webflow Code Components.
+
+Componentes principales esperados:
+
+- QuizToolComponent
+- CalendarToolComponent
+- RoiCalculatorComponent
+
+Los componentes deben:
+
+- Ser React components limpios.
+- Usar TypeScript.
+- Tener props claras.
+- Tener defaults seguros.
+- Ser responsive.
+- Tener estados loading, error y success.
+- No exponer secretos.
+- No hacer llamadas directas a n8n desde cliente.
+- Usar APIs internas de Webflow Cloud.
+- Poder insertarse en Webflow Designer.
+
+Props configurables desde Webflow Designer:
+
+QuizToolComponent:
+- eyebrow
+- title
+- description
+- startButtonLabel
+- leadCaptureTitle
+- leadCaptureDescription
+- resultCtaLabel
+- resultCtaUrl
+- themeVariant
+
+CalendarToolComponent:
+- eyebrow
+- title
+- description
+- defaultService
+- submitButtonLabel
+- successTitle
+- successMessage
+- themeVariant
+
+RoiCalculatorComponent:
+- eyebrow
+- title
+- description
+- defaultMonthlyBudget
+- defaultLeadValue
+- ctaLabel
+- ctaUrl
+- themeVariant
+
+No exponer como props:
+
+- Fórmulas críticas.
+- Endpoints secretos.
+- Webhook URLs.
+- Secrets.
+- Scoring final.
+- Lógica de negocio crítica.
+
+Webflow Designer se usará para:
+
+- Insertar Code Components.
+- Editar props visibles.
+- Montar landing pages.
+- Ajustar copy.
+- Combinar componentes con secciones nativas.
+
+Los cambios profundos de estructura, layout interno o lógica se hacen en código.

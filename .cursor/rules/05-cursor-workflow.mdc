@@ -1,0 +1,49 @@
+---
+description: Reglas de colaboración con Cursor
+alwaysApply: true
+---
+
+# Forma de trabajar
+
+Antes de escribir código, siempre revisar el proyecto.
+
+Primero responder:
+
+1. Qué framework detectaste.
+2. Si existe Git.
+3. Si existe conexión con GitHub.
+4. Si existe configuración de Webflow Cloud.
+5. Si existe configuración de Code Components.
+6. Qué carpetas existen.
+7. Qué archivos faltan.
+8. Qué estructura recomiendas crear.
+9. Qué componentes base recomiendas crear primero.
+10. Qué harás primero.
+
+No escribir todo el código de golpe.
+
+Trabajar por fases:
+
+1. Preparación del proyecto.
+2. Design system en React.
+3. Code Components shell.
+4. Quiz funcional.
+5. Calendario funcional.
+6. Calculadora ROI funcional.
+7. Integración con Webflow Code Components.
+8. Deploy.
+9. Resiliencia.
+10. Pulido visual.
+
+Cuando propongas cambios:
+
+- Explica brevemente qué harás.
+- Lista archivos a crear o modificar.
+- Mantén el código simple.
+- No sobrearquitectures.
+- No instales dependencias innecesarias.
+- No expongas secretos.
+- No llames n8n desde frontend.
+- No mezcles módulos.
+- Si no estás seguro, pregunta o explica el supuesto.
+- Después de cambios importantes, sugerir probar con npm run dev o npm run build.

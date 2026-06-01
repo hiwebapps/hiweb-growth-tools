@@ -1,0 +1,65 @@
+---
+description: Reglas de UI frontend para Hiweb Growth Tools
+alwaysApply: true
+---
+
+# UI y frontend
+
+Diseñar con estilo:
+
+- Moderno.
+- Profesional.
+- B2B SaaS.
+- Limpio.
+- Mobile-first.
+- Claro.
+- Enfocado en conversión.
+- Compatible con una agencia de marketing digital.
+
+Priorizar:
+
+- Buena jerarquía visual.
+- Buen espaciado.
+- Tipografía clara.
+- Cards limpias.
+- Botones consistentes.
+- Estados hover.
+- Estados focus.
+- Estados disabled.
+- Estados loading.
+- Estados error.
+- Estados success.
+- Accesibilidad básica.
+- Responsive design.
+
+Crear componentes base reutilizables:
+
+- Button
+- Card
+- Input
+- ProgressBar
+- Badge
+- Alert
+- Spinner
+- SectionHeader
+
+Buenas prácticas React:
+
+- Componentes pequeños.
+- TypeScript estricto.
+- Props claras.
+- Estado local bien organizado.
+- Funciones puras para cálculos.
+- Validar antes de submit.
+- No duplicar lógica.
+- No hardcodear datos complejos dentro de componentes visuales.
+- No mezclar lógica de negocio con componentes puramente visuales.
+
+Orden visual:
+
+1. Que funcione.
+2. Que sea claro.
+3. Que sea responsive.
+4. Que sea accesible.
+5. Que sea bonito.
+6. Que convierta.

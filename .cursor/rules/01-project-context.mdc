@@ -1,0 +1,46 @@
+---
+description: Contexto general del proyecto Hiweb Growth Tools
+alwaysApply: true
+---
+
+# Proyecto: Hiweb Growth Tools
+
+Este proyecto es una app modular para Hiweb Marketing.
+
+No es una sola landing ni una sola herramienta. Es una suite de herramientas interactivas de captación, diagnóstico y conversión.
+
+La app debe vivir en un solo repositorio de GitHub y desplegarse como una sola app en Webflow Cloud.
+
+Herramientas principales:
+
+1. Quiz multistep de diagnóstico de marketing digital.
+2. Calendario dinámico para agendar llamadas.
+3. Calculadora de ROI de marketing digital.
+
+Principio principal:
+
+- 1 repositorio en GitHub.
+- 1 app en Webflow Cloud.
+- Varias rutas internas.
+- Módulos separados por feature.
+- SQLite para datos persistentes.
+- KV Store para sesiones temporales.
+- n8n para automatizaciones externas.
+- Webflow Code Components para módulos interactivos.
+- Webflow Designer para montar páginas y configurar props.
+
+Rutas esperadas:
+
+- /diagnostico-marketing-digital
+- /calendario
+- /calculadora-roi
+
+APIs esperadas:
+
+- /app/api/quiz/session/route.ts
+- /app/api/quiz/submit/route.ts
+- /app/api/calendar/availability/route.ts
+- /app/api/calendar/book/route.ts
+- /app/api/calendar/cancel/route.ts
+- /app/api/roi/calculate/route.ts
+- /app/api/roi/submit/route.ts
