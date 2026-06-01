@@ -6,18 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "webflow:bundle": "webflow devlink bundle",
+    "webflow:import": "webflow devlink import"
   },
   "dependencies": {
+    "@webflow/data-types": "^2.0.0",
+    "@webflow/react": "^2.0.0",
+    "better-sqlite3": "^12.10.0",
     "next": "16.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@webflow/webflow-cli": "^2.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "tailwindcss": "^4",

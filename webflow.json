@@ -1,0 +1,18 @@
+{
+  "cloud": {
+    "framework": "nextjs"
+  },
+  "library": {
+    "name": "Hiweb Growth Tools",
+    "components": [
+      "./components/code-components/**/*.webflow.tsx"
+    ]
+  },
+  "telemetry": {
+    "global": {
+      "allowTelemetry": true,
+      "lastPrompted": 1780355932776,
+      "version": "2.0.0"
+    }
+  }
+}
