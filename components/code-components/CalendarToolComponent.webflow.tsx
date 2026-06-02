@@ -40,7 +40,7 @@ export default declareComponent(CalendarToolComponent, {
     }),
   },
   options: {
-    ssr: true,
+    ssr: false,
     applyTagSelectors: false,
   },
 });

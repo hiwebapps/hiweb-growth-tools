@@ -1,4 +1,5 @@
-/* Scoped styles for Stitch-inspired ROI calculator (no Tailwind CDN). */
+/** Inline styles for Webflow Code Components (avoid .css imports → localhost URLs in bundle). */
+const ROI_STITCH_CSS = `
 .roi-stitch {
   --roi-bg: #0e0e11;
   --roi-surface: #15181d;
@@ -13,7 +14,6 @@
   --roi-secondary: #c3c6d1;
   color: var(--roi-on-surface);
 }
-
 .roi-stitch .roi-ambient {
   position: absolute;
   width: min(600px, 80vw);
@@ -24,26 +24,22 @@
   opacity: 0.15;
   pointer-events: none;
 }
-
 .roi-stitch .roi-ambient-cyan {
   background: radial-gradient(circle, rgba(43, 167, 246, 0.8) 0%, transparent 70%);
   top: -10%;
   left: -10%;
 }
-
 .roi-stitch .roi-ambient-violet {
   background: radial-gradient(circle, rgba(106, 45, 232, 0.8) 0%, transparent 70%);
   bottom: -10%;
   right: -10%;
 }
-
 .roi-stitch input[type="range"].roi-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   background: transparent;
 }
-
 .roi-stitch input[type="range"].roi-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 24px;
@@ -55,11 +51,9 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   transition: transform 0.2s;
 }
-
 .roi-stitch input[type="range"].roi-slider::-webkit-slider-thumb:hover {
   transform: scale(1.12);
 }
-
 .roi-stitch input[type="range"].roi-slider::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
@@ -67,15 +61,18 @@
   background: #353438;
   border-radius: 2px;
 }
-
 .roi-stitch input[type="range"].roi-slider:focus {
   outline: none;
 }
-
 .roi-stitch .roi-select {
   appearance: none;
   background-color: var(--roi-surface-low);
   border: 1px solid var(--roi-border);
   border-radius: 9999px;
   color: var(--roi-on-surface);
+}
+`;
+
+export function RoiStitchStyles() {
+  return <style>{ROI_STITCH_CSS}</style>;
 }

@@ -38,7 +38,7 @@ export default declareComponent(QuizToolComponent, {
     }),
   },
   options: {
-    ssr: true,
+    ssr: false,
     applyTagSelectors: false,
   },
 });

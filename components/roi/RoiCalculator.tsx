@@ -9,8 +9,8 @@ import type {
   RoiCalculatorState,
   RoiLeadInput,
 } from "@/lib/roi/types";
-import "./roi-stitch.css";
 import { RoiHero } from "./RoiHero";
+import { RoiStitchStyles } from "./RoiStitchStyles";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiLeadPanel } from "./RoiLeadPanel";
 import { RoiResults } from "./RoiResults";
@@ -122,6 +122,7 @@ export function RoiCalculator({
 
   return (
     <div className="roi-stitch relative w-full">
+      <RoiStitchStyles />
       <div className="roi-ambient roi-ambient-cyan" aria-hidden />
       <div className="roi-ambient roi-ambient-violet" aria-hidden />
 

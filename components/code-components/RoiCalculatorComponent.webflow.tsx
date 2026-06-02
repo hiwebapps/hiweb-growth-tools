@@ -43,7 +43,7 @@ export default declareComponent(RoiCalculatorComponent, {
     }),
   },
   options: {
-    ssr: true,
+    ssr: false,
     applyTagSelectors: false,
   },
 });

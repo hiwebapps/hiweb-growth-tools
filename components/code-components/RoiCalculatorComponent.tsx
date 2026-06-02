@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { RoiCalculator } from "@/components/roi";
+import { RoiStitchStyles } from "@/components/roi/RoiStitchStyles";
 import { Alert, Spinner } from "@/components/shared";
 import type { CodeComponentBaseProps } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
@@ -50,6 +51,7 @@ export function RoiCalculatorComponent(
   if (previewState === "loading") {
     return (
       <div className={cn("roi-stitch flex justify-center py-24", className)}>
+        <RoiStitchStyles />
         <Spinner size="lg" />
       </div>
     );
@@ -82,6 +84,7 @@ export function RoiCalculatorComponent(
         className,
       )}
     >
+      <RoiStitchStyles />
       {props.eyebrow ? (
         <p className="mb-4 text-center text-sm font-medium tracking-wide text-[var(--roi-cyan)] uppercase">
           {props.eyebrow}

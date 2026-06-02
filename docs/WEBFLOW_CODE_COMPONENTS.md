@@ -80,6 +80,7 @@ Los Code Components llaman a las mismas APIs (`/api/quiz`, `/api/calendar`, `/ap
 |----------|--------|
 | `devlink import` falla por tipos | Revisa `npm run build`; usa `--force` solo si entiendes el error |
 | `devlink import` — token no autorizado | Usa **Workspace API token**, no Site token. Ver [`DEPLOY_WEBFLOW_CLOUD.md`](./DEPLOY_WEBFLOW_CLOUD.md) §6 |
+| Designer: `CompilationError: Invalid source code` | No importes archivos `.css` en componentes; usa `<style>` inline. Reimporta tras `npm run webflow:bundle` |
 | APIs 404 en producción | Verifica `NEXT_PUBLIC_BASE_PATH` = mount path |
 | Componente vacío en Designer | Confirma deploy de la app Cloud y CORS/origen del sitio |
 | n8n no recibe datos | Revisa variables `N8N_WEBHOOK_*` en el entorno Cloud |
