@@ -24,11 +24,9 @@ export function RoiSliderField({
 }: RoiSliderFieldProps) {
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex justify-between text-base font-semibold text-[var(--roi-on-surface)]">
+      <label className="roi-text-on flex justify-between text-base font-semibold">
         <span>{label}</span>
-        <span className="font-medium text-[var(--roi-cyan)]">
-          {formatValue(value)}
-        </span>
+        <span className="roi-text-cyan font-medium">{formatValue(value)}</span>
       </label>
       <input
         type="range"

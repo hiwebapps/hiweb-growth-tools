@@ -10,18 +10,19 @@ export type AlertProps = {
   className?: string;
 };
 
+/** Clases sin selectores arbitrarios Tailwind (compatibles con Webflow Designer). */
 const variantClasses: Record<AlertVariant, string> = {
-  info: "border-info/30 bg-info-bg text-foreground [&_strong]:text-info",
-  success: "border-success/30 bg-success-bg text-foreground [&_strong]:text-success",
-  warning: "border-warning/30 bg-warning-bg text-foreground [&_strong]:text-warning",
-  error: "border-error/30 bg-error-bg text-foreground [&_strong]:text-error",
+  info: "border border-info bg-info-bg text-foreground",
+  success: "border border-success bg-success-bg text-foreground",
+  warning: "border border-warning bg-warning-bg text-foreground",
+  error: "border border-error bg-error-bg text-foreground",
 };
 
 const icons: Record<AlertVariant, string> = {
-  info: "ℹ",
-  success: "✓",
-  warning: "⚠",
-  error: "✕",
+  info: "i",
+  success: "+",
+  warning: "!",
+  error: "x",
 };
 
 export function Alert({
@@ -34,20 +35,20 @@ export function Alert({
     <div
       role="alert"
       className={cn(
-        "flex gap-3 rounded-lg border p-4 text-sm leading-relaxed",
+        "flex gap-3 rounded-lg p-4 text-sm leading-relaxed",
         variantClasses[variant],
         className,
       )}
     >
       <span
-        className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface/80 text-xs font-bold"
+        className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface text-xs font-bold"
         aria-hidden="true"
       >
         {icons[variant]}
       </span>
       <div className="flex min-w-0 flex-col gap-1">
         {title ? <p className="font-semibold">{title}</p> : null}
-        <div className="text-muted [&_strong]:font-semibold">{children}</div>
+        <div className="text-muted">{children}</div>
       </div>
     </div>
   );

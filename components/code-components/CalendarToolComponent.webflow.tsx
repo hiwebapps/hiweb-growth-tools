@@ -4,7 +4,7 @@ import { contentProps } from "./shared.webflow-props";
 import CalendarToolComponent from "./CalendarToolComponent";
 
 export default declareComponent(CalendarToolComponent, {
-  name: "Calendario — Agendar llamada",
+  name: "Calendario Agendar llamada",
   description:
     "Calendario para consultar disponibilidad y reservar una llamada con Hiweb.",
   group: "Hiweb Growth Tools",

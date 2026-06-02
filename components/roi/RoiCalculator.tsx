@@ -128,9 +128,9 @@ export function RoiCalculator({
 
       <RoiHero title={title} description={description} />
 
-      <div className="relative w-full overflow-hidden rounded-2xl border border-[var(--roi-border)] bg-[var(--roi-surface)] p-5 shadow-[0_0_50px_rgba(43,167,246,0.05)] sm:p-8 lg:p-10">
+      <div className="roi-card relative w-full overflow-hidden rounded-2xl p-5 sm:p-8 lg:p-10">
         <div
-          className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full bg-[var(--roi-cyan)]/10 blur-[80px]"
+          className="roi-glow-dot pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full blur-[80px]"
           aria-hidden
         />
 

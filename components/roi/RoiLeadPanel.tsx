@@ -20,7 +20,7 @@ export function RoiLeadPanel({
   isLoading,
 }: RoiLeadPanelProps) {
   return (
-    <div className="mt-8 rounded-xl border border-[var(--roi-border)] bg-[var(--roi-surface-low)] p-6">
+    <div className="roi-bg-low roi-border mt-8 rounded-xl border p-6">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h3 className="text-lg font-semibold text-white">
           Recibe tu escenario por email
@@ -28,12 +28,12 @@ export function RoiLeadPanel({
         <button
           type="button"
           onClick={onClose}
-          className="text-sm text-[var(--roi-muted)] hover:text-white"
+          className="roi-text-muted text-sm hover:text-white"
         >
           Cerrar
         </button>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 [&_label]:text-[var(--roi-on-surface)] [&_input]:border-[var(--roi-border)] [&_input]:bg-[var(--roi-surface-lowest)] [&_input]:text-white">
+      <div className="roi-lead-grid grid gap-4 sm:grid-cols-2">
         <Input
           label="Nombre"
           name="leadName"
@@ -56,7 +56,7 @@ export function RoiLeadPanel({
           onChange={(e) => onChange("company", e.target.value)}
         />
         <Input
-          label="Teléfono"
+          label="Telefono"
           name="leadPhone"
           type="tel"
           value={lead.phone ?? ""}
@@ -67,7 +67,7 @@ export function RoiLeadPanel({
         type="button"
         disabled={isLoading}
         onClick={onSubmit}
-        className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-[var(--roi-cyan)] font-semibold text-[#0e0e11] hover:opacity-90 disabled:opacity-60"
+        className="roi-btn-submit mt-6 flex h-12 w-full items-center justify-center rounded-full font-semibold hover:opacity-90 disabled:opacity-60"
       >
         Enviar escenario
       </button>

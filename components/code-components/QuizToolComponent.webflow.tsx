@@ -4,7 +4,7 @@ import { contentProps } from "./shared.webflow-props";
 import QuizToolComponent from "./QuizToolComponent";
 
 export default declareComponent(QuizToolComponent, {
-  name: "Quiz — Diagnóstico marketing",
+  name: "Quiz Diagnostico marketing",
   description:
     "Quiz multistep de diagnóstico de marketing digital con score y captura de lead.",
   group: "Hiweb Growth Tools",

@@ -86,7 +86,7 @@ export function RoiCalculatorComponent(
     >
       <RoiStitchStyles />
       {props.eyebrow ? (
-        <p className="mb-4 text-center text-sm font-medium tracking-wide text-[var(--roi-cyan)] uppercase">
+        <p className="roi-text-cyan mb-4 text-center text-sm font-medium tracking-wide uppercase">
           {props.eyebrow}
         </p>
       ) : null}

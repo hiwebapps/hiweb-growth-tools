@@ -4,7 +4,7 @@ import { contentProps } from "./shared.webflow-props";
 import RoiCalculatorComponent from "./RoiCalculatorComponent";
 
 export default declareComponent(RoiCalculatorComponent, {
-  name: "Calculadora — ROI marketing",
+  name: "Calculadora ROI marketing",
   description:
     "Estima leads, ingresos y ROI según presupuesto, industria y ticket medio.",
   group: "Hiweb Growth Tools",

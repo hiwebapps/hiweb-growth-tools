@@ -13,13 +13,13 @@ export function RoiIndustrySelect({ value, onChange }: RoiIndustrySelectProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex justify-between text-base font-semibold text-[var(--roi-on-surface)]">
+      <label className="roi-text-on flex justify-between text-base font-semibold">
         <span>Industria</span>
-        <span className="font-medium text-[var(--roi-cyan)]">{label}</span>
+        <span className="roi-text-cyan font-medium">{label}</span>
       </label>
       <div className="relative">
         <select
-          className="roi-select w-full px-6 py-4 text-base focus:border-[var(--roi-cyan)] focus:outline-none"
+          className="roi-select"
           value={value}
           onChange={(e) => onChange(e.target.value as RoiIndustryId)}
         >
@@ -30,10 +30,10 @@ export function RoiIndustrySelect({ value, onChange }: RoiIndustrySelectProps) {
           ))}
         </select>
         <span
-          className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-[var(--roi-muted)]"
+          className="roi-text-muted pointer-events-none absolute right-6 top-1/2 -translate-y-1/2"
           aria-hidden
         >
-          ▾
+          v
         </span>
       </div>
     </div>
