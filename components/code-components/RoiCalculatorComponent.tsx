@@ -26,7 +26,7 @@ const DEFAULTS: RoiCalculatorComponentProps = {
   defaultLeadValue: 1200,
   defaultLeadsToClose: 15,
   ctaLabel: "Obtener auditoría gratuita",
-  ctaUrl: "/calendario",
+  ctaUrl: "/tools/calendario",
 };
 
 export function RoiCalculatorComponent(
@@ -80,7 +80,7 @@ export function RoiCalculatorComponent(
   return (
     <div
       className={cn(
-        "roi-stitch relative w-full bg-[#0e0e11] py-8 sm:py-12",
+        "roi-stitch roi-bg-page relative w-full py-8 sm:py-12",
         className,
       )}
     >

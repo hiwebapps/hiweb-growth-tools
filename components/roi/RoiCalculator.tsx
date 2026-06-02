@@ -10,7 +10,6 @@ import type {
   RoiLeadInput,
 } from "@/lib/roi/types";
 import { RoiHero } from "./RoiHero";
-import { RoiStitchStyles } from "./RoiStitchStyles";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiLeadPanel } from "./RoiLeadPanel";
 import { RoiResults } from "./RoiResults";
@@ -121,8 +120,7 @@ export function RoiCalculator({
   };
 
   return (
-    <div className="roi-stitch relative w-full">
-      <RoiStitchStyles />
+    <div className="relative w-full">
       <div className="roi-ambient roi-ambient-cyan" aria-hidden />
       <div className="roi-ambient roi-ambient-violet" aria-hidden />
 
@@ -130,7 +128,7 @@ export function RoiCalculator({
 
       <div className="roi-card relative w-full overflow-hidden rounded-2xl p-5 sm:p-8 lg:p-10">
         <div
-          className="roi-glow-dot pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full blur-[80px]"
+          className="roi-glow-dot roi-blur-glow pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full"
           aria-hidden
         />
 
@@ -149,7 +147,7 @@ export function RoiCalculator({
         </div>
 
         {successMessage ? (
-          <p className="hw-border-success-soft hw-bg-success-soft relative z-10 mt-6 rounded-lg border px-4 py-3 text-sm text-emerald-200">
+          <p className="roi-text-success hw-border-success-soft hw-bg-success-soft relative z-10 mt-6 rounded-lg border px-4 py-3 text-sm">
             {successMessage}
           </p>
         ) : null}

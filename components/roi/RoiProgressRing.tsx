@@ -25,7 +25,7 @@ type RoiProgressRingProps = {
 export function RoiProgressRing({ roi, children }: RoiProgressRingProps) {
   const ratio = arcRatio(roi);
   const dashOffset = CIRCUMFERENCE * (1 - ratio);
-  const strokeColor = roi < 0 ? "var(--roi-cyan)" : "var(--roi-gold)";
+  const strokeColor = roi < 0 ? "#2ba7f6" : "#f7c500";
   const glowColor =
     roi < 0 ? "rgba(43, 167, 246, 0.35)" : "rgba(247, 197, 0, 0.35)";
 

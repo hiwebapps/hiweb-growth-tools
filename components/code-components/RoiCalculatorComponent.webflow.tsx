@@ -39,7 +39,7 @@ export default declareComponent(RoiCalculatorComponent, {
     }),
     ctaUrl: props.Text({
       name: "URL CTA",
-      defaultValue: "/calendario",
+      defaultValue: "/tools/calendario",
     }),
   },
   options: {

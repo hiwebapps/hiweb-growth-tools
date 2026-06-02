@@ -65,7 +65,7 @@ export function RoiResults({
           type="button"
           disabled={isLoading}
           onClick={onCtaClick}
-          className="roi-btn-cta mt-2 flex h-[54px] w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold transition-transform active:scale-95 disabled:opacity-60"
+          className="roi-btn-cta roi-h-cta mt-2 flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold transition-transform active:scale-95 disabled:opacity-60"
         >
           <span>{ctaLabel}</span>
           <span aria-hidden>{">"}</span>
