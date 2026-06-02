@@ -84,20 +84,3 @@
   border-top-color: #ffffff;
 }
 
-/* ROI — sin clases Tailwind arbitrarias [valor] */
-.roi-stitch.roi-bg-page {
-  background-color: var(--roi-bg);
-}
-.roi-stitch .roi-blur-glow {
-  filter: blur(80px);
-}
-.roi-stitch .roi-h-cta {
-  height: 54px;
-}
-.roi-stitch .roi-text-success {
-  color: #a7f3d0;
-}
-.roi-stitch .roi-hero-glow {
-  background-color: var(--roi-gold);
-  opacity: 0.05;
-}

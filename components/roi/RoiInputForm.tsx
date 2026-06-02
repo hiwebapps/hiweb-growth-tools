@@ -15,9 +15,9 @@ type RoiInputFormProps = {
 
 export function RoiInputForm({ state, onChange, error }: RoiInputFormProps) {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="roi-stack">
       {error ? (
-        <p className="text-sm text-red-400" role="alert">
+        <p className="roi-error" role="alert">
           {error}
         </p>
       ) : null}

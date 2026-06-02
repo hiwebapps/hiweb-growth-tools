@@ -1,7 +1,6 @@
 "use client";
 
 import { formatUsd } from "@/lib/roi/state";
-import { cn } from "@/lib/shared/utils";
 
 type RoiSliderFieldProps = {
   label: string;
@@ -23,14 +22,14 @@ export function RoiSliderField({
   formatValue = formatUsd,
 }: RoiSliderFieldProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <label className="roi-text-on flex justify-between text-base font-semibold">
+    <div className="roi-field">
+      <label className="roi-field-head">
         <span>{label}</span>
-        <span className="roi-text-cyan font-medium">{formatValue(value)}</span>
+        <span className="roi-field-value">{formatValue(value)}</span>
       </label>
       <input
         type="range"
-        className={cn("roi-slider")}
+        className="roi-slider"
         min={min}
         max={max}
         step={step}

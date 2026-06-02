@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/shared";
 import type { RoiLeadInput } from "@/lib/roi/types";
 
 type RoiLeadPanelProps = {
@@ -20,54 +19,67 @@ export function RoiLeadPanel({
   isLoading,
 }: RoiLeadPanelProps) {
   return (
-    <div className="roi-bg-low roi-border mt-8 rounded-xl border p-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h3 className="text-lg font-semibold text-white">
+    <div className="roi-lead-box">
+      <div className="roi-field-head" style={{ marginBottom: "1rem" }}>
+        <h3 style={{ margin: 0, fontSize: "1.125rem", color: "#fff" }}>
           Recibe tu escenario por email
         </h3>
         <button
           type="button"
           onClick={onClose}
-          className="roi-text-muted text-sm hover:text-white"
+          className="roi-text-muted"
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
         >
           Cerrar
         </button>
       </div>
-      <div className="roi-lead-grid grid gap-4 sm:grid-cols-2">
-        <Input
-          label="Nombre"
-          name="leadName"
-          value={lead.name}
-          onChange={(e) => onChange("name", e.target.value)}
-          required
-        />
-        <Input
-          label="Email"
-          name="leadEmail"
-          type="email"
-          value={lead.email}
-          onChange={(e) => onChange("email", e.target.value)}
-          required
-        />
-        <Input
-          label="Empresa"
-          name="leadCompany"
-          value={lead.company ?? ""}
-          onChange={(e) => onChange("company", e.target.value)}
-        />
-        <Input
-          label="Telefono"
-          name="leadPhone"
-          type="tel"
-          value={lead.phone ?? ""}
-          onChange={(e) => onChange("phone", e.target.value)}
-        />
+      <div className="roi-lead-grid">
+        <div>
+          <label htmlFor="leadName">Nombre</label>
+          <input
+            id="leadName"
+            name="leadName"
+            value={lead.name}
+            onChange={(e) => onChange("name", e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="leadEmail">Email</label>
+          <input
+            id="leadEmail"
+            name="leadEmail"
+            type="email"
+            value={lead.email}
+            onChange={(e) => onChange("email", e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="leadCompany">Empresa</label>
+          <input
+            id="leadCompany"
+            name="leadCompany"
+            value={lead.company ?? ""}
+            onChange={(e) => onChange("company", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="leadPhone">Telefono</label>
+          <input
+            id="leadPhone"
+            name="leadPhone"
+            type="tel"
+            value={lead.phone ?? ""}
+            onChange={(e) => onChange("phone", e.target.value)}
+          />
+        </div>
       </div>
       <button
         type="button"
         disabled={isLoading}
         onClick={onSubmit}
-        className="roi-btn-submit mt-6 flex h-12 w-full items-center justify-center rounded-full font-semibold hover:opacity-90 disabled:opacity-60"
+        className="roi-btn-submit"
       >
         Enviar escenario
       </button>

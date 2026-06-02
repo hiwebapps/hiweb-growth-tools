@@ -21,41 +21,30 @@ export function RoiResults({
   const roiPositive = roiDisplay >= 0;
 
   return (
-    <div className="roi-panel relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 sm:p-8">
-      <div className="roi-panel-glow absolute inset-0 -z-10" aria-hidden />
-
-      <div className="flex w-full flex-col items-center gap-10">
+    <div className="roi-panel">
+      <div className="roi-panel-glow" aria-hidden />
+      <div className="roi-panel-body">
         <RoiProgressRing roi={result.estimatedRoi}>
-          <span className="roi-text-muted mb-2 text-xs font-medium tracking-widest uppercase">
-            ROI estimado
-          </span>
-          <span className="text-5xl leading-none font-bold text-white">
+          <p className="roi-ring-kicker">ROI estimado</p>
+          <p className="roi-ring-value">
             {roiPositive ? "" : "-"}
             {Math.abs(roiDisplay)}
-            <span
-              className={
-                roiPositive ? "roi-text-gold text-3xl" : "roi-text-cyan text-3xl"
-              }
-            >
+            <span className={`roi-ring-pct ${roiPositive ? "roi-text-gold" : "roi-text-cyan"}`}>
               %
             </span>
-          </span>
+          </p>
         </RoiProgressRing>
 
-        <div className="grid w-full grid-cols-2 gap-6 text-center sm:gap-8">
-          <div className="roi-border flex flex-col border-r pr-4 sm:pr-6">
-            <span className="roi-text-muted mb-2 text-xs font-medium tracking-widest uppercase">
-              Leads estimados
-            </span>
-            <span className="text-2xl font-bold text-white sm:text-3xl">
+        <div className="roi-metrics">
+          <div className="roi-metric">
+            <span className="roi-metric-kicker">Leads estimados</span>
+            <span className="roi-metric-val">
               {Math.round(result.estimatedLeads).toLocaleString("es-MX")}
             </span>
           </div>
-          <div className="flex flex-col pl-4 sm:pl-6">
-            <span className="roi-text-muted mb-2 text-xs font-medium tracking-widest uppercase">
-              Ingresos estimados
-            </span>
-            <span className="roi-text-cyan text-2xl font-bold sm:text-3xl">
+          <div className="roi-metric">
+            <span className="roi-metric-kicker">Ingresos estimados</span>
+            <span className="roi-metric-val roi-text-cyan">
               {formatUsd(result.estimatedRevenue)}
             </span>
           </div>
@@ -65,13 +54,13 @@ export function RoiResults({
           type="button"
           disabled={isLoading}
           onClick={onCtaClick}
-          className="roi-btn-cta roi-h-cta mt-2 flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-base font-semibold transition-transform active:scale-95 disabled:opacity-60"
+          className="roi-btn-cta"
         >
           <span>{ctaLabel}</span>
-          <span aria-hidden>{">"}</span>
+          <span aria-hidden> &gt;</span>
         </button>
 
-        <p className="roi-text-muted text-center text-xs">
+        <p className="roi-footnote">
           {result.resultLevelLabel} · {result.resultSummary}
         </p>
       </div>

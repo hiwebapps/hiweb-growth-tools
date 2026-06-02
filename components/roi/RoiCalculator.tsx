@@ -12,6 +12,7 @@ import type {
 import { RoiHero } from "./RoiHero";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiLeadPanel } from "./RoiLeadPanel";
+import { RoiNativeStyles } from "./RoiNativeStyles";
 import { RoiResults } from "./RoiResults";
 
 export type RoiCalculatorProps = {
@@ -70,10 +71,12 @@ export function RoiCalculator({
       setShowLeadForm(true);
       return;
     }
-    if (ctaUrl.startsWith("http")) {
-      window.open(ctaUrl, "_blank", "noopener,noreferrer");
-    } else {
-      window.location.href = ctaUrl;
+    if (typeof window !== "undefined") {
+      if (ctaUrl.startsWith("http")) {
+        window.open(ctaUrl, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.href = ctaUrl;
+      }
     }
   }, [ctaUrl, showLeadForm]);
 
@@ -120,47 +123,40 @@ export function RoiCalculator({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="roi-root">
+      <RoiNativeStyles />
       <div className="roi-ambient roi-ambient-cyan" aria-hidden />
       <div className="roi-ambient roi-ambient-violet" aria-hidden />
-
       <RoiHero title={title} description={description} />
-
-      <div className="roi-card relative w-full overflow-hidden rounded-2xl p-5 sm:p-8 lg:p-10">
-        <div
-          className="roi-glow-dot roi-blur-glow pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full"
-          aria-hidden
-        />
-
-        <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-          <RoiInputForm
-            state={state}
-            onChange={handleStateChange}
-            error={error ?? undefined}
-          />
-          <RoiResults
-            result={previewResult}
-            ctaLabel={ctaLabel}
-            onCtaClick={handleCtaClick}
-            isLoading={isSubmitting}
-          />
+      <div className="roi-card">
+        <div className="roi-glow-dot" aria-hidden />
+        <div className="roi-card-pad">
+          <div className="roi-grid">
+            <RoiInputForm
+              state={state}
+              onChange={handleStateChange}
+              error={error ?? undefined}
+            />
+            <RoiResults
+              result={previewResult}
+              ctaLabel={ctaLabel}
+              onCtaClick={handleCtaClick}
+              isLoading={isSubmitting}
+            />
+          </div>
+          {successMessage ? (
+            <p className="roi-success">{successMessage}</p>
+          ) : null}
+          {showLeadForm ? (
+            <RoiLeadPanel
+              lead={lead}
+              onChange={handleLeadChange}
+              onSubmit={() => void handleSubmitLead()}
+              onClose={() => setShowLeadForm(false)}
+              isLoading={isSubmitting}
+            />
+          ) : null}
         </div>
-
-        {successMessage ? (
-          <p className="roi-text-success hw-border-success-soft hw-bg-success-soft relative z-10 mt-6 rounded-lg border px-4 py-3 text-sm">
-            {successMessage}
-          </p>
-        ) : null}
-
-        {showLeadForm ? (
-          <RoiLeadPanel
-            lead={lead}
-            onChange={handleLeadChange}
-            onSubmit={() => void handleSubmitLead()}
-            onClose={() => setShowLeadForm(false)}
-            isLoading={isSubmitting}
-          />
-        ) : null}
       </div>
     </div>
   );

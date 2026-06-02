@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { RoiCalculator } from "@/components/roi";
-import { RoiStitchStyles } from "@/components/roi/RoiStitchStyles";
-import { Alert, Spinner } from "@/components/shared";
+import { RoiDesignerPreview } from "@/components/roi/RoiDesignerPreview";
+import { RoiErrorBoundary } from "@/components/roi/RoiErrorBoundary";
+import { RoiNativeStyles } from "@/components/roi/RoiNativeStyles";
 import type { CodeComponentBaseProps } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
-import { cn } from "@/lib/shared/utils";
+import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
 
 export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   defaultMonthlyBudget?: number;
@@ -46,84 +47,80 @@ export function RoiCalculatorComponent(
   } = props;
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+
+  const previewProps = {
+    eyebrow: props.eyebrow,
+    title: title ?? DEFAULTS.title!,
+    description,
+    defaultMonthlyBudget: defaultMonthlyBudget ?? DEFAULTS.defaultMonthlyBudget!,
+    defaultLeadValue: defaultLeadValue ?? DEFAULTS.defaultLeadValue!,
+    defaultLeadsToClose: defaultLeadsToClose ?? DEFAULTS.defaultLeadsToClose!,
+    ctaLabel: ctaLabel ?? DEFAULTS.ctaLabel!,
+  };
 
   if (previewState === "loading") {
     return (
-      <div className={cn("roi-stitch flex justify-center py-24", className)}>
-        <RoiStitchStyles />
-        <Spinner size="lg" />
+      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+        <RoiNativeStyles />
+        <p className="roi-text-muted" style={{ textAlign: "center" }}>
+          Cargando…
+        </p>
       </div>
     );
   }
 
   if (previewState === "error") {
     return (
-      <div className={cn("roi-stitch p-6", className)}>
-        <Alert variant="error" title="Error">
+      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+        <RoiNativeStyles />
+        <p className="roi-error" style={{ textAlign: "center" }}>
           No pudimos calcular el ROI.
-        </Alert>
+        </p>
       </div>
     );
   }
 
   if (previewState === "success") {
     return (
-      <div className={cn("roi-stitch p-6", className)}>
-        <Alert variant="success" title="Listo">
+      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+        <RoiNativeStyles />
+        <p className="roi-success" style={{ textAlign: "center" }}>
           Escenario guardado correctamente.
-        </Alert>
+        </p>
+      </div>
+    );
+  }
+
+  if (isWebflowDesignerCanvas()) {
+    return (
+      <div className={className}>
+        <RoiDesignerPreview {...previewProps} />
       </div>
     );
   }
 
   return (
-    <div
-      className={cn(
-        "roi-stitch roi-bg-page relative w-full py-8 sm:py-12",
-        className,
-      )}
-    >
-      <RoiStitchStyles />
-      {props.eyebrow ? (
-        <p className="roi-text-cyan mb-4 text-center text-sm font-medium tracking-wide uppercase">
-          {props.eyebrow}
-        </p>
-      ) : null}
-
-      {isLoading ? (
-        <div className="hw-bg-overlay pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-          <Spinner size="lg" />
-        </div>
-      ) : null}
-
-      {errorMessage ? (
-        <div className="relative z-20 mx-auto mb-4 max-w-3xl px-4">
-          <Alert variant="error" title="Error">
+    <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+      <div className="roi-wrap">
+        {props.eyebrow ? <p className="roi-eyebrow">{props.eyebrow}</p> : null}
+        {errorMessage ? (
+          <p className="roi-error" style={{ marginBottom: "1rem" }}>
             {errorMessage}
-          </Alert>
-        </div>
-      ) : null}
-
-      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-        <RoiCalculator
-          title={title ?? DEFAULTS.title!}
-          description={description}
-          defaultMonthlyBudget={defaultMonthlyBudget ?? DEFAULTS.defaultMonthlyBudget!}
-          defaultLeadValue={defaultLeadValue ?? DEFAULTS.defaultLeadValue!}
-          defaultLeadsToClose={defaultLeadsToClose ?? DEFAULTS.defaultLeadsToClose}
-          ctaLabel={ctaLabel ?? DEFAULTS.ctaLabel!}
-          ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
-          onLoading={setIsLoading}
-          onError={(msg) => {
-            setErrorMessage(msg);
-            setIsLoading(false);
-          }}
-          onSubmitted={() => {
-            setIsLoading(false);
-            setErrorMessage(undefined);
-          }}
-        />
+          </p>
+        ) : null}
+        <RoiErrorBoundary {...previewProps}>
+          <RoiCalculator
+            title={previewProps.title}
+            description={previewProps.description}
+            defaultMonthlyBudget={previewProps.defaultMonthlyBudget}
+            defaultLeadValue={previewProps.defaultLeadValue}
+            defaultLeadsToClose={previewProps.defaultLeadsToClose}
+            ctaLabel={previewProps.ctaLabel}
+            ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
+            onError={(msg) => setErrorMessage(msg)}
+            onSubmitted={() => setErrorMessage(undefined)}
+          />
+        </RoiErrorBoundary>
       </div>
     </div>
   );
