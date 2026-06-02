@@ -85,6 +85,7 @@ Los Code Components llaman a las mismas APIs (`/api/quiz`, `/api/calendar`, `/ap
 | Designer: `CompilationError: Invalid source code` | No importes `.css`; evita clases Tailwind `text-[var(--x)]` o `[&_strong]`; reimporta con `npm run webflow:import` |
 | `getUserLandPrefix` / CSS token | Falta `globals` en `webflow.json` o clases `bg-brand-600/10`; usa `hw-*` y reimporta |
 | Canvas en blanco tras import | Prueba **Smoke Test Hiweb** primero; borra instancias rotas y recarga Designer (F5) |
+| `CodeIslandError: process is not defined` | No uses `process.env` en código del bundle; `lib/shared/api-url.ts` ya es seguro. Reimporta la biblioteca |
 | APIs 404 en producción | Verifica `NEXT_PUBLIC_BASE_PATH` = mount path |
 | Componente vacío en Designer | Confirma deploy de la app Cloud y CORS/origen del sitio |
 | n8n no recibe datos | Revisa variables `N8N_WEBHOOK_*` en el entorno Cloud |

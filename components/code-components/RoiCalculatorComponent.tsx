@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { RoiCalculator } from "@/components/roi";
+import { lazy, Suspense, useState } from "react";
 import { RoiDesignerPreview } from "@/components/roi/RoiDesignerPreview";
 import { RoiErrorBoundary } from "@/components/roi/RoiErrorBoundary";
 import { RoiNativeStyles } from "@/components/roi/RoiNativeStyles";
 import type { CodeComponentBaseProps } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
 import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
+
+const RoiCalculatorLazy = lazy(() =>
+  import("@/components/roi/RoiCalculator").then((m) => ({
+    default: m.RoiCalculator,
+  })),
+);
 
 export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   defaultMonthlyBudget?: number;
@@ -109,17 +114,19 @@ export function RoiCalculatorComponent(
           </p>
         ) : null}
         <RoiErrorBoundary {...previewProps}>
-          <RoiCalculator
-            title={previewProps.title}
-            description={previewProps.description}
-            defaultMonthlyBudget={previewProps.defaultMonthlyBudget}
-            defaultLeadValue={previewProps.defaultLeadValue}
-            defaultLeadsToClose={previewProps.defaultLeadsToClose}
-            ctaLabel={previewProps.ctaLabel}
-            ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
-            onError={(msg) => setErrorMessage(msg)}
-            onSubmitted={() => setErrorMessage(undefined)}
-          />
+          <Suspense fallback={<RoiDesignerPreview {...previewProps} />}>
+            <RoiCalculatorLazy
+              title={previewProps.title}
+              description={previewProps.description}
+              defaultMonthlyBudget={previewProps.defaultMonthlyBudget}
+              defaultLeadValue={previewProps.defaultLeadValue}
+              defaultLeadsToClose={previewProps.defaultLeadsToClose}
+              ctaLabel={previewProps.ctaLabel}
+              ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
+              onError={(msg) => setErrorMessage(msg)}
+              onSubmitted={() => setErrorMessage(undefined)}
+            />
+          </Suspense>
         </RoiErrorBoundary>
       </div>
     </div>
