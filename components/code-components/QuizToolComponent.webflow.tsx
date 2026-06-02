@@ -34,7 +34,7 @@ export default declareComponent(QuizToolComponent, {
     }),
     resultCtaUrl: props.Text({
       name: "URL CTA resultado",
-      defaultValue: "/calendario",
+      defaultValue: "/tools/calendario",
     }),
   },
   options: {

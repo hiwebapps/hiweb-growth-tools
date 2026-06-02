@@ -6,5 +6,9 @@ export const metadata: Metadata = {
 };
 
 export default function DiagnosticoMarketingDigitalPage() {
-  return <QuizToolComponent />;
+  return (
+    <div className="quiz-stitch" style={{ background: "#131316", minHeight: "100vh" }}>
+      <QuizToolComponent />
+    </div>
+  );
 }

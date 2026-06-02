@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { bookingId?: string };
     const bookingId = validateBookingId(body.bookingId);
-    const booking = cancelBooking(bookingId);
+    const booking = await cancelBooking(bookingId);
 
     if (!booking) {
       throw new AppError("Reserva no encontrada.", {

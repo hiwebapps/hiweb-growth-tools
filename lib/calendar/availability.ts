@@ -27,14 +27,16 @@ function isPastSlot(dateIso: string, time: string): boolean {
   return slotMinutes <= nowMinutes;
 }
 
-export function getAvailabilityForDate(dateIso: string): TimeSlot[] {
+export async function getAvailabilityForDate(
+  dateIso: string,
+): Promise<TimeSlot[]> {
   const date = parseDateIso(dateIso);
 
   if (!isWeekday(date)) {
     return [];
   }
 
-  const booked = new Set(getBookedTimesForDate(dateIso));
+  const booked = new Set(await getBookedTimesForDate(dateIso));
 
   return ALL_SLOT_TIMES.filter((time) => {
     const [h] = time.split(":").map(Number);
@@ -45,8 +47,11 @@ export function getAvailabilityForDate(dateIso: string): TimeSlot[] {
   }));
 }
 
-export function isSlotAvailable(dateIso: string, time: string): boolean {
-  const slots = getAvailabilityForDate(dateIso);
+export async function isSlotAvailable(
+  dateIso: string,
+  time: string,
+): Promise<boolean> {
+  const slots = await getAvailabilityForDate(dateIso);
   const slot = slots.find((s) => s.time === time);
   return Boolean(slot?.available);
 }

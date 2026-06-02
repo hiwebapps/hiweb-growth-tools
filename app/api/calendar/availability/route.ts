@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const slots = getAvailabilityForDate(date);
+    const slots = await getAvailabilityForDate(date);
 
     return NextResponse.json({
       date,

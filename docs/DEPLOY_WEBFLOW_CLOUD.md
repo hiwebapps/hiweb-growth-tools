@@ -63,9 +63,20 @@ Copia desde `.env.example` y completa en el panel de Webflow Cloud:
 
 **No** subas `WEBFLOW_API_TOKEN` al entorno Cloud (solo sirve para CLI local / import).
 
-### SQLite en Cloud
+### SQLite (D1) en Cloud
 
-La app usa `better-sqlite3` y `data/app.db` en local. En Webflow Cloud confirma que el runtime permite escritura persistente en disco o planifica migración al almacenamiento oficial de Cloud. Hasta entonces, trata la DB como **best-effort** en producción.
+1. En Webflow Cloud → **Storage** → **Add Storage** (SQLite).
+2. El repo incluye `wrangler.json` con binding `DATABASE` y migraciones en `./migrations`.
+3. Tras **commit + push**, Webflow aplica migraciones y asigna el `database_id` real.
+4. En local sigue funcionando `data/app.db` con `better-sqlite3`.
+
+Comprueba el backend activo:
+
+```bash
+curl -s "https://hiwebmar.webflow.io/tools/api/health"
+# { "storage": "d1" } en Cloud con D1 configurado
+# { "storage": "sqlite" } en local
+```
 
 ## 4. Deploy
 

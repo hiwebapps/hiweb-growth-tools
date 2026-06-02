@@ -7,6 +7,7 @@ import { dispatchRoiWebhook } from "@/lib/n8n/client";
 import { buildRoiN8nPayload } from "@/lib/n8n/payloads";
 import { jsonError } from "@/lib/api/response";
 import { AppError } from "@/lib/shared/errors";
+import { createId } from "@/lib/shared/utils";
 
 type SubmitBody = {
   inputs: Record<string, unknown>;
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const result = calculateRoi(inputs);
-    const leadId = insertRoiLead(inputs, result, lead);
+    const leadId = (await insertRoiLead(inputs, result, lead)) ?? createId();
 
     dispatchRoiWebhook(
       buildRoiN8nPayload({ leadId, inputs, result, lead }),

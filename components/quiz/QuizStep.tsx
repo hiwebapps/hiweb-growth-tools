@@ -1,7 +1,7 @@
 "use client";
 
 import type { QuizQuestion } from "@/lib/quiz/types";
-import { cn } from "@/lib/shared/utils";
+import { QUIZ_SCALE_TITLES, QuizOptionIcon } from "./QuizOptionIcon";
 
 type QuizStepProps = {
   question: QuizQuestion;
@@ -15,36 +15,37 @@ export function QuizStep({
   onSelect,
 }: QuizStepProps) {
   return (
-    <fieldset className="flex flex-col gap-4">
-      <legend className="text-lg font-semibold leading-snug text-foreground">
-        {question.question}
-      </legend>
-      <div className="flex flex-col gap-2" role="radiogroup">
-        {question.options.map((option) => {
+    <div className="quiz-question-wrap">
+      <h2 className="quiz-question-title">{question.question}</h2>
+      {question.helpText ? (
+        <p className="quiz-question-help">{question.helpText}</p>
+      ) : (
+        <p className="quiz-question-help">
+          Selecciona la opción que mejor describa la madurez de tu operación en esta área.
+        </p>
+      )}
+      <div className="quiz-options" role="radiogroup" aria-label={question.question}>
+        {question.options.map((option, index) => {
           const selected = selectedOptionId === option.id;
+          const tierTitle = QUIZ_SCALE_TITLES[index] ?? `Opción ${index + 1}`;
           return (
-            <label
+            <button
               key={option.id}
-              className={cn(
-                "focus-within:ring-brand-600 flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors focus-within:ring-2",
-                selected
-                  ? "border-brand-600 hw-bg-brand-softer"
-                  : "border-border bg-background hover:border-muted",
-              )}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              className={`quiz-option${selected ? " is-selected" : ""}`}
+              onClick={() => onSelect(option.id)}
             >
-              <input
-                type="radio"
-                name={question.id}
-                value={option.id}
-                checked={selected}
-                onChange={() => onSelect(option.id)}
-                className="mt-1 size-4 shrink-0 accent-brand-600"
-              />
-              <span className="text-sm leading-relaxed">{option.label}</span>
-            </label>
+              <div className="quiz-option-icon-wrap">
+                <QuizOptionIcon tierIndex={index} />
+              </div>
+              <h3 className="quiz-option-title">{tierTitle}</h3>
+              <p className="quiz-option-desc">{option.label}</p>
+            </button>
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }

@@ -1,15 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button, ProgressBar } from "@/components/shared";
 import { QUIZ_QUESTIONS, QUIZ_TOTAL_STEPS } from "@/lib/quiz/questions";
-import {
-  createQuizSession,
-  submitQuiz,
-  updateQuizSession,
-} from "@/lib/quiz/client";
+import { updateQuizSession, submitQuiz } from "@/lib/quiz/client";
 import type { QuizAnswers, QuizLeadInput, QuizScoreResult } from "@/lib/quiz/types";
 import { LeadCaptureStep } from "./LeadCaptureStep";
+import { QuizProgressHeader } from "./QuizProgressHeader";
 import { QuizStep } from "./QuizStep";
 
 type Phase = "questions" | "lead";
@@ -18,7 +14,6 @@ type MarketingQuizProps = {
   sessionId: string;
   leadCaptureTitle: string;
   leadCaptureDescription?: string;
-  onLoading?: (loading: boolean) => void;
   onError?: (message: string) => void;
   onSubmitted?: (result: QuizScoreResult) => void;
 };
@@ -33,27 +28,24 @@ const emptyLead = (): QuizLeadInput => ({
 });
 
 export function MarketingQuiz({
-  sessionId: initialSessionId,
+  sessionId,
   leadCaptureTitle,
   leadCaptureDescription,
-  onLoading,
   onError,
   onSubmitted,
 }: MarketingQuizProps) {
-  const [sessionId] = useState(initialSessionId);
   const [phase, setPhase] = useState<Phase>("questions");
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [lead, setLead] = useState<QuizLeadInput>(emptyLead);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentQuestion = QUIZ_QUESTIONS[stepIndex];
-  const progressValue =
-    phase === "questions"
-      ? Math.round((stepIndex / QUIZ_TOTAL_STEPS) * 100)
-      : phase === "lead"
-        ? 92
-        : 100;
+  const totalSteps = QUIZ_TOTAL_STEPS + 1;
+  const currentStepNumber =
+    phase === "lead" ? QUIZ_TOTAL_STEPS + 1 : stepIndex + 1;
+  const progressPercent = Math.round((currentStepNumber / totalSteps) * 100);
 
   const persistAnswer = useCallback(
     async (questionId: string, optionId: string, nextAnswers: QuizAnswers) => {
@@ -64,10 +56,8 @@ export function MarketingQuiz({
           optionId,
           currentStep: Object.keys(nextAnswers).length,
         });
-      } catch (error) {
-        onError?.(
-          error instanceof Error ? error.message : "Error al guardar respuesta.",
-        );
+      } catch {
+        // Sin SQLite en Cloud la API puede responder en modo stateless; el estado vive en el cliente.
       }
     },
     [sessionId, onError],
@@ -121,7 +111,7 @@ export function MarketingQuiz({
       return;
     }
 
-    onLoading?.(true);
+    setIsSubmitting(true);
     setClientError(null);
 
     try {
@@ -132,16 +122,23 @@ export function MarketingQuiz({
         error instanceof Error ? error.message : "No pudimos enviar el quiz.";
       setClientError(message);
       onError?.(message);
-      onLoading?.(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const canGoBack = phase === "lead" || stepIndex > 0;
+
   return (
-    <div className="flex flex-col gap-6">
-      <ProgressBar label="Progreso del diagnóstico" value={progressValue} />
+    <div className="quiz-inner">
+      <QuizProgressHeader
+        stepLabel={`Paso ${currentStepNumber}`}
+        stepCounter={`${currentStepNumber} de ${totalSteps}`}
+        progressPercent={progressPercent}
+      />
 
       {clientError ? (
-        <p className="text-sm text-error" role="alert">
+        <p className="quiz-error" role="alert">
           {clientError}
         </p>
       ) : null}
@@ -163,30 +160,32 @@ export function MarketingQuiz({
         />
       ) : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-        <Button
+      <div className="quiz-nav">
+        <button
           type="button"
-          variant="secondary"
+          className="quiz-btn-back"
           onClick={handleBack}
-          disabled={stepIndex === 0 && phase === "questions"}
+          disabled={!canGoBack}
         >
-          Atrás
-        </Button>
+          <span aria-hidden>←</span> Anterior
+        </button>
         {phase === "questions" ? (
-          <Button type="button" onClick={handleNext}>
+          <button type="button" className="quiz-btn-primary" onClick={handleNext}>
             {stepIndex === QUIZ_TOTAL_STEPS - 1 ? "Ver resultado" : "Siguiente"}
-          </Button>
+            <span aria-hidden>→</span>
+          </button>
         ) : (
-          <Button type="button" onClick={() => void handleSubmit()}>
-            Enviar diagnóstico
-          </Button>
+          <button
+            type="button"
+            className="quiz-btn-primary"
+            disabled={isSubmitting}
+            onClick={() => void handleSubmit()}
+          >
+            {isSubmitting ? "Enviando…" : "Enviar diagnóstico"}
+            <span aria-hidden>→</span>
+          </button>
         )}
       </div>
     </div>
   );
-}
-
-export async function startQuizSession(): Promise<string> {
-  const session = await createQuizSession();
-  return session.sessionId;
 }

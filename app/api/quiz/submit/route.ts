@@ -15,6 +15,7 @@ import { dispatchQuizWebhook } from "@/lib/n8n/client";
 import { buildQuizN8nPayload } from "@/lib/n8n/payloads";
 import { jsonError } from "@/lib/api/response";
 import { AppError } from "@/lib/shared/errors";
+import { createId } from "@/lib/shared/utils";
 
 type SubmitBody = {
   sessionId: string;
@@ -28,26 +29,37 @@ export async function POST(request: Request) {
     const sessionId = sanitizeSessionId(body.sessionId);
     const lead = validateQuizLead(body.lead);
 
-    const session = getQuizSession(sessionId);
-    if (!session) {
-      throw new AppError("Sesión no encontrada.", {
-        statusCode: 404,
-        code: "SESSION_NOT_FOUND",
-      });
+    let answers: QuizAnswers | undefined = body.answers;
+
+    if (!answers) {
+      const session = await getQuizSession(sessionId);
+      if (session) {
+        answers = session.answers;
+      }
     }
 
-    const answers = body.answers ?? session.answers;
+    if (!answers) {
+      throw new AppError(
+        "Faltan las respuestas del quiz. Vuelve a completar el diagnóstico.",
+        { statusCode: 400, code: "ANSWERS_REQUIRED" },
+      );
+    }
+
     validateQuizAnswers(answers);
 
     const result = calculateQuizScore(answers);
-    const leadId = insertQuizLead(lead, result, answers);
-
-    dispatchQuizWebhook(buildQuizN8nPayload({ leadId, lead, result }));
+    const leadId = (await insertQuizLead(lead, result, answers)) ?? createId();
 
     try {
-      deleteQuizSession(sessionId);
+      await deleteQuizSession(sessionId);
     } catch {
-      // Non-blocking cleanup of ephemeral session.
+      // Limpieza no bloqueante.
+    }
+
+    try {
+      dispatchQuizWebhook(buildQuizN8nPayload({ leadId, lead, result }));
+    } catch (webhookError) {
+      console.error("[quiz/submit] n8n dispatch failed:", webhookError);
     }
 
     return NextResponse.json({

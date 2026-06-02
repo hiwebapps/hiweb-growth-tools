@@ -11,6 +11,7 @@
     "webflow:import": "webflow devlink import"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@webflow/data-types": "^2.0.0",
     "@webflow/react": "^2.0.0",
     "better-sqlite3": "^12.10.0",
@@ -19,6 +20,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260602.1",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",

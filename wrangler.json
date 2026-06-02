@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hiweb-growth-tools",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DATABASE",
+      "database_name": "hiweb-growth-tools",
+      "database_id": "123456789",
+      "migrations_dir": "./migrations"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/quiz";
 import { jsonError } from "@/lib/api/response";
 import { AppError } from "@/lib/shared/errors";
+import { createId } from "@/lib/shared/utils";
 
 type SessionBody = {
   action?: "create" | "update";
@@ -19,51 +20,77 @@ type SessionBody = {
   currentStep?: number;
 };
 
+function mergeAnswersFromBody(
+  existing: QuizAnswers,
+  body: SessionBody,
+): QuizAnswers {
+  if (body.questionId && body.optionId) {
+    return { ...existing, [body.questionId]: body.optionId };
+  }
+  if (body.answers) {
+    return { ...body.answers };
+  }
+  return existing;
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as SessionBody;
     const action = body.action ?? (body.sessionId ? "update" : "create");
 
     if (action === "create") {
-      const session = createQuizSession();
+      const session = await createQuizSession();
+      if (session) {
+        return NextResponse.json({
+          sessionId: session.sessionId,
+          currentStep: session.currentStep,
+          totalSteps: QUIZ_TOTAL_STEPS,
+          answers: session.answers,
+        });
+      }
+
       return NextResponse.json({
-        sessionId: session.sessionId,
-        currentStep: session.currentStep,
+        sessionId: createId(),
+        currentStep: 0,
         totalSteps: QUIZ_TOTAL_STEPS,
-        answers: session.answers,
+        answers: {},
+        ephemeral: true,
       });
     }
 
     const sessionId = sanitizeSessionId(body.sessionId);
-    const existing = getQuizSession(sessionId);
+    const existing = await getQuizSession(sessionId);
 
-    if (!existing) {
-      throw new AppError("Sesión no encontrada.", {
-        statusCode: 404,
-        code: "SESSION_NOT_FOUND",
-      });
+    if (existing) {
+      const merged = mergeAnswersFromBody(existing.answers, body);
+      const currentStep =
+        typeof body.currentStep === "number"
+          ? body.currentStep
+          : Object.keys(merged).length;
+
+      const session = await updateQuizSession(sessionId, merged, currentStep);
+      if (session) {
+        return NextResponse.json({
+          sessionId: session.sessionId,
+          currentStep: session.currentStep,
+          totalSteps: QUIZ_TOTAL_STEPS,
+          answers: session.answers,
+        });
+      }
     }
 
-    let answers: QuizAnswers = { ...existing.answers };
-
-    if (body.questionId && body.optionId) {
-      answers[body.questionId] = body.optionId;
-    } else if (body.answers) {
-      answers = { ...body.answers };
-    }
-
+    const answers = mergeAnswersFromBody({}, body);
     const currentStep =
       typeof body.currentStep === "number"
         ? body.currentStep
         : Object.keys(answers).length;
 
-    const session = updateQuizSession(sessionId, answers, currentStep);
-
     return NextResponse.json({
-      sessionId: session.sessionId,
-      currentStep: session.currentStep,
+      sessionId,
+      currentStep,
       totalSteps: QUIZ_TOTAL_STEPS,
-      answers: session.answers,
+      answers,
+      ephemeral: true,
     });
   } catch (error) {
     return jsonError(error);

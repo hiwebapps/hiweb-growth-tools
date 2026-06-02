@@ -8,7 +8,7 @@ import { jsonError } from "@/lib/api/response";
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as BookingInput;
-    const booking = createBooking(body);
+    const booking = await createBooking(body);
 
     dispatchCalendarWebhook(
       buildCalendarN8nPayload({ event: "calendar.booked", booking }),

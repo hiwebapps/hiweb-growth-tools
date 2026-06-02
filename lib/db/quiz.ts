@@ -1,6 +1,7 @@
 import { createId } from "@/lib/shared/utils";
 import type { QuizAnswers, QuizLeadInput, QuizScoreResult } from "@/lib/quiz/types";
-import { getDb } from "./client";
+import { isSqliteAvailable, getDb } from "./client";
+import { d1First, d1Run, getD1 } from "./d1";
 
 export type QuizSessionRow = {
   sessionId: string;
@@ -9,38 +10,14 @@ export type QuizSessionRow = {
   updatedAt: string;
 };
 
-export function createQuizSession(): QuizSessionRow {
-  const sessionId = createId();
-  const updatedAt = new Date().toISOString();
-  const db = getDb();
+type SessionDbRow = {
+  session_id: string;
+  current_step: number;
+  answers_json: string;
+  updated_at: string;
+};
 
-  db.prepare(
-    `INSERT INTO quiz_sessions (session_id, current_step, answers_json, updated_at)
-     VALUES (?, 0, '{}', ?)`,
-  ).run(sessionId, updatedAt);
-
-  return { sessionId, currentStep: 0, answers: {}, updatedAt };
-}
-
-export function getQuizSession(sessionId: string): QuizSessionRow | null {
-  const row = getDb()
-    .prepare(
-      `SELECT session_id, current_step, answers_json, updated_at
-       FROM quiz_sessions WHERE session_id = ?`,
-    )
-    .get(sessionId) as
-    | {
-        session_id: string;
-        current_step: number;
-        answers_json: string;
-        updated_at: string;
-      }
-    | undefined;
-
-  if (!row) {
-    return null;
-  }
-
+function mapSessionRow(row: SessionDbRow): QuizSessionRow {
   return {
     sessionId: row.session_id,
     currentStep: row.current_step,
@@ -49,52 +26,161 @@ export function getQuizSession(sessionId: string): QuizSessionRow | null {
   };
 }
 
-export function updateQuizSession(
+export async function createQuizSession(): Promise<QuizSessionRow | null> {
+  const sessionId = createId();
+  const updatedAt = new Date().toISOString();
+  const row = { sessionId, currentStep: 0, answers: {}, updatedAt };
+
+  const d1 = await getD1();
+  if (d1) {
+    await d1Run(
+      d1,
+      `INSERT INTO quiz_sessions (session_id, current_step, answers_json, updated_at)
+       VALUES (?, 0, '{}', ?)`,
+      sessionId,
+      updatedAt,
+    );
+    return row;
+  }
+
+  if (isSqliteAvailable()) {
+    getDb()
+      .prepare(
+        `INSERT INTO quiz_sessions (session_id, current_step, answers_json, updated_at)
+         VALUES (?, 0, '{}', ?)`,
+      )
+      .run(sessionId, updatedAt);
+    return row;
+  }
+
+  return null;
+}
+
+export async function getQuizSession(
+  sessionId: string,
+): Promise<QuizSessionRow | null> {
+  const d1 = await getD1();
+  if (d1) {
+    const row = await d1First<SessionDbRow>(
+      d1,
+      `SELECT session_id, current_step, answers_json, updated_at
+       FROM quiz_sessions WHERE session_id = ?`,
+      sessionId,
+    );
+    return row ? mapSessionRow(row) : null;
+  }
+
+  if (!isSqliteAvailable()) {
+    return null;
+  }
+
+  const row = getDb()
+    .prepare(
+      `SELECT session_id, current_step, answers_json, updated_at
+       FROM quiz_sessions WHERE session_id = ?`,
+    )
+    .get(sessionId) as SessionDbRow | undefined;
+
+  return row ? mapSessionRow(row) : null;
+}
+
+export async function updateQuizSession(
   sessionId: string,
   answers: QuizAnswers,
   currentStep: number,
-): QuizSessionRow {
+): Promise<QuizSessionRow | null> {
   const updatedAt = new Date().toISOString();
+  const answersJson = JSON.stringify(answers);
+
+  const d1 = await getD1();
+  if (d1) {
+    const result = await d1Run(
+      d1,
+      `UPDATE quiz_sessions
+       SET answers_json = ?, current_step = ?, updated_at = ?
+       WHERE session_id = ?`,
+      answersJson,
+      currentStep,
+      updatedAt,
+      sessionId,
+    );
+    if ((result.meta?.changes ?? 0) === 0) {
+      throw new Error("SESSION_NOT_FOUND");
+    }
+    return { sessionId, currentStep, answers, updatedAt };
+  }
+
+  if (!isSqliteAvailable()) {
+    return null;
+  }
+
   const result = getDb()
     .prepare(
       `UPDATE quiz_sessions
        SET answers_json = ?, current_step = ?, updated_at = ?
        WHERE session_id = ?`,
     )
-    .run(JSON.stringify(answers), currentStep, updatedAt, sessionId);
+    .run(answersJson, currentStep, updatedAt, sessionId);
 
   if (result.changes === 0) {
     throw new Error("SESSION_NOT_FOUND");
   }
 
-  return {
-    sessionId,
-    currentStep,
-    answers,
-    updatedAt,
-  };
+  return { sessionId, currentStep, answers, updatedAt };
 }
 
-export function deleteQuizSession(sessionId: string): void {
-  getDb()
-    .prepare(`DELETE FROM quiz_sessions WHERE session_id = ?`)
-    .run(sessionId);
+export async function deleteQuizSession(sessionId: string): Promise<void> {
+  const d1 = await getD1();
+  if (d1) {
+    await d1Run(d1, `DELETE FROM quiz_sessions WHERE session_id = ?`, sessionId);
+    return;
+  }
+
+  if (isSqliteAvailable()) {
+    getDb()
+      .prepare(`DELETE FROM quiz_sessions WHERE session_id = ?`)
+      .run(sessionId);
+  }
 }
 
-export type QuizLeadRecord = {
-  id: string;
-  lead: QuizLeadInput;
-  result: QuizScoreResult;
-  answers: QuizAnswers;
-};
-
-export function insertQuizLead(
+export async function insertQuizLead(
   lead: QuizLeadInput,
   result: QuizScoreResult,
   answers: QuizAnswers,
-): string {
+): Promise<string | null> {
   const id = createId();
   const createdAt = new Date().toISOString();
+
+  const d1 = await getD1();
+  if (d1) {
+    await d1Run(
+      d1,
+      `INSERT INTO quiz_leads (
+        id, name, company, email, phone, website, industry,
+        score_total, score_percentage, result_level, recommended_services,
+        answers_json, category_scores_json, pending_sync, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+      id,
+      lead.name,
+      lead.company ?? null,
+      lead.email,
+      lead.phone ?? null,
+      lead.website ?? null,
+      lead.industry ?? null,
+      result.scoreTotal,
+      result.scorePercentage,
+      result.resultLevel,
+      JSON.stringify(result.recommendedServices),
+      JSON.stringify(answers),
+      JSON.stringify(result.categoryScores),
+      createdAt,
+    );
+    return id;
+  }
+
+  if (!isSqliteAvailable()) {
+    return null;
+  }
 
   getDb()
     .prepare(

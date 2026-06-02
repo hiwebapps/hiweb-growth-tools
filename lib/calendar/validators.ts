@@ -13,7 +13,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-export function validateBookingInput(input: BookingInput): BookingInput {
+export async function validateBookingInput(
+  input: BookingInput,
+): Promise<BookingInput> {
   const name = input.name?.trim();
   const email = input.email?.trim().toLowerCase();
   const service = input.service?.trim();
@@ -73,7 +75,7 @@ export function validateBookingInput(input: BookingInput): BookingInput {
     });
   }
 
-  if (!isSlotAvailable(selectedDate, selectedTime)) {
+  if (!(await isSlotAvailable(selectedDate, selectedTime))) {
     throw new AppError("Ese horario ya no está disponible.", {
       statusCode: 409,
       code: "SLOT_UNAVAILABLE",

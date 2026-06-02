@@ -1,19 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Badge, Button } from "@/components/shared";
-import {
-  MarketingQuiz,
-  QuizResult,
-  startQuizSession,
-} from "@/components/quiz";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { QuizDesignerPreview } from "@/components/quiz/QuizDesignerPreview";
+import { QuizNativeStyles } from "@/components/quiz/QuizNativeStyles";
+import { QuizResult } from "@/components/quiz/QuizResult";
 import type { QuizScoreResult } from "@/lib/quiz/types";
-import {
-  CodeComponentFrame,
-  PlaceholderPanel,
-} from "./CodeComponentFrame";
+import { startQuizSession } from "@/lib/quiz/session";
 import type { CodeComponentBaseProps, ToolViewState } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
+import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
+
+const MarketingQuizLazy = lazy(() =>
+  import("@/components/quiz/MarketingQuiz").then((m) => ({
+    default: m.MarketingQuiz,
+  })),
+);
 
 export type QuizToolComponentProps = CodeComponentBaseProps & {
   startButtonLabel?: string;
@@ -28,79 +29,33 @@ const DEFAULTS: QuizToolComponentProps = {
   title: "¿Qué tan maduro es tu marketing digital?",
   description:
     "Responde unas preguntas y recibe un score con recomendaciones personalizadas de Hiweb Marketing.",
-  themeVariant: "light",
   startButtonLabel: "Comenzar diagnóstico",
   leadCaptureTitle: "Recibe tu resultado",
   leadCaptureDescription:
     "Déjanos tus datos para enviarte el informe y las recomendaciones.",
-  resultCtaLabel: "Agendar llamada",
-  resultCtaUrl: "/calendario",
+  resultCtaLabel: "Agendar diagnóstico gratuito",
+  resultCtaUrl: "/tools/calendario",
 };
 
-function QuizToolPreviewMock({
-  props,
-  resolvedView,
-  themeVariant,
-  leadCaptureTitle,
-  leadCaptureDescription,
-  onMockError,
-  onMockSubmit,
-}: {
-  props: QuizToolComponentProps;
-  resolvedView: ToolViewState;
-  themeVariant: QuizToolComponentProps["themeVariant"];
-  leadCaptureTitle?: string;
-  leadCaptureDescription?: string;
-  onMockError: () => void;
-  onMockSubmit: () => void;
-}) {
-  return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      successTitle="Diagnóstico completado"
-      successMessage="Tu resultado está listo."
-      footer={
-        resolvedView === "intro" ? (
-          <Button type="button" onClick={onMockSubmit} fullWidth>
-            {props.startButtonLabel}
-          </Button>
-        ) : resolvedView === "active" ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" variant="secondary" onClick={onMockError}>
-              Simular error
-            </Button>
-            <Button type="button" onClick={onMockSubmit} fullWidth>
-              Preview
-            </Button>
-          </div>
-        ) : null
-      }
-    >
-      {resolvedView === "intro" ? (
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="brand">~5 min</Badge>
-          <Badge variant="neutral">Preview</Badge>
-        </div>
-      ) : null}
-      {resolvedView === "active" ? (
-        <PlaceholderPanel
-          title={leadCaptureTitle ?? "Lead capture"}
-          themeVariant={themeVariant}
-        >
-          <p className="text-sm text-muted">{leadCaptureDescription}</p>
-        </PlaceholderPanel>
-      ) : null}
-    </CodeComponentFrame>
-  );
+function navigateToUrl(url: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  if (url.startsWith("http")) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  } else {
+    window.location.href = url;
+  }
 }
 
 export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
   const props = mergeProps(DEFAULTS, rawProps);
   const {
-    themeVariant,
     previewState,
     className,
+    eyebrow,
+    title,
+    description,
     startButtonLabel,
     leadCaptureTitle,
     leadCaptureDescription,
@@ -122,6 +77,9 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
   }, [previewState]);
 
   const handleStart = useCallback(async () => {
+    if (previewState) {
+      return;
+    }
     setViewState("loading");
     setErrorMessage(undefined);
 
@@ -135,109 +93,114 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
       );
       setViewState("error");
     }
-  }, []);
-
-  const handleLoading = useCallback((loading: boolean) => {
-    if (!previewState && loading) {
-      setViewState("loading");
-    }
   }, [previewState]);
 
-  const handleError = useCallback(
-    (message: string) => {
-      setErrorMessage(message);
-      setViewState("error");
+  const handleSubmitted = useCallback(
+    (result: QuizScoreResult) => {
+      setQuizResult(result);
+      setViewState("success");
     },
     [],
   );
 
-  const handleSubmitted = useCallback((result: QuizScoreResult) => {
-    setQuizResult(result);
-    setViewState("success");
-  }, []);
+  const handleCta = useCallback(() => {
+    navigateToUrl(resultCtaUrl ?? DEFAULTS.resultCtaUrl!);
+  }, [resultCtaUrl]);
 
-  if (previewState) {
+  const shellClass = `quiz-stitch quiz-root ${className ?? ""}`.trim();
+
+  if (isWebflowDesignerCanvas() && !previewState) {
     return (
-      <QuizToolPreviewMock
-        props={props}
-        resolvedView={previewState}
-        themeVariant={themeVariant}
-        leadCaptureTitle={leadCaptureTitle}
-        leadCaptureDescription={leadCaptureDescription}
-        onMockError={() => setViewState("error")}
-        onMockSubmit={() =>
-          setViewState(previewState === "intro" ? "active" : "success")
-        }
-      />
+      <div className={shellClass}>
+        <QuizDesignerPreview />
+      </div>
     );
   }
 
   return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      errorMessage={errorMessage}
-      successTitle="Diagnóstico completado"
-      successMessage="Tu resultado está listo. Revisa las recomendaciones abajo o agenda una llamada con nuestro equipo."
-      className={className}
-      footer={
-        resolvedView === "intro" ? (
-          <Button type="button" onClick={() => void handleStart()} fullWidth>
-            {startButtonLabel}
-          </Button>
-        ) : resolvedView === "error" ? (
-          <Button
+    <div className={shellClass}>
+      <QuizNativeStyles />
+      <div className="quiz-ambient quiz-ambient-violet" aria-hidden />
+      <div className="quiz-ambient quiz-ambient-cyan" aria-hidden />
+
+      {resolvedView === "loading" ? (
+        <p className="quiz-loading">Preparando tu diagnóstico…</p>
+      ) : null}
+
+      {resolvedView === "error" ? (
+        <div className="quiz-inner">
+          <p className="quiz-error" role="alert">
+            {errorMessage ?? "No pudimos completar el diagnóstico."}
+          </p>
+          <button
             type="button"
-            variant="secondary"
-            fullWidth
+            className="quiz-btn-ghost"
             onClick={() => {
               setViewState("intro");
               setSessionId(null);
             }}
           >
             Reintentar
-          </Button>
-        ) : resolvedView === "success" ? (
-          <Button
-            type="button"
-            fullWidth
-            onClick={() => {
-              const url = resultCtaUrl ?? "/calendario";
-              if (url.startsWith("http")) {
-                window.open(url, "_blank", "noopener,noreferrer");
-              } else {
-                window.location.href = url;
-              }
-            }}
-          >
-            {resultCtaLabel}
-          </Button>
-        ) : null
-      }
-    >
+          </button>
+        </div>
+      ) : null}
+
       {resolvedView === "intro" ? (
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="brand">~5 min</Badge>
-          <Badge variant="neutral">8 preguntas</Badge>
-          <Badge variant="neutral">Score + recomendaciones</Badge>
+        <div className="quiz-inner">
+          <section className="quiz-intro">
+            {eyebrow ? <span className="quiz-eyebrow">{eyebrow}</span> : null}
+            {title ? <h1 className="quiz-intro-title">{title}</h1> : null}
+            {description ? <p className="quiz-intro-desc">{description}</p> : null}
+            <div className="quiz-badges">
+              <span className="quiz-badge">~5 min</span>
+              <span className="quiz-badge">8 preguntas</span>
+              <span className="quiz-badge">Score + recomendaciones</span>
+            </div>
+            <button
+              type="button"
+              className="quiz-btn-primary"
+              onClick={() => void handleStart()}
+            >
+              {startButtonLabel}
+              <span aria-hidden>→</span>
+            </button>
+          </section>
         </div>
       ) : null}
 
       {resolvedView === "active" && sessionId ? (
-        <MarketingQuiz
-          sessionId={sessionId}
-          leadCaptureTitle={leadCaptureTitle ?? DEFAULTS.leadCaptureTitle!}
-          leadCaptureDescription={leadCaptureDescription}
-          onLoading={handleLoading}
-          onError={handleError}
-          onSubmitted={handleSubmitted}
-        />
+        <Suspense fallback={<p className="quiz-loading">Cargando preguntas…</p>}>
+          <MarketingQuizLazy
+            sessionId={sessionId}
+            leadCaptureTitle={leadCaptureTitle ?? DEFAULTS.leadCaptureTitle!}
+            leadCaptureDescription={leadCaptureDescription}
+            onError={(message) => {
+              setErrorMessage(message);
+              setViewState("error");
+            }}
+            onSubmitted={handleSubmitted}
+          />
+        </Suspense>
+      ) : null}
+
+      {resolvedView === "active" && previewState && !sessionId ? (
+        <QuizDesignerPreview />
       ) : null}
 
       {resolvedView === "success" && quizResult ? (
-        <QuizResult result={quizResult} />
+        <QuizResult
+          result={quizResult}
+          ctaLabel={resultCtaLabel ?? DEFAULTS.resultCtaLabel!}
+          onCtaClick={handleCta}
+        />
       ) : null}
-    </CodeComponentFrame>
+
+      {resolvedView === "success" && previewState && !quizResult ? (
+        <div className="quiz-inner">
+          <p className="quiz-section-desc">Vista previa: resultado del diagnóstico.</p>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
