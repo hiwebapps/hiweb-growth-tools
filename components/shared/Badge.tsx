@@ -10,11 +10,11 @@ export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 
 const variantClasses: Record<BadgeVariant, string> = {
   neutral: "bg-background text-foreground border-border",
-  brand: "bg-brand-600/10 text-brand-600 border-brand-600/20",
-  success: "bg-success-bg text-success border-success/20",
-  warning: "bg-warning-bg text-warning border-warning/20",
-  error: "bg-error-bg text-error border-error/20",
-  info: "bg-info-bg text-info border-info/20",
+  brand: "hw-bg-brand-soft text-brand-600 hw-border-brand-badge",
+  success: "bg-success-bg text-success hw-border-success-badge",
+  warning: "bg-warning-bg text-warning hw-border-warning-badge",
+  error: "bg-error-bg text-error hw-border-error-badge",
+  info: "bg-info-bg text-info hw-border-info-badge",
 };
 
 export function Badge({

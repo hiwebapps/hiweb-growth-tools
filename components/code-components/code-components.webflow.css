@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+  --success: #059669;
+  --success-bg: #ecfdf5;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --error: #dc2626;
+  --error-bg: #fef2f2;
+  --info: #0284c7;
+  --info-bg: #f0f9ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+}
+
+/* Utilidades sin sintaxis bg-color/opacity (rompe Libraries en Designer) */
+.hw-text-white-muted {
+  color: rgba(255, 255, 255, 0.8);
+}
+.hw-bg-brand-soft {
+  background-color: rgba(37, 99, 235, 0.1);
+}
+.hw-bg-brand-softer {
+  background-color: rgba(37, 99, 235, 0.05);
+}
+.hw-border-brand-soft {
+  border-color: rgba(37, 99, 235, 0.3);
+}
+.hw-bg-brand-disabled {
+  background-color: rgba(37, 99, 235, 0.5);
+}
+.hw-bg-surface-glass {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+.hw-bg-overlay {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.hw-border-success-soft {
+  border-color: rgba(5, 150, 105, 0.3);
+}
+.hw-bg-success-soft {
+  background-color: rgba(5, 150, 105, 0.1);
+}
+.hw-border-success-badge {
+  border-color: rgba(5, 150, 105, 0.2);
+}
+.hw-border-warning-badge {
+  border-color: rgba(217, 119, 6, 0.2);
+}
+.hw-border-error-badge {
+  border-color: rgba(220, 38, 38, 0.2);
+}
+.hw-border-info-badge {
+  border-color: rgba(2, 132, 199, 0.2);
+}
+.hw-border-brand-badge {
+  border-color: rgba(37, 99, 235, 0.2);
+}
+.hw-spinner-on-primary {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+}

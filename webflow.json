@@ -3,12 +3,13 @@
     "framework": "nextjs"
   },
   "library": {
-    "name": "Hiweb Prueba",
+    "name": "Hiweb Growth Tools",
     "components": [
       "./components/code-components/**/*.webflow.tsx"
     ],
-    "description": "Prueba",
-    "id": "hiweb-prueba"
+    "description": "Herramientas interactivas Hiweb",
+    "id": "hiweb-growth-tools",
+    "globals": "./components/code-components/globals.webflow.ts"
   },
   "telemetry": {
     "global": {

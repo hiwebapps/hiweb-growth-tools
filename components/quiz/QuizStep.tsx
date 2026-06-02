@@ -28,7 +28,7 @@ export function QuizStep({
               className={cn(
                 "focus-within:ring-brand-600 flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors focus-within:ring-2",
                 selected
-                  ? "border-brand-600 bg-brand-600/5"
+                  ? "border-brand-600 hw-bg-brand-softer"
                   : "border-border bg-background hover:border-muted",
               )}
             >

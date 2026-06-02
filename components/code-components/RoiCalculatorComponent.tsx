@@ -92,7 +92,7 @@ export function RoiCalculatorComponent(
       ) : null}
 
       {isLoading ? (
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+        <div className="hw-bg-overlay pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
           <Spinner size="lg" />
         </div>
       ) : null}

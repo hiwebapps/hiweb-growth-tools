@@ -17,11 +17,11 @@ export function contentProps(defaults: {
       defaultValue: defaults.eyebrow,
     }),
     title: props.Text({
-      name: "Título",
+      name: "Titulo",
       defaultValue: defaults.title,
     }),
     description: props.Text({
-      name: "Descripción",
+      name: "Descripcion",
       defaultValue: defaults.description,
     }),
     themeVariant: themeVariantProp,

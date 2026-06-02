@@ -50,7 +50,7 @@ export function TimeSlotSelector({
               className={cn(
                 "focus-ring rounded-lg border px-2 py-2 text-sm font-medium transition-colors",
                 selected
-                  ? "border-brand-600 bg-brand-600/10 text-brand-600"
+                  ? "border-brand-600 hw-bg-brand-soft text-brand-600"
                   : "border-border bg-background hover:border-brand-600",
               )}
             >

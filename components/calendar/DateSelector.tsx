@@ -25,7 +25,7 @@ export function DateSelector({ value, onChange }: DateSelectorProps) {
               className={cn(
                 "focus-ring shrink-0 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
                 selected
-                  ? "border-brand-600 bg-brand-600/10 text-brand-600"
+                  ? "border-brand-600 hw-bg-brand-soft text-brand-600"
                   : "border-border bg-background hover:border-muted",
               )}
             >

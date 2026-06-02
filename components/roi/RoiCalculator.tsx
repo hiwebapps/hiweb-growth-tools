@@ -149,7 +149,7 @@ export function RoiCalculator({
         </div>
 
         {successMessage ? (
-          <p className="relative z-10 mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <p className="hw-border-success-soft hw-bg-success-soft relative z-10 mt-6 rounded-lg border px-4 py-3 text-sm text-emerald-200">
             {successMessage}
           </p>
         ) : null}

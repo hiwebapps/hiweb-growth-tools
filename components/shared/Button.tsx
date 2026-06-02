@@ -15,11 +15,11 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-600 text-white hover:bg-brand-700 disabled:bg-brand-600/50",
+    "bg-brand-600 text-white hover:bg-brand-700 disabled:hw-bg-brand-disabled",
   secondary:
     "bg-surface text-foreground border border-border hover:bg-background disabled:opacity-50",
   outline:
-    "border border-brand-600 text-brand-600 bg-transparent hover:bg-brand-600/10 disabled:opacity-50",
+    "border border-brand-600 text-brand-600 bg-transparent hover:hw-bg-brand-soft disabled:opacity-50",
   ghost:
     "text-foreground bg-transparent hover:bg-background disabled:opacity-50",
 };
@@ -61,7 +61,7 @@ export function Button({
       {isLoading ? (
         <Spinner
           size="sm"
-          className={variant === "primary" ? "border-white/30 border-t-white" : undefined}
+          className={variant === "primary" ? "hw-spinner-on-primary" : undefined}
         />
       ) : null}
       {children}

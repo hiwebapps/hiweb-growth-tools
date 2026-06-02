@@ -55,7 +55,7 @@ export function CodeComponentFrame({
               <p
                 className={cn(
                   "text-sm font-medium",
-                  isDark ? "text-white/80" : "text-muted",
+                  isDark ? "hw-text-white-muted" : "text-muted",
                 )}
               >
                 Procesando…

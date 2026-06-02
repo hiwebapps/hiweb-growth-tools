@@ -33,7 +33,7 @@ export function SectionHeader({
         <p
           className={cn(
             "text-sm font-medium tracking-wide uppercase",
-            isBrand || isDark ? "text-white/80" : "text-brand-600",
+            isBrand || isDark ? "hw-text-white-muted" : "text-brand-600",
           )}
         >
           {eyebrow}
@@ -51,7 +51,7 @@ export function SectionHeader({
         <p
           className={cn(
             "max-w-2xl text-base leading-relaxed sm:text-lg",
-            isBrand || isDark ? "text-white/80" : "text-muted",
+            isBrand || isDark ? "hw-text-white-muted" : "text-muted",
           )}
         >
           {description}
