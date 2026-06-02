@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hiweb - ROI Calculator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#1f1f22",
+                        "on-primary": "#2f3131",
+                        "surface-container-highest": "#353438",
+                        "on-secondary": "#2c3039",
+                        "on-secondary-container": "#b2b5bf",
+                        "on-surface": "#e4e1e6",
+                        "on-tertiary-fixed-variant": "#0039b5",
+                        "surface-bright": "#39393c",
+                        "primary": "#ffffff",
+                        "on-secondary-fixed": "#181c23",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-dim": "#131316",
+                        "background": "#131316",
+                        "brand-orange": "#F97316",
+                        "tertiary": "#ffffff",
+                        "accent-violet": "#6A2DE8",
+                        "on-primary-container": "#636565",
+                        "accent-cyan": "#2BA7F6",
+                        "primary-container": "#e2e2e2",
+                        "on-primary-fixed-variant": "#454747",
+                        "on-tertiary-fixed": "#001551",
+                        "accent-gold": "#F7C500",
+                        "primary-fixed": "#e2e2e2",
+                        "outline-variant": "#444748",
+                        "primary-fixed-dim": "#c6c6c7",
+                        "on-tertiary": "#002682",
+                        "surface-border": "#4D4D4D78",
+                        "tertiary-fixed": "#dce1ff",
+                        "error": "#EF4444",
+                        "secondary-container": "#434750",
+                        "inverse-primary": "#5d5f5f",
+                        "surface-container-low": "#1b1b1e",
+                        "surface-variant": "#353438",
+                        "surface-container-lowest": "#0e0e11",
+                        "surface": "#15181D",
+                        "inverse-on-surface": "#303033",
+                        "on-tertiary-container": "#2b57e1",
+                        "error-container": "#93000a",
+                        "outline": "#8e9192",
+                        "secondary-fixed": "#dfe2ed",
+                        "surface-container-high": "#2a2a2d",
+                        "tertiary-container": "#dce1ff",
+                        "secondary": "#c3c6d1",
+                        "surface-tint": "#c6c6c7",
+                        "on-primary-fixed": "#1a1c1c",
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#434750",
+                        "inverse-surface": "#e4e1e6",
+                        "secondary-fixed-dim": "#c3c6d1",
+                        "tertiary-fixed-dim": "#b7c4ff",
+                        "on-background": "#e4e1e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "lg": "46px",
+                        "section-padding": "96px",
+                        "md": "38px",
+                        "gutter": "24px",
+                        "xs": "8px",
+                        "sm": "20px",
+                        "xl": "64px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "display": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "28px", "letterSpacing": "-0.32px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "30px", "letterSpacing": "-0.18px", "fontWeight": "400" }],
+                        "label-lg": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-md": ["28px", { "lineHeight": "33.6px", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "38.4px", "letterSpacing": "-0.64px", "fontWeight": "600" }],
+                        "display": ["52px", { "lineHeight": "57.2px", "letterSpacing": "-1.56px", "fontWeight": "600" }],
+                        "headline-lg": ["44px", { "lineHeight": "44px", "letterSpacing": "-0.88px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0E0E11;
+            color: #e4e1e6;
+            overflow-x: hidden;
+        }
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .glow-cyan { background: radial-gradient(circle, rgba(43,167,246,0.8) 0%, rgba(43,167,246,0) 70%); top: -10%; left: -10%; }
+        .glow-violet { background: radial-gradient(circle, rgba(106,45,232,0.8) 0%, rgba(106,45,232,0) 70%); bottom: -10%; right: -10%; }
+        
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: transform 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #353438;
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+<!-- Ambient Background Glows -->
+<div class="ambient-glow glow-cyan"></div>
+<div class="ambient-glow glow-violet"></div>
+<!-- TopNavBar -->
+<nav class="bg-surface-container-lowest/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-surface-border flat no shadows">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-[1280px] mx-auto">
+<div class="font-display text-headline-md text-primary tracking-tighter">
+                Hiweb
+            </div>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300 scale-95 active:scale-90 transition-transform font-label-lg text-label-lg" href="#">Solutions</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300 scale-95 active:scale-90 transition-transform font-label-lg text-label-lg" href="#">Case Studies</a>
+<a class="text-primary font-bold border-b-2 border-brand-orange pb-1 hover:text-primary transition-colors duration-300 scale-95 active:scale-90 transition-transform font-label-lg text-label-lg" href="#">ROI Calculator</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300 scale-95 active:scale-90 transition-transform font-label-lg text-label-lg" href="#">Contact</a>
+</div>
+<button class="hidden md:block bg-secondary text-primary font-label-lg text-label-lg px-6 py-3 rounded-full hover:bg-surface-variant transition-colors scale-95 active:scale-90">
+                Get Audit
+            </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow pt-32 pb-section-padding px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto w-full flex flex-col items-center">
+<!-- Hero Section -->
+<div class="text-center max-w-3xl mx-auto mb-16 relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-accent-gold/5 blur-[100px] -z-10 rounded-full"></div>
+<h1 class="font-display text-display text-primary mb-6">Maximiza tu Retorno</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Calcula el impacto real de tu inversión en marketing digital con nuestra herramienta de precisión.</p>
+</div>
+<!-- Calculator Container -->
+<div class="w-full bg-surface border border-surface-border rounded-lg p-md md:p-lg shadow-[0_0_50px_rgba(43,167,246,0.05)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-accent-cyan/10 blur-[80px] -z-10 rounded-full"></div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter lg:gap-xl">
+<!-- Left Column (Inputs) -->
+<div class="flex flex-col gap-8">
+<!-- Input 1: Industria -->
+<div class="flex flex-col gap-4">
+<label class="font-label-lg text-label-lg text-primary flex justify-between">
+<span>Industria</span>
+<span class="text-accent-cyan font-medium" id="val-industry">SaaS</span>
+</label>
+<div class="relative">
+<select class="w-full bg-surface-container border border-surface-border rounded-full px-6 py-4 font-body-md text-primary appearance-none focus:outline-none focus:border-accent-cyan transition-colors">
+<option>SaaS</option>
+<option>E-commerce</option>
+<option>Servicios B2B</option>
+<option>Real Estate</option>
+</select>
+<span class="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Input 2: Presupuesto Mensual -->
+<div class="flex flex-col gap-4">
+<label class="font-label-lg text-label-lg text-primary flex justify-between">
+<span>Presupuesto Mensual</span>
+<span class="text-accent-cyan font-medium" id="val-budget">$5,000 USD</span>
+</label>
+<input class="w-full" id="slider-budget" max="50000" min="1000" step="1000" type="range" value="5000"/>
+</div>
+<!-- Input 3: Ticket Promedio -->
+<div class="flex flex-col gap-4">
+<label class="font-label-lg text-label-lg text-primary flex justify-between">
+<span>Ticket Promedio</span>
+<span class="text-accent-cyan font-medium" id="val-ticket">$1,200 USD</span>
+</label>
+<input class="w-full" id="slider-ticket" max="10000" min="100" step="100" type="range" value="1200"/>
+</div>
+<!-- Input 4: Leads para Cerrar Venta -->
+<div class="flex flex-col gap-4">
+<label class="font-label-lg text-label-lg text-primary flex justify-between">
+<span>Leads para Cerrar Venta</span>
+<span class="text-accent-cyan font-medium" id="val-leads">15</span>
+</label>
+<input class="w-full" id="slider-leads" max="100" min="1" step="1" type="range" value="15"/>
+</div>
+</div>
+<!-- Right Column (Visual Outputs) -->
+<div class="flex flex-col justify-center items-center bg-surface-container-lowest rounded-xl border border-surface-border p-md relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-accent-violet/5 to-accent-cyan/5 -z-10"></div>
+<div class="flex flex-col items-center gap-12 w-full">
+<!-- ROI Circle -->
+<div class="relative flex justify-center items-center w-48 h-48">
+<div class="absolute inset-0 rounded-full border-4 border-surface-border"></div>
+<div class="absolute inset-0 rounded-full border-4 border-accent-gold shadow-[0_0_30px_rgba(247,197,0,0.3)] border-t-transparent border-l-transparent transform rotate-45 transition-transform duration-1000" style="clip-path: polygon(50% 50%, 100% 0, 100% 100%, 0 100%, 0 0, 50% 0);"></div>
+<div class="flex flex-col items-center justify-center text-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">ROI Estimado</span>
+<span class="font-display text-[48px] leading-none text-primary font-bold">450<span class="text-accent-gold text-[32px]">%</span></span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8 w-full text-center divide-x divide-surface-border">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Leads Estimados</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">342</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Ingresos Estimados</span>
+<span class="font-headline-md text-headline-md text-primary font-bold text-accent-cyan">$27,500</span>
+</div>
+</div>
+<button class="mt-4 w-full bg-secondary text-primary font-label-lg text-label-lg px-8 py-4 rounded-full hover:bg-surface-variant transition-colors scale-95 active:scale-90 flex items-center justify-center gap-2 h-[54px]">
+<span>Obtener Auditoría Gratuita</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest w-full py-xl border-t border-surface-border flat no shadows mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center gap-gutter px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+<div class="flex flex-col md:flex-row items-center gap-6">
+<div class="font-display text-headline-sm text-primary">
+                    Hiweb
+                </div>
+<span class="font-body-md text-body-md text-on-surface-variant">© 2024 Hiweb Performance Agency. All rights reserved.</span>
+</div>
+<div class="flex gap-6 items-center">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-brand-orange transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-brand-orange transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-brand-orange transition-colors opacity-80 hover:opacity-100" href="#">Cookies</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-brand-orange transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple script to update slider values visually (No actual complex calculation logic needed for UI demo)
+        const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        
+        document.getElementById('slider-budget').addEventListener('input', (e) => {
+            document.getElementById('val-budget').textContent = formatCurrency(e.target.value);
+        });
+        
+        document.getElementById('slider-ticket').addEventListener('input', (e) => {
+            document.getElementById('val-ticket').textContent = formatCurrency(e.target.value);
+        });
+        
+        document.getElementById('slider-leads').addEventListener('input', (e) => {
+            document.getElementById('val-leads').textContent = e.target.value;
+        });
+    </script>
+</body></html>
