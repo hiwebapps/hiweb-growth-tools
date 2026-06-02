@@ -20,8 +20,11 @@ Las definiciones para Webflow están en `components/code-components/*.webflow.ts
 
 ```bash
 # .env.local (no subir al repo)
-WEBFLOW_API_TOKEN=your_token_here
+# Workspace API token (Workspace Admin → Apps & Integrations → Workspace API Access)
+WEBFLOW_API_TOKEN=your_workspace_token_here
 ```
+
+> **Importante:** Un **Site API token** permite `webflow sites list`, pero **`devlink import` falla** con “invalid or not authorized”. Usa siempre un **Workspace API token** o `npx webflow auth login --force`.
 
 ## Configuración del proyecto
 
@@ -76,6 +79,7 @@ Los Code Components llaman a las mismas APIs (`/api/quiz`, `/api/calendar`, `/ap
 | Problema | Acción |
 |----------|--------|
 | `devlink import` falla por tipos | Revisa `npm run build`; usa `--force` solo si entiendes el error |
+| `devlink import` — token no autorizado | Usa **Workspace API token**, no Site token. Ver [`DEPLOY_WEBFLOW_CLOUD.md`](./DEPLOY_WEBFLOW_CLOUD.md) §6 |
 | APIs 404 en producción | Verifica `NEXT_PUBLIC_BASE_PATH` = mount path |
 | Componente vacío en Designer | Confirma deploy de la app Cloud y CORS/origen del sitio |
 | n8n no recibe datos | Revisa variables `N8N_WEBHOOK_*` en el entorno Cloud |

@@ -53,8 +53,9 @@ No subas `.env` ni secretos al repositorio.
 
 ## APIs (estructura)
 
-Las rutas bajo `app/api/` devuelven `501` hasta implementar cada módulo:
+APIs implementadas (SQLite + webhooks n8n):
 
+- `GET /api/health` — comprobación de deploy
 - `POST /api/quiz/session`, `POST /api/quiz/submit`
 - `GET /api/calendar/availability`, `POST /api/calendar/book`, `POST /api/calendar/cancel`
 - `POST /api/roi/calculate`, `POST /api/roi/submit`
@@ -106,14 +107,17 @@ Archivos: `components/code-components/*.webflow.tsx` + `webflow.json`.
 
 Especificación completa: [`docs/HIWEB_GROWTH_TOOLS_SPEC.md`](docs/HIWEB_GROWTH_TOOLS_SPEC.md).
 
-## Deploy (Webflow Cloud)
+## Deploy (Webflow Cloud) — Fase 8
 
-1. Push a GitHub (`origin/main`).
-2. Conectar el repositorio en Webflow Cloud.
-3. Configurar las variables de entorno en el panel de cloud.
-4. Verificar `npm run build` y las rutas principales tras el deploy.
+1. Push a GitHub (`hiwebapps/hiweb-growth-tools`, rama `main`).
+2. Conectar el repo en **Webflow Cloud** (workspace Hiweb).
+3. Definir **mount path** y `NEXT_PUBLIC_BASE_PATH` (mismo valor, ej. `/growth-tools`).
+4. Variables: `APP_URL`, `N8N_WEBHOOK_*` (ver `.env.example`).
+5. Deploy y validar `GET /api/health` + rutas de herramientas.
 
-Ver [`docs/WEBFLOW_CODE_COMPONENTS.md`](docs/WEBFLOW_CODE_COMPONENTS.md) para Designer y `webflow devlink import`.
+Guía paso a paso: [`docs/DEPLOY_WEBFLOW_CLOUD.md`](docs/DEPLOY_WEBFLOW_CLOUD.md).
+
+Code Components: [`docs/WEBFLOW_CODE_COMPONENTS.md`](docs/WEBFLOW_CODE_COMPONENTS.md) — `npm run webflow:import` requiere **Workspace API token**.
 
 ## n8n
 
