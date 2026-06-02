@@ -23,11 +23,6 @@ export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
 };
 
 const DEFAULTS: RoiCalculatorComponentProps = {
-  eyebrow: "ROI",
-  title: "Maximiza tu Retorno",
-  description:
-    "Calcula el impacto real de tu inversión en marketing digital con nuestra herramienta de precisión.",
-  themeVariant: "dark",
   defaultMonthlyBudget: 5000,
   defaultLeadValue: 1200,
   defaultLeadsToClose: 15,
@@ -42,8 +37,6 @@ export function RoiCalculatorComponent(
   const {
     previewState,
     className,
-    title,
-    description,
     defaultMonthlyBudget,
     defaultLeadValue,
     defaultLeadsToClose,
@@ -53,21 +46,21 @@ export function RoiCalculatorComponent(
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const previewProps = {
-    eyebrow: props.eyebrow,
-    title: title ?? DEFAULTS.title!,
-    description,
+  const calculatorProps = {
     defaultMonthlyBudget: defaultMonthlyBudget ?? DEFAULTS.defaultMonthlyBudget!,
     defaultLeadValue: defaultLeadValue ?? DEFAULTS.defaultLeadValue!,
     defaultLeadsToClose: defaultLeadsToClose ?? DEFAULTS.defaultLeadsToClose!,
     ctaLabel: ctaLabel ?? DEFAULTS.ctaLabel!,
+    ctaUrl: ctaUrl ?? DEFAULTS.ctaUrl!,
   };
+
+  const shellClass = `roi-stitch ${className ?? ""}`.trim();
 
   if (previewState === "loading") {
     return (
-      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+      <div className={shellClass}>
         <RoiNativeStyles />
-        <p className="roi-text-muted" style={{ textAlign: "center" }}>
+        <p className="roi-text-muted" style={{ textAlign: "center", padding: "2rem" }}>
           Cargando…
         </p>
       </div>
@@ -76,9 +69,9 @@ export function RoiCalculatorComponent(
 
   if (previewState === "error") {
     return (
-      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+      <div className={shellClass}>
         <RoiNativeStyles />
-        <p className="roi-error" style={{ textAlign: "center" }}>
+        <p className="roi-error" style={{ textAlign: "center", padding: "2rem" }}>
           No pudimos calcular el ROI.
         </p>
       </div>
@@ -87,9 +80,9 @@ export function RoiCalculatorComponent(
 
   if (previewState === "success") {
     return (
-      <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
+      <div className={shellClass}>
         <RoiNativeStyles />
-        <p className="roi-success" style={{ textAlign: "center" }}>
+        <p className="roi-success" style={{ textAlign: "center", padding: "2rem" }}>
           Escenario guardado correctamente.
         </p>
       </div>
@@ -98,37 +91,29 @@ export function RoiCalculatorComponent(
 
   if (isWebflowDesignerCanvas()) {
     return (
-      <div className={className}>
-        <RoiDesignerPreview {...previewProps} />
+      <div className={shellClass}>
+        <RoiDesignerPreview {...calculatorProps} />
       </div>
     );
   }
 
   return (
-    <div className={`roi-stitch roi-bg-page roi-page ${className ?? ""}`}>
-      <div className="roi-wrap">
-        {props.eyebrow ? <p className="roi-eyebrow">{props.eyebrow}</p> : null}
-        {errorMessage ? (
-          <p className="roi-error" style={{ marginBottom: "1rem" }}>
-            {errorMessage}
-          </p>
-        ) : null}
-        <RoiErrorBoundary {...previewProps}>
-          <Suspense fallback={<RoiDesignerPreview {...previewProps} />}>
-            <RoiCalculatorLazy
-              title={previewProps.title}
-              description={previewProps.description}
-              defaultMonthlyBudget={previewProps.defaultMonthlyBudget}
-              defaultLeadValue={previewProps.defaultLeadValue}
-              defaultLeadsToClose={previewProps.defaultLeadsToClose}
-              ctaLabel={previewProps.ctaLabel}
-              ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
-              onError={(msg) => setErrorMessage(msg)}
-              onSubmitted={() => setErrorMessage(undefined)}
-            />
-          </Suspense>
-        </RoiErrorBoundary>
-      </div>
+    <div className={shellClass}>
+      {errorMessage ? (
+        <p className="roi-error" style={{ marginBottom: "1rem" }}>
+          {errorMessage}
+        </p>
+      ) : null}
+      <RoiErrorBoundary {...calculatorProps}>
+        <Suspense fallback={<RoiDesignerPreview {...calculatorProps} />}>
+          <RoiCalculatorLazy
+            layout="card"
+            {...calculatorProps}
+            onError={(msg) => setErrorMessage(msg)}
+            onSubmitted={() => setErrorMessage(undefined)}
+          />
+        </Suspense>
+      </RoiErrorBoundary>
     </div>
   );
 }

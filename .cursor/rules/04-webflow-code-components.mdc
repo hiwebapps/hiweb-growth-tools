@@ -1,86 +1,102 @@
 ---
-description: Reglas para crear componentes compatibles con Webflow Code Components
+description: Reglas para crear Code Components compatibles con Webflow Designer y code-island
 alwaysApply: true
 ---
 
 # Webflow Code Components
 
-El flujo principal es:
+Flujo:
 
-Cursor / React / TypeScript
-→ Code Components
-→ Webflow Designer
-→ Webflow Cloud
+```
+React / TypeScript → *.webflow.tsx → npm run webflow:import → Designer / sitio publicado
+APIs y rutas Next → commit + push → Webflow Cloud
+```
 
-Los módulos interactivos deben poder usarse como Webflow Code Components.
+**No confundir los dos pipelines:** cambios de UI del componente en Webflow requieren `npm run webflow:import` (local). La app Cloud (`/tools`, `/api/*`) se despliega con **git push**.
 
-Componentes principales esperados:
+## Archivos y estructura
 
-- QuizToolComponent
-- CalendarToolComponent
-- RoiCalculatorComponent
+| Pieza | Ubicación |
+|-------|-----------|
+| Wrapper + props | `components/code-components/*Component.tsx` |
+| Declaración Webflow | `components/code-components/*.webflow.tsx` (`declareComponent`, `@webflow/data-types`) |
+| UI reutilizable | `components/quiz`, `calendar`, `roi` |
+| Estilos globales Shadow DOM | `webflow.json` → `library.globals` → `globals.webflow.ts` + `code-components.webflow.css` |
+| APIs cliente | `lib/*/client.ts` → **solo** `lib/shared/api-url.ts` para URLs |
+| Env en navegador | `lib/shared/public-env.ts` |
+| Detección Designer | `lib/shared/is-webflow-designer.ts` |
 
-Los componentes deben:
+Componentes de biblioteca: `QuizToolComponent`, `CalendarToolComponent`, `RoiCalculatorComponent`, `SmokeTestComponent`.
 
-- Ser React components limpios.
-- Usar TypeScript.
-- Tener props claras.
-- Tener defaults seguros.
-- Ser responsive.
-- Tener estados loading, error y success.
-- No exponer secretos.
-- No hacer llamadas directas a n8n desde cliente.
-- Usar APIs internas de Webflow Cloud.
-- Poder insertarse en Webflow Designer.
+## Lecciones del incidente ROI (obligatorio)
 
-Props configurables desde Webflow Designer:
+El bundle de Webflow (**code-island**) corre en el **navegador**, no en Node. El Designer es **más estricto** que producción: puede fallar allí y verse bien en `/tools/calculadora-roi`.
 
-QuizToolComponent:
-- eyebrow
-- title
-- description
-- startButtonLabel
-- leadCaptureTitle
-- leadCaptureDescription
-- resultCtaLabel
-- resultCtaUrl
-- themeVariant
+### 1. `process is not defined` (`CodeIslandError`)
 
-CalendarToolComponent:
-- eyebrow
-- title
-- description
-- defaultService
-- submitButtonLabel
-- successTitle
-- successMessage
-- themeVariant
+- **Causa:** `process.env.*` en módulos importados por el componente (p. ej. `lib/shared/api-url.ts` vía `lib/roi/client.ts`).
+- **Síntoma:** `Failed to load code-island: process is not defined` — el componente no renderiza ni en Designer ni al publicar.
+- **Regla:** Nunca referenciar `process` sin comprobar `typeof process !== "undefined"`.
+- **Patrón del repo:** `readNextPublicEnv()` en `lib/shared/public-env.ts`; rutas API con `getApiBasePath()` / `apiUrl()` en `lib/shared/api-url.ts` (fallback `/tools` en `*.webflow.io`).
+- **No importar** en el árbol del Code Component: `lib/shared/env.ts`, `lib/db/*`, `lib/n8n/*` (solo servidor).
 
-RoiCalculatorComponent:
-- eyebrow
-- title
-- description
-- defaultMonthlyBudget
-- defaultLeadValue
-- ctaLabel
-- ctaUrl
-- themeVariant
+### 2. Imports de CSS externos
 
-No exponer como props:
+- **Causa:** `import "./algo.css"` en componentes del bundle → URLs `http://localhost/...` en el manifest.
+- **Regla:** No importar archivos `.css` desde código que entra en `*.webflow.tsx`.
+- **Patrón:** CSS nativo en string (`roi-native.css.ts`) + `<style>` vía `RoiNativeStyles` o clases en `code-components.webflow.css`.
 
-- Fórmulas críticas.
-- Endpoints secretos.
-- Webhook URLs.
-- Secrets.
-- Scoring final.
-- Lógica de negocio crítica.
+### 3. Tailwind que rompe el parser de Webflow
 
-Webflow Designer se usará para:
+Evitar en código del bundle de biblioteca:
 
-- Insertar Code Components.
-- Editar props visibles.
-- Montar landing pages.
-- Ajustar copy.
-- Combinar componentes con secciones nativas.
+- Valores arbitrarios: `bg-[#0e0e11]`, `text-[var(--x)]`, `blur-[80px]`, `h-[54px]`
+- Selectores complejos: `[&_strong]`
+- Opacidad con slash: `bg-brand-600/10`
+- `text-[var(--...)]` en cualquier forma
 
-Los cambios profundos de estructura, layout interno o lógica se hacen en código.
+**Preferir:** clases planas (`roi-*`, `hw-*`) definidas en CSS inyectado o en `code-components.webflow.css`. Tailwind ligero en Quiz/Calendario solo con clases simples ya presentes en globals.
+
+### 4. Designer vs sitio publicado
+
+- Usar `isWebflowDesignerCanvas()` para vista previa estática (`RoiDesignerPreview`) sin cargar lógica frágil.
+- `React.lazy()` para módulos pesados (calculadora interactiva) y no evaluar `client.ts` en Designer si no hace falta.
+- `ErrorBoundary` con fallback a la preview.
+- Probar con **Smoke Test Hiweb** antes de depurar un componente grande.
+
+### 5. Diseño para embed en landing
+
+- **ROI:** solo la **card** (inputs + resultados). Título, eyebrow y descripción van en **elementos nativos de Webflow**.
+- Props en `.webflow.tsx`: defaults numéricos, CTA, URLs — no copy de página completa salvo que el producto lo pida.
+- `RoiCalculator` admite `layout: "card" | "page"`; el Code Component usa siempre `layout="card"`.
+
+## Checklist antes de `webflow:import`
+
+1. `npm run build` sin errores.
+2. Grep: sin `process.env` desprotegido en `components/code-components`, `components/roi`, `lib/*/client.ts`.
+3. Grep: sin `import "*.css"` en el árbol del componente.
+4. Grep: sin clases Tailwind `[` arbitrarias en esos mismos paths.
+5. `npm run webflow:bundle` (opcional) y `npm run webflow:import` con **Workspace API token** (no Site token).
+6. Designer: F5, quitar instancias rotas, volver a arrastrar.
+
+## Props por componente (Designer)
+
+**QuizToolComponent:** eyebrow, title, description, startButtonLabel, leadCaptureTitle, leadCaptureDescription, resultCtaLabel, resultCtaUrl, themeVariant.
+
+**CalendarToolComponent:** eyebrow, title, description, defaultService, submitButtonLabel, successTitle, successMessage, themeVariant.
+
+**RoiCalculatorComponent (solo card):** defaultMonthlyBudget, defaultLeadValue, defaultLeadsToClose, ctaLabel, ctaUrl.
+
+**No exponer como props:** webhooks, secrets, fórmulas, scoring, URLs de n8n, lógica de negocio crítica.
+
+## Comportamiento esperado
+
+- React + TypeScript, props con defaults seguros.
+- Estados `loading`, `error`, `success` vía `previewState` (design-system).
+- Responsive; sin secretos en cliente.
+- Llamadas HTTP solo a APIs internas (`apiUrl("/api/...")`), nunca a n8n desde el browser.
+- Cambios de layout interno o lógica → código + reimport. Copy de marketing en páginas Webflow nativas.
+
+## Referencia
+
+Detalle operativo y troubleshooting: `docs/WEBFLOW_CODE_COMPONENTS.md`.

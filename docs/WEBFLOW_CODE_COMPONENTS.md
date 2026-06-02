@@ -55,10 +55,27 @@ npm run webflow:bundle
 1. Abre el sitio en Webflow Designer.
 2. Panel **Components** → biblioteca **Hiweb Growth Tools**.
 3. Arrastra el componente a la página.
-4. En el panel derecho, edita props (título, copy, CTA, tema, etc.).
+4. En el panel derecho, edita props (CTA, defaults numéricos, etc.; el copy de página va en elementos nativos).
 5. Publica el sitio.
 
 **No expongas en props:** webhooks, secretos, fórmulas ni scoring (solo copy y configuración visual segura).
+
+## Dos formas de publicar (no mezclar)
+
+| Qué cambias | Cómo llega a producción |
+|-------------|-------------------------|
+| UI del Code Component en Designer | `npm run webflow:import` (no requiere git push) |
+| App Next.js, APIs, rutas `/tools/*` | commit + push → deploy Webflow Cloud |
+
+## Lecciones aprendidas (ROI)
+
+Resumen de incidentes reales; reglas completas en `.cursor/rules/04-webflow-code-components.mdc`.
+
+1. **`process is not defined`** — El bundle code-island no tiene Node. Usar `lib/shared/public-env.ts` y `api-url.ts`; no importar `lib/shared/env.ts` ni módulos de servidor en el árbol del componente.
+2. **`import "*.css"`** — Rompe Designer (URLs localhost). Usar CSS inyectado (`<style>`) o `code-components.webflow.css`.
+3. **Tailwind arbitrario** — `bg-[#…]`, `text-[var(--…)]`, `blur-[80px]` → `CompilationError` o crash. Usar clases `roi-*` / `hw-*`.
+4. **Designer ≠ producción** — Preview estática + `lazy()` + error boundary; validar con Smoke Test.
+5. **Embed en landing** — ROI exporta solo la card; el hero va en Webflow nativo.
 
 ## Webflow Cloud (app Next.js)
 

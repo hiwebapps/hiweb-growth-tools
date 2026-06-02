@@ -15,8 +15,12 @@ import { RoiLeadPanel } from "./RoiLeadPanel";
 import { RoiNativeStyles } from "./RoiNativeStyles";
 import { RoiResults } from "./RoiResults";
 
+export type RoiCalculatorLayout = "page" | "card";
+
 export type RoiCalculatorProps = {
-  title: string;
+  /** `card` = solo el panel (Webflow). `page` = hero + card (ruta /calculadora-roi). */
+  layout?: RoiCalculatorLayout;
+  title?: string;
   description?: string;
   defaultMonthlyBudget: number;
   defaultLeadValue: number;
@@ -29,6 +33,7 @@ export type RoiCalculatorProps = {
 };
 
 export function RoiCalculator({
+  layout = "page",
   title,
   description,
   defaultMonthlyBudget,
@@ -122,12 +127,21 @@ export function RoiCalculator({
     setError(null);
   };
 
+  const rootClass =
+    layout === "card" ? "roi-root roi-root--card" : "roi-root roi-root--page";
+
   return (
-    <div className="roi-root">
+    <div className={rootClass}>
       <RoiNativeStyles />
-      <div className="roi-ambient roi-ambient-cyan" aria-hidden />
-      <div className="roi-ambient roi-ambient-violet" aria-hidden />
-      <RoiHero title={title} description={description} />
+      {layout === "page" ? (
+        <>
+          <div className="roi-ambient roi-ambient-cyan" aria-hidden />
+          <div className="roi-ambient roi-ambient-violet" aria-hidden />
+          {title ? (
+            <RoiHero title={title} description={description} />
+          ) : null}
+        </>
+      ) : null}
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">

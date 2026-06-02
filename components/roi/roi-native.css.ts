@@ -17,6 +17,9 @@ export const ROI_NATIVE_CSS = `
 }
 .roi-stitch *, .roi-stitch *::before, .roi-stitch *::after { box-sizing: border-box; }
 .roi-stitch.roi-bg-page { background-color: var(--roi-bg); }
+.roi-root { position: relative; width: 100%; }
+.roi-root--card { background: transparent; }
+.roi-root--page { padding: 2rem 0; }
 .roi-page { position: relative; width: 100%; padding: 2rem 0; }
 .roi-wrap { position: relative; z-index: 1; max-width: 64rem; margin: 0 auto; padding: 0 1rem; }
 .roi-eyebrow { margin: 0 0 1rem; text-align: center; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--roi-cyan); }

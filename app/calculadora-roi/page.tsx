@@ -6,5 +6,9 @@ export const metadata: Metadata = {
 };
 
 export default function CalculadoraRoiPage() {
-  return <RoiCalculatorComponent />;
+  return (
+    <div className="roi-stitch roi-bg-page roi-page">
+      <RoiCalculatorComponent />
+    </div>
+  );
 }

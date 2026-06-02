@@ -1,20 +1,13 @@
 import { declareComponent } from "@webflow/react";
 import { props } from "@webflow/data-types";
-import { contentProps } from "./shared.webflow-props";
 import RoiCalculatorComponent from "./RoiCalculatorComponent";
 
 export default declareComponent(RoiCalculatorComponent, {
   name: "Calculadora ROI marketing",
   description:
-    "Estima leads, ingresos y ROI según presupuesto, industria y ticket medio.",
+    "Card interactiva: industria, presupuesto, ticket, leads y resultados estimados.",
   group: "Hiweb Growth Tools",
   props: {
-    ...contentProps({
-      eyebrow: "ROI",
-      title: "Maximiza tu Retorno",
-      description:
-        "Calcula el impacto real de tu inversión en marketing digital con nuestra herramienta de precisión.",
-    }),
     defaultMonthlyBudget: props.Number({
       name: "Presupuesto mensual (USD)",
       defaultValue: 5000,
