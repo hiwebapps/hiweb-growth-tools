@@ -1,3 +1,4 @@
+import { resolveIndustryId } from "./industry";
 import type { RoiInputs, RoiLeadInput } from "./types";
 import { AppError } from "@/lib/shared/errors";
 
@@ -6,9 +7,16 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
   const monthlyBudget = Number(raw.monthlyBudget);
   const averageLeadValue = Number(raw.averageLeadValue);
+  const industry = raw.industry
+    ? resolveIndustryId(String(raw.industry))
+    : "saas";
+  const leadsToCloseSale =
+    raw.leadsToCloseSale === undefined || raw.leadsToCloseSale === null
+      ? undefined
+      : Number(raw.leadsToCloseSale);
   const conversionRate =
     raw.conversionRate === undefined || raw.conversionRate === null
-      ? 12
+      ? undefined
       : Number(raw.conversionRate);
   const costPerLead =
     raw.costPerLead === undefined || raw.costPerLead === null
@@ -33,15 +41,30 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
     );
   }
 
-  if (
-    !Number.isFinite(conversionRate) ||
-    conversionRate < 0.5 ||
-    conversionRate > 80
-  ) {
-    throw new AppError(
-      "La tasa de conversión debe estar entre 0.5% y 80%.",
-      { statusCode: 400, code: "INVALID_CONVERSION" },
-    );
+  if (leadsToCloseSale !== undefined) {
+    if (
+      !Number.isFinite(leadsToCloseSale) ||
+      leadsToCloseSale < 1 ||
+      leadsToCloseSale > 100
+    ) {
+      throw new AppError(
+        "Los leads para cerrar venta deben estar entre 1 y 100.",
+        { statusCode: 400, code: "INVALID_LEADS_TO_CLOSE" },
+      );
+    }
+  }
+
+  if (conversionRate !== undefined) {
+    if (
+      !Number.isFinite(conversionRate) ||
+      conversionRate < 0.5 ||
+      conversionRate > 80
+    ) {
+      throw new AppError(
+        "La tasa de conversión debe estar entre 0.5% y 80%.",
+        { statusCode: 400, code: "INVALID_CONVERSION" },
+      );
+    }
   }
 
   if (
@@ -57,6 +80,8 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
   return {
     monthlyBudget,
     averageLeadValue,
+    industry,
+    leadsToCloseSale,
     conversionRate,
     costPerLead,
   };

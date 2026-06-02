@@ -1,101 +1,96 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Input } from "@/components/shared";
-import { calculateRoiApi, submitRoiApi } from "@/lib/roi/client";
-import type { RoiCalculationResult } from "@/lib/roi/types";
-import { RoiInputForm, type RoiFormValues } from "./RoiInputForm";
+import { useCallback, useMemo, useState } from "react";
+import { calculateRoi } from "@/lib/roi/calculator";
+import { submitRoiApi } from "@/lib/roi/client";
+import { createDefaultRoiState, stateToRoiInputs } from "@/lib/roi/state";
+import type {
+  RoiCalculationResult,
+  RoiCalculatorState,
+  RoiLeadInput,
+} from "@/lib/roi/types";
+import "./roi-stitch.css";
+import { RoiHero } from "./RoiHero";
+import { RoiInputForm } from "./RoiInputForm";
+import { RoiLeadPanel } from "./RoiLeadPanel";
 import { RoiResults } from "./RoiResults";
 
-type RoiCalculatorProps = {
+export type RoiCalculatorProps = {
+  title: string;
+  description?: string;
   defaultMonthlyBudget: number;
   defaultLeadValue: number;
+  defaultLeadsToClose?: number;
+  ctaLabel: string;
+  ctaUrl: string;
   onLoading?: (loading: boolean) => void;
   onError?: (message: string) => void;
-  onCalculated?: (result: RoiCalculationResult) => void;
   onSubmitted?: () => void;
-  onRegisterCalculate?: (fn: () => Promise<void>) => void;
-  onRegisterSubmit?: (fn: () => Promise<void>) => void;
 };
 
-function toFormValues(
-  budget: number,
-  leadValue: number,
-): RoiFormValues {
-  return {
-    monthlyBudget: String(budget),
-    averageLeadValue: String(leadValue),
-    conversionRate: "12",
-    costPerLead: "",
-  };
-}
-
-function toPayload(values: RoiFormValues) {
-  return {
-    monthlyBudget: Number(values.monthlyBudget),
-    averageLeadValue: Number(values.averageLeadValue),
-    conversionRate: Number(values.conversionRate || 12),
-    costPerLead: values.costPerLead ? Number(values.costPerLead) : undefined,
-  };
-}
-
 export function RoiCalculator({
+  title,
+  description,
   defaultMonthlyBudget,
   defaultLeadValue,
+  defaultLeadsToClose = 15,
+  ctaLabel,
+  ctaUrl,
   onLoading,
   onError,
-  onCalculated,
   onSubmitted,
-  onRegisterCalculate,
-  onRegisterSubmit,
 }: RoiCalculatorProps) {
-  const [values, setValues] = useState(() =>
-    toFormValues(defaultMonthlyBudget, defaultLeadValue),
+  const [state, setState] = useState<RoiCalculatorState>(() =>
+    createDefaultRoiState(
+      defaultMonthlyBudget,
+      defaultLeadValue,
+      defaultLeadsToClose,
+    ),
   );
-  const [result, setResult] = useState<RoiCalculationResult | null>(null);
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const [lead, setLead] = useState({
-    name: "",
-    email: "",
-    company: "",
-    phone: "",
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lead, setLead] = useState({ name: "", email: "", company: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleChange = (field: keyof RoiFormValues, value: string) => {
-    setValues((prev) => ({ ...prev, [field]: value }));
+  const previewResult = useMemo<RoiCalculationResult>(() => {
+    return calculateRoi(stateToRoiInputs(state));
+  }, [state]);
+
+  const handleStateChange = <K extends keyof RoiCalculatorState>(
+    key: K,
+    value: RoiCalculatorState[K],
+  ) => {
+    setState((prev) => ({ ...prev, [key]: value }));
     setError(null);
+    setSuccessMessage(null);
   };
 
-  const handleCalculate = useCallback(async () => {
-    onLoading?.(true);
-    setError(null);
-
-    try {
-      const { result: calculated } = await calculateRoiApi(toPayload(values));
-      setResult(calculated);
+  const handleCtaClick = useCallback(() => {
+    if (ctaUrl && !showLeadForm) {
       setShowLeadForm(true);
-      onCalculated?.(calculated);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "No pudimos calcular el ROI.";
-      setError(message);
-      onError?.(message);
-      onLoading?.(false);
+      return;
     }
-  }, [values, onLoading, onError, onCalculated]);
+    if (ctaUrl.startsWith("http")) {
+      window.open(ctaUrl, "_blank", "noopener,noreferrer");
+    } else {
+      window.location.href = ctaUrl;
+    }
+  }, [ctaUrl, showLeadForm]);
 
   const handleSubmitLead = useCallback(async () => {
-    if (!result) {
+    if (!lead.name.trim() || !lead.email.trim()) {
+      setError("Nombre y email son obligatorios para enviar el escenario.");
       return;
     }
 
     onLoading?.(true);
+    setIsSubmitting(true);
     setError(null);
 
     try {
       await submitRoiApi({
-        inputs: toPayload(values),
+        inputs: stateToRoiInputs(state),
         lead: {
           name: lead.name,
           email: lead.email,
@@ -103,6 +98,11 @@ export function RoiCalculator({
           phone: lead.phone || undefined,
         },
       });
+      setSuccessMessage(
+        "Escenario guardado. Un asesor puede contactarte con una propuesta personalizada.",
+      );
+      setShowLeadForm(false);
+      onLoading?.(false);
       onSubmitted?.();
     } catch (err) {
       const message =
@@ -110,62 +110,59 @@ export function RoiCalculator({
       setError(message);
       onError?.(message);
       onLoading?.(false);
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [result, values, lead, onLoading, onError, onSubmitted]);
+  }, [state, lead, onLoading, onError, onSubmitted]);
 
-  useEffect(() => {
-    onRegisterCalculate?.(handleCalculate);
-  }, [handleCalculate, onRegisterCalculate]);
-
-  useEffect(() => {
-    onRegisterSubmit?.(handleSubmitLead);
-  }, [handleSubmitLead, onRegisterSubmit]);
+  const handleLeadChange = (field: keyof RoiLeadInput, value: string) => {
+    setLead((prev) => ({ ...prev, [field]: value }));
+    setError(null);
+  };
 
   return (
-    <div className="flex flex-col gap-6">
-      <RoiInputForm values={values} onChange={handleChange} error={error ?? undefined} />
+    <div className="roi-stitch relative w-full">
+      <div className="roi-ambient roi-ambient-cyan" aria-hidden />
+      <div className="roi-ambient roi-ambient-violet" aria-hidden />
 
-      {result ? <RoiResults result={result} /> : null}
+      <RoiHero title={title} description={description} />
 
-      {showLeadForm && result ? (
-        <div className="flex flex-col gap-4 border-t border-border pt-6">
-          <p className="text-sm font-medium text-foreground">
-            ¿Quieres que te enviemos este escenario?
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Nombre"
-              name="leadName"
-              value={lead.name}
-              onChange={(e) => setLead((p) => ({ ...p, name: e.target.value }))}
-              required
-            />
-            <Input
-              label="Email"
-              name="leadEmail"
-              type="email"
-              value={lead.email}
-              onChange={(e) => setLead((p) => ({ ...p, email: e.target.value }))}
-              required
-            />
-            <Input
-              label="Empresa"
-              name="leadCompany"
-              value={lead.company}
-              onChange={(e) =>
-                setLead((p) => ({ ...p, company: e.target.value }))
-              }
-            />
-            <Input
-              label="Teléfono"
-              name="leadPhone"
-              type="tel"
-              value={lead.phone}
-              onChange={(e) => setLead((p) => ({ ...p, phone: e.target.value }))}
-            />
-          </div>
+      <div className="relative w-full overflow-hidden rounded-2xl border border-[var(--roi-border)] bg-[var(--roi-surface)] p-5 shadow-[0_0_50px_rgba(43,167,246,0.05)] sm:p-8 lg:p-10">
+        <div
+          className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full bg-[var(--roi-cyan)]/10 blur-[80px]"
+          aria-hidden
+        />
+
+        <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+          <RoiInputForm
+            state={state}
+            onChange={handleStateChange}
+            error={error ?? undefined}
+          />
+          <RoiResults
+            result={previewResult}
+            ctaLabel={ctaLabel}
+            onCtaClick={handleCtaClick}
+            isLoading={isSubmitting}
+          />
         </div>
-      ) : null}
+
+        {successMessage ? (
+          <p className="relative z-10 mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            {successMessage}
+          </p>
+        ) : null}
+
+        {showLeadForm ? (
+          <RoiLeadPanel
+            lead={lead}
+            onChange={handleLeadChange}
+            onSubmit={() => void handleSubmitLead()}
+            onClose={() => setShowLeadForm(false)}
+            isLoading={isSubmitting}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

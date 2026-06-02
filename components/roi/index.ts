@@ -1,4 +1,4 @@
-export { RoiCalculator } from "./RoiCalculator";
-export { RoiInputForm, type RoiFormValues } from "./RoiInputForm";
-export { RoiRecommendationCard } from "./RoiRecommendationCard";
+export { RoiCalculator, type RoiCalculatorProps } from "./RoiCalculator";
+export { RoiInputForm } from "./RoiInputForm";
 export { RoiResults } from "./RoiResults";
+export { RoiRecommendationCard } from "./RoiRecommendationCard";

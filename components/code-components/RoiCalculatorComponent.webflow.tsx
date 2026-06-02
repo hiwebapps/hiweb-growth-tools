@@ -6,30 +6,36 @@ import RoiCalculatorComponent from "./RoiCalculatorComponent";
 export default declareComponent(RoiCalculatorComponent, {
   name: "Calculadora — ROI marketing",
   description:
-    "Estima leads, ventas, ingresos y ROI según presupuesto y conversión.",
+    "Estima leads, ingresos y ROI según presupuesto, industria y ticket medio.",
   group: "Hiweb Growth Tools",
   props: {
     ...contentProps({
       eyebrow: "ROI",
-      title: "Calcula el retorno de tu inversión en marketing",
+      title: "Maximiza tu Retorno",
       description:
-        "Estima leads, ventas e ingresos potenciales según tu presupuesto y ticket medio.",
+        "Calcula el impacto real de tu inversión en marketing digital con nuestra herramienta de precisión.",
     }),
     defaultMonthlyBudget: props.Number({
       name: "Presupuesto mensual (USD)",
-      defaultValue: 3000,
-      min: 100,
-      max: 500000,
+      defaultValue: 5000,
+      min: 1000,
+      max: 50000,
     }),
     defaultLeadValue: props.Number({
-      name: "Valor por lead (USD)",
-      defaultValue: 500,
-      min: 10,
-      max: 1000000,
+      name: "Ticket promedio (USD)",
+      defaultValue: 1200,
+      min: 100,
+      max: 10000,
+    }),
+    defaultLeadsToClose: props.Number({
+      name: "Leads para cerrar venta",
+      defaultValue: 15,
+      min: 1,
+      max: 100,
     }),
     ctaLabel: props.Text({
       name: "Texto CTA",
-      defaultValue: "Quiero una propuesta",
+      defaultValue: "Obtener auditoría gratuita",
     }),
     ctaUrl: props.Text({
       name: "URL CTA",

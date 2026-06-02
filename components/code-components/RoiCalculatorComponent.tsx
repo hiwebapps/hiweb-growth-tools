@@ -1,81 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge, Button } from "@/components/shared";
+import { useState } from "react";
 import { RoiCalculator } from "@/components/roi";
-import {
-  CodeComponentFrame,
-  PlaceholderPanel,
-} from "./CodeComponentFrame";
-import type { CodeComponentBaseProps, ToolViewState } from "@/lib/shared/code-component";
+import { Alert, Spinner } from "@/components/shared";
+import type { CodeComponentBaseProps } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
+import { cn } from "@/lib/shared/utils";
 
 export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   defaultMonthlyBudget?: number;
   defaultLeadValue?: number;
+  defaultLeadsToClose?: number;
   ctaLabel?: string;
   ctaUrl?: string;
 };
 
 const DEFAULTS: RoiCalculatorComponentProps = {
   eyebrow: "ROI",
-  title: "Calcula el retorno de tu inversión en marketing",
+  title: "Maximiza tu Retorno",
   description:
-    "Estima leads, ventas e ingresos potenciales según tu presupuesto y ticket medio.",
-  themeVariant: "light",
-  defaultMonthlyBudget: 3000,
-  defaultLeadValue: 500,
-  ctaLabel: "Quiero una propuesta",
+    "Calcula el impacto real de tu inversión en marketing digital con nuestra herramienta de precisión.",
+  themeVariant: "dark",
+  defaultMonthlyBudget: 5000,
+  defaultLeadValue: 1200,
+  defaultLeadsToClose: 15,
+  ctaLabel: "Obtener auditoría gratuita",
   ctaUrl: "/calendario",
 };
-
-function RoiPreviewMock({
-  props,
-  resolvedView,
-  themeVariant,
-  ctaLabel,
-  onMockError,
-  onMockSubmit,
-}: {
-  props: RoiCalculatorComponentProps;
-  resolvedView: ToolViewState;
-  themeVariant: RoiCalculatorComponentProps["themeVariant"];
-  ctaLabel?: string;
-  onMockError: () => void;
-  onMockSubmit: () => void;
-}) {
-  return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      footer={
-        resolvedView === "intro" ? (
-          <Button type="button" onClick={onMockSubmit} fullWidth>
-            Calcular estimación
-          </Button>
-        ) : resolvedView === "active" ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" variant="secondary" onClick={onMockError}>
-              Simular error
-            </Button>
-            <Button type="button" onClick={onMockSubmit} fullWidth>
-              {ctaLabel ?? "Guardar"}
-            </Button>
-          </div>
-        ) : null
-      }
-    >
-      {resolvedView === "intro" ? (
-        <Badge variant="brand">Preview</Badge>
-      ) : null}
-      {resolvedView === "active" ? (
-        <PlaceholderPanel title="ROI" themeVariant={themeVariant}>
-          <p className="text-sm text-muted">Vista previa del design system.</p>
-        </PlaceholderPanel>
-      ) : null}
-    </CodeComponentFrame>
-  );
-}
 
 export function RoiCalculatorComponent(
   rawProps: RoiCalculatorComponentProps = {},
@@ -84,157 +35,94 @@ export function RoiCalculatorComponent(
   const {
     previewState,
     className,
+    title,
+    description,
     defaultMonthlyBudget,
     defaultLeadValue,
+    defaultLeadsToClose,
     ctaLabel,
     ctaUrl,
   } = props;
 
-  const [viewState, setViewState] = useState<ToolViewState>("intro");
-  const [hasResult, setHasResult] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const calculateRef = useRef<(() => Promise<void>) | null>(null);
-  const submitRef = useRef<(() => Promise<void>) | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const resolvedView = previewState ?? viewState;
-
-  useEffect(() => {
-    if (previewState) {
-      setViewState(previewState);
-    }
-  }, [previewState]);
-
-  const handleLoading = useCallback(
-    (loading: boolean) => {
-      if (!previewState && loading) {
-        setViewState("loading");
-      }
-    },
-    [previewState],
-  );
-
-  const handleError = useCallback((message: string) => {
-    setErrorMessage(message);
-    setViewState("error");
-  }, []);
-
-  const handleCalculated = useCallback(() => {
-    setHasResult(true);
-    setViewState("active");
-  }, []);
-
-  const handleSubmitted = useCallback(() => {
-    setViewState("success");
-  }, []);
-
-  if (previewState) {
+  if (previewState === "loading") {
     return (
-      <RoiPreviewMock
-        props={props}
-        resolvedView={previewState}
-        themeVariant={props.themeVariant}
-        ctaLabel={ctaLabel}
-        onMockError={() => setViewState("error")}
-        onMockSubmit={() =>
-          setViewState(previewState === "intro" ? "active" : "success")
-        }
-      />
+      <div className={cn("roi-stitch flex justify-center py-24", className)}>
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (previewState === "error") {
+    return (
+      <div className={cn("roi-stitch p-6", className)}>
+        <Alert variant="error" title="Error">
+          No pudimos calcular el ROI.
+        </Alert>
+      </div>
+    );
+  }
+
+  if (previewState === "success") {
+    return (
+      <div className={cn("roi-stitch p-6", className)}>
+        <Alert variant="success" title="Listo">
+          Escenario guardado correctamente.
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      errorMessage={
-        errorMessage ??
-        "No pudimos calcular el ROI. Revisa los valores e inténtalo de nuevo."
-      }
-      successTitle="Estimación guardada"
-      successMessage="Hemos registrado tu escenario. Un asesor puede contactarte con una propuesta personalizada."
-      className={className}
-      footer={
-        resolvedView === "intro" ? (
-          <Button
-            type="button"
-            onClick={() => {
-              setViewState("active");
-            }}
-            fullWidth
-          >
-            Comenzar calculadora
-          </Button>
-        ) : resolvedView === "active" && !hasResult ? (
-          <Button
-            type="button"
-            fullWidth
-            onClick={() => void calculateRef.current?.()}
-          >
-            Calcular estimación
-          </Button>
-        ) : resolvedView === "active" && hasResult ? (
-          <Button
-            type="button"
-            fullWidth
-            onClick={() => void submitRef.current?.()}
-          >
-            Enviar escenario
-          </Button>
-        ) : resolvedView === "error" ? (
-          <Button
-            type="button"
-            variant="secondary"
-            fullWidth
-            onClick={() => {
-              setViewState("intro");
-              setHasResult(false);
-              setErrorMessage(undefined);
-            }}
-          >
-            Reintentar
-          </Button>
-        ) : resolvedView === "success" ? (
-          <Button
-            type="button"
-            fullWidth
-            onClick={() => {
-              const url = ctaUrl ?? "/calendario";
-              if (url.startsWith("http")) {
-                window.open(url, "_blank", "noopener,noreferrer");
-              } else {
-                window.location.href = url;
-              }
-            }}
-          >
-            {ctaLabel}
-          </Button>
-        ) : null
-      }
+    <div
+      className={cn(
+        "roi-stitch relative w-full bg-[#0e0e11] py-8 sm:py-12",
+        className,
+      )}
     >
-      {resolvedView === "intro" ? (
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="brand">Cálculo en servidor</Badge>
-          <Badge variant="neutral">Sin compromiso</Badge>
+      {props.eyebrow ? (
+        <p className="mb-4 text-center text-sm font-medium tracking-wide text-[var(--roi-cyan)] uppercase">
+          {props.eyebrow}
+        </p>
+      ) : null}
+
+      {isLoading ? (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+          <Spinner size="lg" />
         </div>
       ) : null}
 
-      {resolvedView === "active" ? (
+      {errorMessage ? (
+        <div className="relative z-20 mx-auto mb-4 max-w-3xl px-4">
+          <Alert variant="error" title="Error">
+            {errorMessage}
+          </Alert>
+        </div>
+      ) : null}
+
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
         <RoiCalculator
+          title={title ?? DEFAULTS.title!}
+          description={description}
           defaultMonthlyBudget={defaultMonthlyBudget ?? DEFAULTS.defaultMonthlyBudget!}
           defaultLeadValue={defaultLeadValue ?? DEFAULTS.defaultLeadValue!}
-          onLoading={handleLoading}
-          onError={handleError}
-          onCalculated={handleCalculated}
-          onSubmitted={handleSubmitted}
-          onRegisterCalculate={(fn) => {
-            calculateRef.current = fn;
+          defaultLeadsToClose={defaultLeadsToClose ?? DEFAULTS.defaultLeadsToClose}
+          ctaLabel={ctaLabel ?? DEFAULTS.ctaLabel!}
+          ctaUrl={ctaUrl ?? DEFAULTS.ctaUrl!}
+          onLoading={setIsLoading}
+          onError={(msg) => {
+            setErrorMessage(msg);
+            setIsLoading(false);
           }}
-          onRegisterSubmit={(fn) => {
-            submitRef.current = fn;
+          onSubmitted={() => {
+            setIsLoading(false);
+            setErrorMessage(undefined);
           }}
         />
-      ) : null}
-    </CodeComponentFrame>
+      </div>
+    </div>
   );
 }
 

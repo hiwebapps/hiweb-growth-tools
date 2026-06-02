@@ -1,7 +1,15 @@
+import type { RoiIndustryId } from "./industry";
+
+export type { RoiIndustryId };
+
 export type RoiInputs = {
   monthlyBudget: number;
   averageLeadValue: number;
-  conversionRate: number;
+  industry?: RoiIndustryId;
+  /** Leads necesarios para cerrar una venta (UI Stitch). */
+  leadsToCloseSale?: number;
+  /** Tasa lead → venta en % (si no se usa leadsToCloseSale). */
+  conversionRate?: number;
   costPerLead?: number;
 };
 
@@ -31,4 +39,11 @@ export type RoiLeadInput = {
 export type RoiSubmitResponse = {
   leadId: string;
   result: RoiCalculationResult;
+};
+
+export type RoiCalculatorState = {
+  industry: RoiIndustryId;
+  monthlyBudget: number;
+  averageLeadValue: number;
+  leadsToCloseSale: number;
 };
