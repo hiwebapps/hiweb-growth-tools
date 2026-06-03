@@ -14,8 +14,12 @@ type MarketingQuizProps = {
   sessionId: string;
   leadCaptureTitle: string;
   leadCaptureDescription?: string;
+  submitButtonLabel?: string;
   onError?: (message: string) => void;
-  onSubmitted?: (result: QuizScoreResult) => void;
+  onSubmitted?: (payload: {
+    result: QuizScoreResult;
+    leadId: string;
+  }) => void;
 };
 
 const emptyLead = (): QuizLeadInput => ({
@@ -31,6 +35,7 @@ export function MarketingQuiz({
   sessionId,
   leadCaptureTitle,
   leadCaptureDescription,
+  submitButtonLabel = "Enviar diagnóstico",
   onError,
   onSubmitted,
 }: MarketingQuizProps) {
@@ -116,7 +121,7 @@ export function MarketingQuiz({
 
     try {
       const response = await submitQuiz({ sessionId, lead, answers });
-      onSubmitted?.(response.result);
+      onSubmitted?.({ result: response.result, leadId: response.leadId });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No pudimos enviar el quiz.";
@@ -181,7 +186,7 @@ export function MarketingQuiz({
             disabled={isSubmitting}
             onClick={() => void handleSubmit()}
           >
-            {isSubmitting ? "Enviando…" : "Enviar diagnóstico"}
+            {isSubmitting ? "Enviando…" : submitButtonLabel}
             <span aria-hidden>→</span>
           </button>
         )}

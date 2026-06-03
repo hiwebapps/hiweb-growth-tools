@@ -6,7 +6,7 @@ import QuizToolComponent from "./QuizToolComponent";
 export default declareComponent(QuizToolComponent, {
   name: "Quiz Diagnostico marketing",
   description:
-    "Quiz multistep de diagnóstico de marketing digital con score y captura de lead.",
+    "Quiz multistep con captura de lead. Al enviar, redirige a tu página de resultados.",
   group: "Hiweb Growth Tools",
   props: {
     ...contentProps({
@@ -28,13 +28,9 @@ export default declareComponent(QuizToolComponent, {
       defaultValue:
         "Déjanos tus datos para enviarte el informe y las recomendaciones.",
     }),
-    resultCtaLabel: props.Text({
-      name: "Texto CTA resultado",
-      defaultValue: "Agendar llamada",
-    }),
-    resultCtaUrl: props.Text({
-      name: "URL CTA resultado",
-      defaultValue: "/tools/calendario",
+    resultsRedirectUrl: props.Text({
+      name: "URL página de resultados",
+      defaultValue: "/resultados-diagnostico",
     }),
   },
   options: {

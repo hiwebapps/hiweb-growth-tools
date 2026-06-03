@@ -3,8 +3,8 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { QuizDesignerPreview } from "@/components/quiz/QuizDesignerPreview";
 import { QuizNativeStyles } from "@/components/quiz/QuizNativeStyles";
-import { QuizResult } from "@/components/quiz/QuizResult";
 import type { QuizScoreResult } from "@/lib/quiz/types";
+import { saveQuizResult } from "@/lib/quiz/result-storage";
 import { startQuizSession } from "@/lib/quiz/session";
 import type { CodeComponentBaseProps, ToolViewState } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
@@ -20,8 +20,8 @@ export type QuizToolComponentProps = CodeComponentBaseProps & {
   startButtonLabel?: string;
   leadCaptureTitle?: string;
   leadCaptureDescription?: string;
-  resultCtaLabel?: string;
-  resultCtaUrl?: string;
+  /** Ruta o URL de la página de resultados en Webflow (ej. /resultados-diagnostico). */
+  resultsRedirectUrl?: string;
 };
 
 const DEFAULTS: QuizToolComponentProps = {
@@ -33,8 +33,7 @@ const DEFAULTS: QuizToolComponentProps = {
   leadCaptureTitle: "Recibe tu resultado",
   leadCaptureDescription:
     "Déjanos tus datos para enviarte el informe y las recomendaciones.",
-  resultCtaLabel: "Agendar diagnóstico gratuito",
-  resultCtaUrl: "/tools/calendario",
+  resultsRedirectUrl: "/resultados-diagnostico",
 };
 
 function navigateToUrl(url: string) {
@@ -42,7 +41,7 @@ function navigateToUrl(url: string) {
     return;
   }
   if (url.startsWith("http")) {
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.location.href = url;
   } else {
     window.location.href = url;
   }
@@ -59,16 +58,16 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
     startButtonLabel,
     leadCaptureTitle,
     leadCaptureDescription,
-    resultCtaLabel,
-    resultCtaUrl,
+    resultsRedirectUrl,
   } = props;
 
   const [viewState, setViewState] = useState<ToolViewState>("intro");
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [quizResult, setQuizResult] = useState<QuizScoreResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const resolvedView = previewState ?? viewState;
+  const redirectUrl = resultsRedirectUrl?.trim() ?? "";
+  const submitLabel = redirectUrl ? "Ver mis resultados" : "Enviar diagnóstico";
 
   useEffect(() => {
     if (previewState) {
@@ -96,16 +95,21 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
   }, [previewState]);
 
   const handleSubmitted = useCallback(
-    (result: QuizScoreResult) => {
-      setQuizResult(result);
-      setViewState("success");
-    },
-    [],
-  );
+    (payload: { result: QuizScoreResult; leadId: string }) => {
+      if (previewState) {
+        return;
+      }
 
-  const handleCta = useCallback(() => {
-    navigateToUrl(resultCtaUrl ?? DEFAULTS.resultCtaUrl!);
-  }, [resultCtaUrl]);
+      saveQuizResult(payload);
+
+      if (redirectUrl) {
+        setViewState("loading");
+        navigateToUrl(redirectUrl);
+        return;
+      }
+    },
+    [previewState, redirectUrl],
+  );
 
   const shellClass = `quiz-stitch quiz-root ${className ?? ""}`.trim();
 
@@ -124,7 +128,9 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
       <div className="quiz-ambient quiz-ambient-cyan" aria-hidden />
 
       {resolvedView === "loading" ? (
-        <p className="quiz-loading">Preparando tu diagnóstico…</p>
+        <p className="quiz-loading">
+          {redirectUrl ? "Preparando tus resultados…" : "Preparando tu diagnóstico…"}
+        </p>
       ) : null}
 
       {resolvedView === "error" ? (
@@ -174,6 +180,7 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
             sessionId={sessionId}
             leadCaptureTitle={leadCaptureTitle ?? DEFAULTS.leadCaptureTitle!}
             leadCaptureDescription={leadCaptureDescription}
+            submitButtonLabel={submitLabel}
             onError={(message) => {
               setErrorMessage(message);
               setViewState("error");
@@ -187,17 +194,11 @@ export function QuizToolComponent(rawProps: QuizToolComponentProps = {}) {
         <QuizDesignerPreview />
       ) : null}
 
-      {resolvedView === "success" && quizResult ? (
-        <QuizResult
-          result={quizResult}
-          ctaLabel={resultCtaLabel ?? DEFAULTS.resultCtaLabel!}
-          onCtaClick={handleCta}
-        />
-      ) : null}
-
-      {resolvedView === "success" && previewState && !quizResult ? (
+      {resolvedView === "success" && previewState ? (
         <div className="quiz-inner">
-          <p className="quiz-section-desc">Vista previa: resultado del diagnóstico.</p>
+          <p className="quiz-section-desc">
+            Vista previa: tras enviar, el usuario irá a la URL de resultados configurada.
+          </p>
         </div>
       ) : null}
     </div>
