@@ -9,7 +9,7 @@ Guía para publicar e insertar los tres módulos interactivos en Webflow Designe
 | Quiz — Diagnóstico marketing | `QuizToolComponent` | Hiweb Growth Tools |
 | Calendario — Agendar llamada | `CalendarToolComponent` | Hiweb Growth Tools |
 | Calculadora — ROI marketing | `RoiCalculatorComponent` | Hiweb Growth Tools |
-| Quiz resultado — Score / Desglose / Fortalezas / Oportunidades / Prioridad (×3) | `QuizResult*Component` | Hiweb Growth Tools |
+| Quiz resultado — Score y desglose / Fortalezas y mejoras / Prioridades | `QuizResultOverviewComponent`, `QuizResultInsightsComponent`, `QuizResultPrioritiesComponent` | Hiweb Growth Tools |
 
 Las definiciones para Webflow están en `components/code-components/*.webflow.tsx` (`declareComponent` + `@webflow/data-types`).
 
@@ -98,11 +98,10 @@ Los Code Components llaman a las mismas APIs (`/api/quiz`, `/api/calendar`, `/ap
 
 1. Crea una página en Webflow (ej. `/resultados-diagnostico`).
 2. En el componente **Quiz Diagnóstico**, configura **URL página de resultados** con la misma ruta.
-3. Arrastra en la página de resultados:
-   - `Quiz resultado — Score general`
-   - `Quiz resultado — Desglose por area`
-   - `Quiz resultado — Fortalezas` y `Oportunidades`
-   - Tres instancias de `Quiz resultado — Prioridad` (prioridad 1, 2 y 3)
+3. Arrastra en la página de resultados (en este orden sugerido):
+   - `Quiz resultado — Score y desglose`
+   - `Quiz resultado — Fortalezas y mejoras`
+   - `Quiz resultado — Prioridades` (las 3 tarjetas se generan solas)
 4. Los datos se pasan vía `sessionStorage` al completar el quiz (mismo dominio).
 
 ## Solución de problemas
