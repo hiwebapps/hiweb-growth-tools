@@ -1,9 +1,10 @@
 "use client";
 
-import { formatUsd } from "@/lib/roi/state";
+import { formatMxn } from "@/lib/roi/currency";
 
 type RoiSliderFieldProps = {
   label: string;
+  hint?: string;
   value: number;
   min: number;
   max: number;
@@ -14,12 +15,13 @@ type RoiSliderFieldProps = {
 
 export function RoiSliderField({
   label,
+  hint,
   value,
   min,
   max,
   step,
   onChange,
-  formatValue = formatUsd,
+  formatValue = formatMxn,
 }: RoiSliderFieldProps) {
   return (
     <div className="roi-field">
@@ -27,6 +29,7 @@ export function RoiSliderField({
         <span>{label}</span>
         <span className="roi-field-value">{formatValue(value)}</span>
       </label>
+      {hint ? <p className="roi-field-hint">{hint}</p> : null}
       <input
         type="range"
         className="roi-slider"

@@ -1,22 +1,16 @@
 import { getIndustryCplMultiplier, type RoiIndustryId } from "./industry";
+import { ROI_CPL_BUDGET_TIERS } from "./currency";
 import type { RoiInputs } from "./types";
 
-/** CPL estimado cuando el usuario no indica uno (benchmark B2B marketing). */
+/** CPL estimado cuando el usuario no indica uno (benchmark B2B marketing, MXN). */
 export function deriveCostPerLead(
   monthlyBudget: number,
   industry: RoiIndustryId = "saas",
 ): number {
-  let base: number;
-  if (monthlyBudget < 1500) {
-    base = 45;
-  } else if (monthlyBudget < 5000) {
-    base = 65;
-  } else if (monthlyBudget < 15000) {
-    base = 85;
-  } else {
-    base = 110;
-  }
-  return base * getIndustryCplMultiplier(industry);
+  const tier =
+    ROI_CPL_BUDGET_TIERS.find((t) => monthlyBudget < t.budgetBelow) ??
+    ROI_CPL_BUDGET_TIERS[ROI_CPL_BUDGET_TIERS.length - 1];
+  return tier.baseCpl * getIndustryCplMultiplier(industry);
 }
 
 export function calculateRoiMetrics(inputs: RoiInputs) {

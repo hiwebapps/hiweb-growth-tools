@@ -1,4 +1,5 @@
 import { resolveIndustryId } from "./industry";
+import { ROI_VALIDATION } from "./currency";
 import type { RoiInputs, RoiLeadInput } from "./types";
 import { AppError } from "@/lib/shared/errors";
 
@@ -23,20 +24,24 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
       ? undefined
       : Number(raw.costPerLead);
 
-  if (!Number.isFinite(monthlyBudget) || monthlyBudget < 100 || monthlyBudget > 500_000) {
+  if (
+    !Number.isFinite(monthlyBudget) ||
+    monthlyBudget < ROI_VALIDATION.monthlyBudgetMin ||
+    monthlyBudget > ROI_VALIDATION.monthlyBudgetMax
+  ) {
     throw new AppError(
-      "El presupuesto mensual debe estar entre 100 y 500,000 USD.",
+      "El presupuesto mensual debe estar entre 1,800 y 9,000,000 MXN.",
       { statusCode: 400, code: "INVALID_BUDGET" },
     );
   }
 
   if (
     !Number.isFinite(averageLeadValue) ||
-    averageLeadValue < 10 ||
-    averageLeadValue > 1_000_000
+    averageLeadValue < ROI_VALIDATION.averageLeadValueMin ||
+    averageLeadValue > ROI_VALIDATION.averageLeadValueMax
   ) {
     throw new AppError(
-      "El valor por lead debe estar entre 10 y 1,000,000 USD.",
+      "El ticket promedio debe estar entre 200 y 18,000,000 MXN.",
       { statusCode: 400, code: "INVALID_LEAD_VALUE" },
     );
   }
@@ -69,10 +74,12 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
 
   if (
     costPerLead !== undefined &&
-    (!Number.isFinite(costPerLead) || costPerLead < 5 || costPerLead > 10_000)
+    (!Number.isFinite(costPerLead) ||
+      costPerLead < ROI_VALIDATION.costPerLeadMin ||
+      costPerLead > ROI_VALIDATION.costPerLeadMax)
   ) {
     throw new AppError(
-      "El costo por lead debe estar entre 5 y 10,000 USD.",
+      "El costo por lead debe estar entre 90 y 180,000 MXN.",
       { statusCode: 400, code: "INVALID_CPL" },
     );
   }

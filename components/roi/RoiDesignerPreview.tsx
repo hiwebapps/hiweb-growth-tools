@@ -2,34 +2,33 @@
 
 import { calculateRoi } from "@/lib/roi/calculator";
 import { ROI_INDUSTRIES } from "@/lib/roi/industry";
-import { createDefaultRoiState, formatUsd, stateToRoiInputs } from "@/lib/roi/state";
+import { ROI_BUDGET, ROI_TICKET, formatMxn } from "@/lib/roi/currency";
+import { createDefaultRoiState } from "@/lib/roi/state";
 import { RoiNativeStyles } from "./RoiNativeStyles";
-import { RoiProgressRing } from "./RoiProgressRing";
 
 export type RoiDesignerPreviewProps = {
   defaultMonthlyBudget: number;
+  minMonthlyBudget: number;
   defaultLeadValue: number;
   defaultLeadsToClose: number;
-  ctaLabel: string;
+  resultsButtonLabel: string;
 };
 
-/** Vista estatica de la card para Webflow Designer. */
+/** Vista estática del paso 1 para Webflow Designer. */
 export function RoiDesignerPreview({
   defaultMonthlyBudget,
+  minMonthlyBudget,
   defaultLeadValue,
   defaultLeadsToClose,
-  ctaLabel,
+  resultsButtonLabel,
 }: RoiDesignerPreviewProps) {
   const state = createDefaultRoiState(
-    defaultMonthlyBudget,
+    Math.max(minMonthlyBudget, defaultMonthlyBudget),
     defaultLeadValue,
     defaultLeadsToClose,
   );
-  const result = calculateRoi(stateToRoiInputs(state));
   const industryLabel =
     ROI_INDUSTRIES.find((i) => i.id === state.industry)?.label ?? "SaaS";
-  const roiDisplay = Math.round(result.estimatedRoi);
-  const roiPositive = roiDisplay >= 0;
 
   const pct = (value: number, min: number, max: number) =>
     `${Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100))}%`;
@@ -43,13 +42,16 @@ export function RoiDesignerPreview({
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">
-          <div className="roi-grid">
+          <div className="roi-step roi-step-inputs">
             <div className="roi-stack">
               <div className="roi-field">
                 <div className="roi-field-head">
                   <span>Industria</span>
                   <span className="roi-field-value">{industryLabel}</span>
                 </div>
+                <p className="roi-field-hint">
+                  Sector de tu negocio; define los benchmarks del cálculo.
+                </p>
                 <div className="roi-select" aria-hidden>
                   {industryLabel}
                 </div>
@@ -57,24 +59,32 @@ export function RoiDesignerPreview({
               <div className="roi-field">
                 <div className="roi-field-head">
                   <span>Presupuesto mensual</span>
-                  <span className="roi-field-value">{formatUsd(state.monthlyBudget)}</span>
+                  <span className="roi-field-value">{formatMxn(state.monthlyBudget)}</span>
                 </div>
+                <p className="roi-field-hint">
+                  Inversión mensual estimada en marketing digital.
+                </p>
                 <div className="roi-track">
                   <div
                     className="roi-track-fill"
-                    style={{ width: pct(state.monthlyBudget, 1000, 50000) }}
+                    style={{
+                      width: pct(state.monthlyBudget, minMonthlyBudget, ROI_BUDGET.max),
+                    }}
                   />
                 </div>
               </div>
               <div className="roi-field">
                 <div className="roi-field-head">
                   <span>Ticket promedio</span>
-                  <span className="roi-field-value">{formatUsd(state.averageLeadValue)}</span>
+                  <span className="roi-field-value">{formatMxn(state.averageLeadValue)}</span>
                 </div>
+                <p className="roi-field-hint">
+                  Valor económico medio de cada venta que cierras.
+                </p>
                 <div className="roi-track">
                   <div
                     className="roi-track-fill"
-                    style={{ width: pct(state.averageLeadValue, 100, 10000) }}
+                    style={{ width: pct(state.averageLeadValue, ROI_TICKET.min, ROI_TICKET.max) }}
                   />
                 </div>
               </div>
@@ -83,6 +93,9 @@ export function RoiDesignerPreview({
                   <span>Leads para cerrar venta</span>
                   <span className="roi-field-value">{state.leadsToCloseSale}</span>
                 </div>
+                <p className="roi-field-hint">
+                  Cuántos leads necesitas en promedio para lograr una venta.
+                </p>
                 <div className="roi-track">
                   <div
                     className="roi-track-fill"
@@ -91,43 +104,9 @@ export function RoiDesignerPreview({
                 </div>
               </div>
             </div>
-            <div className="roi-panel">
-              <div className="roi-panel-glow" aria-hidden />
-              <div className="roi-panel-body">
-                <RoiProgressRing roi={result.estimatedRoi}>
-                  <p className="roi-ring-kicker">ROI estimado</p>
-                  <p className="roi-ring-value">
-                    {roiPositive ? "" : "-"}
-                    {Math.abs(roiDisplay)}
-                    <span
-                      className={`roi-ring-pct ${roiPositive ? "roi-text-gold" : "roi-text-cyan"}`}
-                    >
-                      %
-                    </span>
-                  </p>
-                </RoiProgressRing>
-                <div className="roi-metrics">
-                  <div className="roi-metric">
-                    <span className="roi-metric-kicker">Leads estimados</span>
-                    <span className="roi-metric-val">
-                      {Math.round(result.estimatedLeads).toLocaleString("es-MX")}
-                    </span>
-                  </div>
-                  <div className="roi-metric">
-                    <span className="roi-metric-kicker">Ingresos estimados</span>
-                    <span className="roi-metric-val roi-text-cyan">
-                      {formatUsd(result.estimatedRevenue)}
-                    </span>
-                  </div>
-                </div>
-                <button type="button" className="roi-btn-cta" disabled>
-                  {ctaLabel} &gt;
-                </button>
-                <p className="roi-footnote">
-                  {result.resultLevelLabel} · {result.resultSummary}
-                </p>
-              </div>
-            </div>
+            <button type="button" className="roi-btn-primary" disabled>
+              {resultsButtonLabel} →
+            </button>
           </div>
         </div>
       </div>

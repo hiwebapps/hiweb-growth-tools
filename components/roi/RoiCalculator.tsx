@@ -2,20 +2,19 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { calculateRoi } from "@/lib/roi/calculator";
-import { submitRoiApi } from "@/lib/roi/client";
+import { ROI_BUDGET } from "@/lib/roi/currency";
 import { createDefaultRoiState, stateToRoiInputs } from "@/lib/roi/state";
-import type {
-  RoiCalculationResult,
-  RoiCalculatorState,
-  RoiLeadInput,
-} from "@/lib/roi/types";
+import type { RoiCalculatorState } from "@/lib/roi/types";
 import { RoiHero } from "./RoiHero";
 import { RoiInputForm } from "./RoiInputForm";
-import { RoiLeadPanel } from "./RoiLeadPanel";
 import { RoiNativeStyles } from "./RoiNativeStyles";
 import { RoiResults } from "./RoiResults";
 
 export type RoiCalculatorLayout = "page" | "card";
+export type RoiCalculatorStep = "inputs" | "results";
+
+const DEFAULT_DISCLAIMER =
+  "Esta calculadora ofrece estimaciones orientativas. Los resultados reales pueden variar según tu mercado, canal y ejecución.";
 
 export type RoiCalculatorProps = {
   /** `card` = solo el panel (Webflow). `page` = hero + card (ruta /calculadora-roi). */
@@ -23,109 +22,95 @@ export type RoiCalculatorProps = {
   title?: string;
   description?: string;
   defaultMonthlyBudget: number;
+  minMonthlyBudget?: number;
   defaultLeadValue: number;
   defaultLeadsToClose?: number;
+  resultsButtonLabel?: string;
+  retryButtonLabel?: string;
   ctaLabel: string;
   ctaUrl: string;
-  onLoading?: (loading: boolean) => void;
+  disclaimer?: string;
   onError?: (message: string) => void;
-  onSubmitted?: () => void;
 };
+
+function clampBudget(value: number, min: number): number {
+  return Math.max(min, Math.min(ROI_BUDGET.max, value));
+}
+
+function navigateToUrl(url: string) {
+  if (typeof window === "undefined" || !url) {
+    return;
+  }
+  window.location.href = url;
+}
 
 export function RoiCalculator({
   layout = "page",
   title,
   description,
   defaultMonthlyBudget,
+  minMonthlyBudget = ROI_BUDGET.min,
   defaultLeadValue,
   defaultLeadsToClose = 15,
+  resultsButtonLabel = "Ver resultados",
+  retryButtonLabel = "Volver a intentar",
   ctaLabel,
   ctaUrl,
-  onLoading,
+  disclaimer = DEFAULT_DISCLAIMER,
   onError,
-  onSubmitted,
 }: RoiCalculatorProps) {
-  const [state, setState] = useState<RoiCalculatorState>(() =>
-    createDefaultRoiState(
+  const [step, setStep] = useState<RoiCalculatorStep>("inputs");
+  const [state, setState] = useState<RoiCalculatorState>(() => {
+    const initial = createDefaultRoiState(
       defaultMonthlyBudget,
       defaultLeadValue,
       defaultLeadsToClose,
-    ),
-  );
-  const [showLeadForm, setShowLeadForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lead, setLead] = useState({ name: "", email: "", company: "", phone: "" });
+    );
+    return {
+      ...initial,
+      monthlyBudget: clampBudget(initial.monthlyBudget, minMonthlyBudget),
+    };
+  });
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const previewResult = useMemo<RoiCalculationResult>(() => {
-    return calculateRoi(stateToRoiInputs(state));
-  }, [state]);
+  const result = useMemo(
+    () => calculateRoi(stateToRoiInputs(state)),
+    [state],
+  );
 
   const handleStateChange = <K extends keyof RoiCalculatorState>(
     key: K,
     value: RoiCalculatorState[K],
   ) => {
-    setState((prev) => ({ ...prev, [key]: value }));
+    setState((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === "monthlyBudget") {
+        next.monthlyBudget = clampBudget(value as number, minMonthlyBudget);
+      }
+      return next;
+    });
     setError(null);
-    setSuccessMessage(null);
   };
+
+  const handleShowResults = useCallback(() => {
+    setStep("results");
+    setError(null);
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setStep("inputs");
+    setError(null);
+  }, []);
 
   const handleCtaClick = useCallback(() => {
-    if (ctaUrl && !showLeadForm) {
-      setShowLeadForm(true);
-      return;
-    }
-    if (typeof window !== "undefined") {
-      if (ctaUrl.startsWith("http")) {
-        window.open(ctaUrl, "_blank", "noopener,noreferrer");
-      } else {
-        window.location.href = ctaUrl;
-      }
-    }
-  }, [ctaUrl, showLeadForm]);
-
-  const handleSubmitLead = useCallback(async () => {
-    if (!lead.name.trim() || !lead.email.trim()) {
-      setError("Nombre y email son obligatorios para enviar el escenario.");
-      return;
-    }
-
-    onLoading?.(true);
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      await submitRoiApi({
-        inputs: stateToRoiInputs(state),
-        lead: {
-          name: lead.name,
-          email: lead.email,
-          company: lead.company || undefined,
-          phone: lead.phone || undefined,
-        },
-      });
-      setSuccessMessage(
-        "Escenario guardado. Un asesor puede contactarte con una propuesta personalizada.",
-      );
-      setShowLeadForm(false);
-      onLoading?.(false);
-      onSubmitted?.();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "No pudimos guardar el escenario.";
+    if (!ctaUrl) {
+      const message = "No hay URL configurada para el CTA.";
       setError(message);
       onError?.(message);
-      onLoading?.(false);
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
-  }, [state, lead, onLoading, onError, onSubmitted]);
-
-  const handleLeadChange = (field: keyof RoiLeadInput, value: string) => {
-    setLead((prev) => ({ ...prev, [field]: value }));
-    setError(null);
-  };
+    navigateToUrl(ctaUrl);
+  }, [ctaUrl, onError]);
 
   const rootClass =
     layout === "card" ? "roi-root roi-root--card" : "roi-root roi-root--page";
@@ -145,31 +130,25 @@ export function RoiCalculator({
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">
-          <div className="roi-grid">
+          {step === "inputs" ? (
             <RoiInputForm
               state={state}
+              minMonthlyBudget={minMonthlyBudget}
               onChange={handleStateChange}
               error={error ?? undefined}
+              resultsButtonLabel={resultsButtonLabel}
+              onShowResults={handleShowResults}
             />
+          ) : (
             <RoiResults
-              result={previewResult}
+              result={result}
               ctaLabel={ctaLabel}
+              retryLabel={retryButtonLabel}
+              disclaimer={disclaimer}
               onCtaClick={handleCtaClick}
-              isLoading={isSubmitting}
+              onRetry={handleRetry}
             />
-          </div>
-          {successMessage ? (
-            <p className="roi-success">{successMessage}</p>
-          ) : null}
-          {showLeadForm ? (
-            <RoiLeadPanel
-              lead={lead}
-              onChange={handleLeadChange}
-              onSubmit={() => void handleSubmitLead()}
-              onClose={() => setShowLeadForm(false)}
-              isLoading={isSubmitting}
-            />
-          ) : null}
+          )}
         </div>
       </div>
     </div>

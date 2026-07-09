@@ -85,7 +85,7 @@ Evitar en código del bundle de biblioteca:
 
 **CalendarToolComponent:** eyebrow, title, description, defaultService, submitButtonLabel, successTitle, successMessage, themeVariant.
 
-**RoiCalculatorComponent (solo card):** defaultMonthlyBudget, defaultLeadValue, defaultLeadsToClose, ctaLabel, ctaUrl.
+**RoiCalculatorComponent (solo card):** minMonthlyBudget, defaultMonthlyBudget, defaultLeadValue, defaultLeadsToClose, resultsButtonLabel, retryButtonLabel, ctaLabel, ctaUrl.
 
 **No exponer como props:** webhooks, secrets, fórmulas, scoring, URLs de n8n, lógica de negocio crítica.
 

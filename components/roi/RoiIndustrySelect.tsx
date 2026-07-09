@@ -4,10 +4,15 @@ import { ROI_INDUSTRIES, type RoiIndustryId } from "@/lib/roi/industry";
 
 type RoiIndustrySelectProps = {
   value: RoiIndustryId;
+  hint?: string;
   onChange: (value: RoiIndustryId) => void;
 };
 
-export function RoiIndustrySelect({ value, onChange }: RoiIndustrySelectProps) {
+export function RoiIndustrySelect({
+  value,
+  hint,
+  onChange,
+}: RoiIndustrySelectProps) {
   const label =
     ROI_INDUSTRIES.find((i) => i.id === value)?.label ?? "SaaS";
 
@@ -17,6 +22,7 @@ export function RoiIndustrySelect({ value, onChange }: RoiIndustrySelectProps) {
         <span>Industria</span>
         <span className="roi-field-value">{label}</span>
       </label>
+      {hint ? <p className="roi-field-hint">{hint}</p> : null}
       <select
         className="roi-select"
         value={value}

@@ -4,6 +4,7 @@ import { lazy, Suspense, useState } from "react";
 import { RoiDesignerPreview } from "@/components/roi/RoiDesignerPreview";
 import { RoiErrorBoundary } from "@/components/roi/RoiErrorBoundary";
 import { RoiNativeStyles } from "@/components/roi/RoiNativeStyles";
+import { ROI_BUDGET, ROI_TICKET } from "@/lib/roi/currency";
 import type { CodeComponentBaseProps } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
 import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
@@ -16,17 +17,23 @@ const RoiCalculatorLazy = lazy(() =>
 
 export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   defaultMonthlyBudget?: number;
+  minMonthlyBudget?: number;
   defaultLeadValue?: number;
   defaultLeadsToClose?: number;
+  resultsButtonLabel?: string;
+  retryButtonLabel?: string;
   ctaLabel?: string;
   ctaUrl?: string;
 };
 
 const DEFAULTS: RoiCalculatorComponentProps = {
-  defaultMonthlyBudget: 5000,
-  defaultLeadValue: 1200,
+  defaultMonthlyBudget: ROI_BUDGET.default,
+  minMonthlyBudget: ROI_BUDGET.min,
+  defaultLeadValue: ROI_TICKET.default,
   defaultLeadsToClose: 15,
-  ctaLabel: "Obtener auditoría gratuita",
+  resultsButtonLabel: "Ver resultados",
+  retryButtonLabel: "Volver a intentar",
+  ctaLabel: "Agenda tu auditoría gratuita",
   ctaUrl: "/tools/calendario",
 };
 
@@ -38,20 +45,32 @@ export function RoiCalculatorComponent(
     previewState,
     className,
     defaultMonthlyBudget,
+    minMonthlyBudget,
     defaultLeadValue,
     defaultLeadsToClose,
+    resultsButtonLabel,
+    retryButtonLabel,
     ctaLabel,
     ctaUrl,
   } = props;
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
+  const minBudget = minMonthlyBudget ?? DEFAULTS.minMonthlyBudget!;
   const calculatorProps = {
     defaultMonthlyBudget: defaultMonthlyBudget ?? DEFAULTS.defaultMonthlyBudget!,
+    minMonthlyBudget: minBudget,
     defaultLeadValue: defaultLeadValue ?? DEFAULTS.defaultLeadValue!,
     defaultLeadsToClose: defaultLeadsToClose ?? DEFAULTS.defaultLeadsToClose!,
+    resultsButtonLabel: resultsButtonLabel ?? DEFAULTS.resultsButtonLabel!,
+    retryButtonLabel: retryButtonLabel ?? DEFAULTS.retryButtonLabel!,
     ctaLabel: ctaLabel ?? DEFAULTS.ctaLabel!,
     ctaUrl: ctaUrl ?? DEFAULTS.ctaUrl!,
+  };
+
+  const previewProps = {
+    ...calculatorProps,
+    resultsButtonLabel: calculatorProps.resultsButtonLabel,
   };
 
   const shellClass = `roi-stitch ${className ?? ""}`.trim();
@@ -83,7 +102,7 @@ export function RoiCalculatorComponent(
       <div className={shellClass}>
         <RoiNativeStyles />
         <p className="roi-success" style={{ textAlign: "center", padding: "2rem" }}>
-          Escenario guardado correctamente.
+          Escenario calculado correctamente.
         </p>
       </div>
     );
@@ -92,7 +111,7 @@ export function RoiCalculatorComponent(
   if (isWebflowDesignerCanvas()) {
     return (
       <div className={shellClass}>
-        <RoiDesignerPreview {...calculatorProps} />
+        <RoiDesignerPreview {...previewProps} />
       </div>
     );
   }
@@ -104,13 +123,12 @@ export function RoiCalculatorComponent(
           {errorMessage}
         </p>
       ) : null}
-      <RoiErrorBoundary {...calculatorProps}>
-        <Suspense fallback={<RoiDesignerPreview {...calculatorProps} />}>
+      <RoiErrorBoundary {...previewProps}>
+        <Suspense fallback={<RoiDesignerPreview {...previewProps} />}>
           <RoiCalculatorLazy
             layout="card"
             {...calculatorProps}
             onError={(msg) => setErrorMessage(msg)}
-            onSubmitted={() => setErrorMessage(undefined)}
           />
         </Suspense>
       </RoiErrorBoundary>

@@ -1,5 +1,8 @@
 import type { RoiIndustryId } from "./industry";
+import { ROI_BUDGET, ROI_TICKET } from "./currency";
 import type { RoiCalculatorState, RoiInputs } from "./types";
+
+export { formatMxn } from "./currency";
 
 export function stateToRoiInputs(state: RoiCalculatorState): RoiInputs {
   return {
@@ -11,8 +14,8 @@ export function stateToRoiInputs(state: RoiCalculatorState): RoiInputs {
 }
 
 export function createDefaultRoiState(
-  budget = 5000,
-  ticket = 1200,
+  budget = ROI_BUDGET.default,
+  ticket = ROI_TICKET.default,
   leadsToCloseSale = 15,
   industry: RoiIndustryId = "saas",
 ): RoiCalculatorState {
@@ -22,12 +25,4 @@ export function createDefaultRoiState(
     averageLeadValue: ticket,
     leadsToCloseSale,
   };
-}
-
-export function formatUsd(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
 }

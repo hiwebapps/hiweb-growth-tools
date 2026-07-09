@@ -32,9 +32,22 @@ export const ROI_NATIVE_CSS = `
 .roi-glow-dot { position: absolute; top: 0; right: 0; width: 16rem; height: 16rem; border-radius: 9999px; background: rgba(43, 167, 246, 0.1); filter: blur(80px); pointer-events: none; }
 .roi-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
 @media (min-width: 1024px) { .roi-grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }
-.roi-stack { display: flex; flex-direction: column; gap: 2rem; }
-.roi-field { display: flex; flex-direction: column; gap: 0.75rem; }
+.roi-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+@media (min-width: 768px) { .roi-stack { gap: 2rem; } }
+.roi-step { width: 100%; }
+.roi-step-inputs { display: flex; flex-direction: column; gap: 1.5rem; }
+.roi-step-results { display: flex; flex-direction: column; gap: 1.25rem; }
+.roi-btn-primary { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: 9999px; background: #fff; color: #0e0e11; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.roi-btn-primary:hover { background: #e2e2e2; }
+.roi-step-actions { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+@media (min-width: 640px) { .roi-step-actions { flex-direction: row; } }
+.roi-btn-secondary { display: flex; flex: 1; min-height: 48px; align-items: center; justify-content: center; border: 1px solid var(--roi-border); border-radius: 9999px; background: transparent; color: var(--roi-on-surface); font-size: 1rem; font-weight: 600; cursor: pointer; }
+.roi-btn-secondary:hover { border-color: var(--roi-muted); background: var(--roi-surface-low); }
+.roi-btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+.roi-disclaimer { margin: 0; max-width: 28rem; text-align: center; font-size: 0.6875rem; line-height: 1.5; color: var(--roi-muted); opacity: 0.85; }
+.roi-field { display: flex; flex-direction: column; gap: 0.5rem; }
 .roi-field-head { display: flex; align-items: center; justify-content: space-between; font-size: 1rem; font-weight: 600; color: var(--roi-on-surface); }
+.roi-field-hint { margin: 0; font-size: 0.8125rem; line-height: 1.45; color: var(--roi-muted); }
 .roi-field-value { font-weight: 500; color: var(--roi-cyan); }
 .roi-select { width: 100%; padding: 1rem 1.5rem; border: 1px solid var(--roi-border); border-radius: 9999px; background: var(--roi-surface-low); color: var(--roi-on-surface); font-size: 1rem; }
 .roi-track { height: 4px; border-radius: 2px; background: #353438; }
@@ -53,7 +66,7 @@ export const ROI_NATIVE_CSS = `
 .roi-metric:first-child { border-right: 1px solid var(--roi-border); padding-right: 1rem; }
 .roi-metric-kicker { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--roi-muted); }
 .roi-metric-val { font-size: 1.75rem; font-weight: 700; color: #fff; }
-.roi-btn-cta { display: flex; width: 100%; height: 54px; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; border: none; border-radius: 9999px; background: var(--roi-secondary); color: #0e0e11; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.roi-btn-cta { display: flex; flex: 1; min-height: 48px; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: 9999px; background: var(--roi-secondary); color: #0e0e11; font-size: 1rem; font-weight: 600; cursor: pointer; }
 .roi-btn-cta:hover { background: #fff; }
 .roi-btn-cta:disabled { opacity: 0.6; cursor: not-allowed; }
 .roi-footnote { margin: 0; text-align: center; font-size: 0.75rem; line-height: 1.5; color: var(--roi-muted); }
