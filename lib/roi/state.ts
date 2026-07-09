@@ -14,9 +14,9 @@ export function stateToRoiInputs(state: RoiCalculatorState): RoiInputs {
 }
 
 export function createDefaultRoiState(
-  budget = ROI_BUDGET.default,
-  ticket = ROI_TICKET.default,
-  leadsToCloseSale = 15,
+  budget: number = ROI_BUDGET.default,
+  ticket: number = ROI_TICKET.default,
+  leadsToCloseSale: number = 15,
   industry: RoiIndustryId = "saas",
 ): RoiCalculatorState {
   return {
