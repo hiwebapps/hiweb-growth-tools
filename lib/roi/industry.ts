@@ -3,24 +3,20 @@ export type RoiIndustryId = "saas" | "ecommerce" | "b2b-services" | "real-estate
 export const ROI_INDUSTRIES: Array<{ id: RoiIndustryId; label: string }> = [
   { id: "saas", label: "SaaS" },
   { id: "ecommerce", label: "E-commerce" },
-  { id: "b2b-services", label: "Servicios B2B" },
-  { id: "real-estate", label: "Real Estate" },
+  { id: "b2b-services", label: "Industrial B2B / Manufactura" },
+  { id: "real-estate", label: "Desarrollo Inmobiliario" },
 ];
 
-/** Multiplier applied to derived CPL (1 = baseline). */
-export function getIndustryCplMultiplier(industry: RoiIndustryId): number {
-  switch (industry) {
-    case "saas":
-      return 1;
-    case "ecommerce":
-      return 0.92;
-    case "b2b-services":
-      return 1.08;
-    case "real-estate":
-      return 1.15;
-    default:
-      return 1;
-  }
+/** CPL benchmark fijo por industria (MXN). */
+const INDUSTRY_CPL_MXN: Record<RoiIndustryId, number> = {
+  saas: 300,
+  ecommerce: 150,
+  "b2b-services": 500,
+  "real-estate": 350,
+};
+
+export function getIndustryEstimatedCpl(industry: RoiIndustryId): number {
+  return INDUSTRY_CPL_MXN[industry] ?? INDUSTRY_CPL_MXN.saas;
 }
 
 export function resolveIndustryId(value: string): RoiIndustryId {

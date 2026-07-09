@@ -61,11 +61,12 @@ export const ROI_NATIVE_CSS = `
 .roi-ring-kicker { margin: 0 0 0.5rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--roi-muted); }
 .roi-ring-value { margin: 0; font-size: 3rem; font-weight: 700; line-height: 1; color: #fff; }
 .roi-ring-pct { font-size: 1.875rem; }
-.roi-metrics { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 1.5rem; text-align: center; }
+.roi-metrics { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 1.25rem 1.5rem; text-align: center; }
+.roi-metrics-4 .roi-metric { display: flex; flex-direction: column; gap: 0.35rem; align-items: center; }
 .roi-metric { display: flex; flex-direction: column; gap: 0.5rem; }
-.roi-metric:first-child { border-right: 1px solid var(--roi-border); padding-right: 1rem; }
 .roi-metric-kicker { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--roi-muted); }
-.roi-metric-val { font-size: 1.75rem; font-weight: 700; color: #fff; }
+.roi-metric-val { font-size: 1.375rem; font-weight: 700; color: #fff; }
+@media (min-width: 768px) { .roi-metric-val { font-size: 1.5rem; } }
 .roi-btn-cta { display: flex; flex: 1; min-height: 48px; align-items: center; justify-content: center; gap: 0.5rem; border: none; border-radius: 9999px; background: var(--roi-secondary); color: #0e0e11; font-size: 1rem; font-weight: 600; cursor: pointer; }
 .roi-btn-cta:hover { background: #fff; }
 .roi-btn-cta:disabled { opacity: 0.6; cursor: not-allowed; }

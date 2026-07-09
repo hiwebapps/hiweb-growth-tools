@@ -19,9 +19,11 @@ export type RoiCalculationResult = {
   monthlyBudget: number;
   estimatedLeads: number;
   costPerLead: number;
+  estimatedCac: number;
   conversionRate: number;
   estimatedSales: number;
   estimatedRevenue: number;
+  estimatedRoas: number;
   estimatedRoi: number;
   resultLevel: RoiResultLevelId;
   resultLevelLabel: string;

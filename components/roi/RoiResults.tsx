@@ -14,6 +14,14 @@ type RoiResultsProps = {
   isLoading?: boolean;
 };
 
+function formatCount(value: number): string {
+  const rounded =
+    Math.abs(value - Math.round(value)) < 0.01
+      ? Math.round(value)
+      : Math.round(value * 10) / 10;
+  return rounded.toLocaleString("es-MX");
+}
+
 export function RoiResults({
   result,
   ctaLabel,
@@ -25,6 +33,29 @@ export function RoiResults({
 }: RoiResultsProps) {
   const roiDisplay = Math.round(result.estimatedRoi);
   const roiPositive = roiDisplay >= 0;
+
+  const metrics = [
+    {
+      label: "CPL estimado",
+      value: formatMxn(result.costPerLead),
+      accent: false,
+    },
+    {
+      label: "Leads totales",
+      value: formatCount(result.estimatedLeads),
+      accent: false,
+    },
+    {
+      label: "Ventas estimadas",
+      value: formatCount(result.estimatedSales),
+      accent: false,
+    },
+    {
+      label: "Ingresos estimados",
+      value: formatMxn(result.estimatedRevenue),
+      accent: true,
+    },
+  ];
 
   return (
     <div className="roi-step roi-step-results">
@@ -44,24 +75,18 @@ export function RoiResults({
             </p>
           </RoiProgressRing>
 
-          <div className="roi-metrics">
-            <div className="roi-metric">
-              <span className="roi-metric-kicker">Leads estimados</span>
-              <span className="roi-metric-val">
-                {Math.round(result.estimatedLeads).toLocaleString("es-MX")}
-              </span>
-            </div>
-            <div className="roi-metric">
-              <span className="roi-metric-kicker">Ingresos estimados</span>
-              <span className="roi-metric-val roi-text-cyan">
-                {formatMxn(result.estimatedRevenue)}
-              </span>
-            </div>
+          <div className="roi-metrics roi-metrics-4">
+            {metrics.map((metric) => (
+              <div key={metric.label} className="roi-metric">
+                <span className="roi-metric-kicker">{metric.label}</span>
+                <span
+                  className={`roi-metric-val${metric.accent ? " roi-text-cyan" : ""}`}
+                >
+                  {metric.value}
+                </span>
+              </div>
+            ))}
           </div>
-
-          <p className="roi-footnote">
-            {result.resultLevelLabel} · {result.resultSummary}
-          </p>
 
           <p className="roi-disclaimer">{disclaimer}</p>
         </div>

@@ -1,38 +1,33 @@
-import { getIndustryCplMultiplier, type RoiIndustryId } from "./industry";
-import { ROI_CPL_BUDGET_TIERS } from "./currency";
+import { getIndustryEstimatedCpl, type RoiIndustryId } from "./industry";
 import type { RoiInputs } from "./types";
 
-/** CPL estimado cuando el usuario no indica uno (benchmark B2B marketing, MXN). */
-export function deriveCostPerLead(
-  monthlyBudget: number,
-  industry: RoiIndustryId = "saas",
-): number {
-  const tier =
-    ROI_CPL_BUDGET_TIERS.find((t) => monthlyBudget < t.budgetBelow) ??
-    ROI_CPL_BUDGET_TIERS[ROI_CPL_BUDGET_TIERS.length - 1];
-  return tier.baseCpl * getIndustryCplMultiplier(industry);
-}
-
 export function calculateRoiMetrics(inputs: RoiInputs) {
-  const industry = inputs.industry ?? "saas";
+  const industry: RoiIndustryId = inputs.industry ?? "saas";
   const costPerLead =
-    inputs.costPerLead ?? deriveCostPerLead(inputs.monthlyBudget, industry);
+    inputs.costPerLead ?? getIndustryEstimatedCpl(industry);
+
   const estimatedLeads = inputs.monthlyBudget / costPerLead;
 
   let estimatedSales: number;
+  let estimatedCac: number;
   let effectiveConversionRate: number;
 
   if (inputs.leadsToCloseSale && inputs.leadsToCloseSale > 0) {
     estimatedSales = estimatedLeads / inputs.leadsToCloseSale;
+    estimatedCac = costPerLead * inputs.leadsToCloseSale;
     effectiveConversionRate =
       estimatedLeads > 0 ? (estimatedSales / estimatedLeads) * 100 : 0;
   } else {
     const rate = inputs.conversionRate ?? 12;
     effectiveConversionRate = rate;
     estimatedSales = estimatedLeads * (rate / 100);
+    estimatedCac =
+      estimatedSales > 0 ? inputs.monthlyBudget / estimatedSales : 0;
   }
 
   const estimatedRevenue = estimatedSales * inputs.averageLeadValue;
+  const estimatedRoas =
+    inputs.monthlyBudget > 0 ? estimatedRevenue / inputs.monthlyBudget : 0;
   const estimatedRoi =
     inputs.monthlyBudget > 0
       ? ((estimatedRevenue - inputs.monthlyBudget) / inputs.monthlyBudget) * 100
@@ -42,9 +37,11 @@ export function calculateRoiMetrics(inputs: RoiInputs) {
     monthlyBudget: inputs.monthlyBudget,
     estimatedLeads: round2(estimatedLeads),
     costPerLead: round2(costPerLead),
+    estimatedCac: round2(estimatedCac),
     conversionRate: round2(effectiveConversionRate),
     estimatedSales: round2(estimatedSales),
     estimatedRevenue: round2(estimatedRevenue),
+    estimatedRoas: round2(estimatedRoas),
     estimatedRoi: round2(estimatedRoi),
   };
 }

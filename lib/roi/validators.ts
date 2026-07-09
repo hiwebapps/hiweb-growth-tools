@@ -30,7 +30,7 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
     monthlyBudget > ROI_VALIDATION.monthlyBudgetMax
   ) {
     throw new AppError(
-      "El presupuesto mensual debe estar entre 1,800 y 9,000,000 MXN.",
+      "El presupuesto mensual debe estar entre 1,800 y 100,000 MXN.",
       { statusCode: 400, code: "INVALID_BUDGET" },
     );
   }
