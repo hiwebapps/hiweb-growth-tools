@@ -3,8 +3,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { calculateRoi } from "@/lib/roi/calculator";
 import { ROI_BUDGET } from "@/lib/roi/currency";
-import { createDefaultRoiState, stateToRoiInputs } from "@/lib/roi/state";
-import type { RoiCalculatorState } from "@/lib/roi/types";
+import {
+  createDefaultRoiState,
+  DEFAULT_BENCHMARKS,
+  type RoiDefaultInputs,
+} from "@/lib/roi/defaults";
+import type { RoiBenchmarks, RoiCalculatorState } from "@/lib/roi/types";
 import { RoiHero } from "./RoiHero";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiNativeStyles } from "./RoiNativeStyles";
@@ -17,14 +21,12 @@ const DEFAULT_DISCLAIMER =
   "Esta calculadora ofrece estimaciones orientativas. Los resultados reales pueden variar según tu mercado, canal y ejecución.";
 
 export type RoiCalculatorProps = {
-  /** `card` = solo el panel (Webflow). `page` = hero + card (ruta /calculadora-roi). */
   layout?: RoiCalculatorLayout;
   title?: string;
   description?: string;
-  defaultMonthlyBudget: number;
   minMonthlyBudget?: number;
-  defaultLeadValue: number;
-  defaultLeadsToClose?: number;
+  benchmarks?: Partial<RoiBenchmarks>;
+  defaultInputs?: Partial<RoiDefaultInputs>;
   resultsButtonLabel?: string;
   retryButtonLabel?: string;
   ctaLabel: string;
@@ -48,10 +50,9 @@ export function RoiCalculator({
   layout = "page",
   title,
   description,
-  defaultMonthlyBudget,
   minMonthlyBudget = ROI_BUDGET.min,
-  defaultLeadValue,
-  defaultLeadsToClose = 15,
+  benchmarks: benchmarkOverrides,
+  defaultInputs,
   resultsButtonLabel = "Ver resultados",
   retryButtonLabel = "Volver a intentar",
   ctaLabel,
@@ -59,13 +60,17 @@ export function RoiCalculator({
   disclaimer = DEFAULT_DISCLAIMER,
   onError,
 }: RoiCalculatorProps) {
+  const benchmarks = useMemo(
+    (): RoiBenchmarks => ({
+      ...DEFAULT_BENCHMARKS,
+      ...benchmarkOverrides,
+    }),
+    [benchmarkOverrides],
+  );
+
   const [step, setStep] = useState<RoiCalculatorStep>("inputs");
   const [state, setState] = useState<RoiCalculatorState>(() => {
-    const initial = createDefaultRoiState(
-      defaultMonthlyBudget,
-      defaultLeadValue,
-      defaultLeadsToClose,
-    );
+    const initial = createDefaultRoiState(defaultInputs);
     return {
       ...initial,
       monthlyBudget: clampBudget(initial.monthlyBudget, minMonthlyBudget),
@@ -74,8 +79,8 @@ export function RoiCalculator({
   const [error, setError] = useState<string | null>(null);
 
   const result = useMemo(
-    () => calculateRoi(stateToRoiInputs(state)),
-    [state],
+    () => calculateRoi(state, benchmarks),
+    [state, benchmarks],
   );
 
   const handleStateChange = <K extends keyof RoiCalculatorState>(

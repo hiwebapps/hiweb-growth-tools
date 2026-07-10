@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { calculateRoi } from "@/lib/roi/calculator";
-import type { RoiLeadInput } from "@/lib/roi/types";
-import { validateRoiInputs, validateRoiLeadOptional } from "@/lib/roi/validators";
+import { DEFAULT_BENCHMARKS } from "@/lib/roi/defaults";
+import type { RoiCalculatorState, RoiLeadInput } from "@/lib/roi/types";
+import {
+  validateRoiBenchmarks,
+  validateRoiCalculatorState,
+  validateRoiLeadOptional,
+} from "@/lib/roi/validators";
 import { insertRoiLead } from "@/lib/db/roi";
 import { dispatchRoiWebhook } from "@/lib/n8n/client";
 import { buildRoiN8nPayload } from "@/lib/n8n/payloads";
@@ -17,7 +22,11 @@ type SubmitBody = {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as SubmitBody;
-    const inputs = validateRoiInputs(body.inputs);
+    const state = validateRoiCalculatorState(body.inputs);
+    const benchmarkOverrides = validateRoiBenchmarks(
+      body.inputs.benchmarks as Record<string, unknown> | undefined,
+    );
+    const benchmarks = { ...DEFAULT_BENCHMARKS, ...benchmarkOverrides };
     const lead = validateRoiLeadOptional(body.lead);
 
     if (!lead) {
@@ -27,11 +36,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = calculateRoi(inputs);
-    const leadId = (await insertRoiLead(inputs, result, lead)) ?? createId();
+    const result = calculateRoi(state, benchmarks);
+    const leadId = (await insertRoiLead(state, result, lead)) ?? createId();
 
     dispatchRoiWebhook(
-      buildRoiN8nPayload({ leadId, inputs, result, lead }),
+      buildRoiN8nPayload({ leadId, state, result, lead }),
     );
 
     return NextResponse.json({ leadId, result });

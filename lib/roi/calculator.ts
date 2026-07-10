@@ -1,17 +1,27 @@
-import { calculateRoiMetrics } from "./formulas";
+import { calculateIndustryMetrics } from "./calculate-industry";
 import { getRoiResultLevel } from "./result-levels";
 import { buildRoiRecommendations } from "./service-recommendations";
-import type { RoiCalculationResult, RoiInputs } from "./types";
+import type {
+  RoiBenchmarks,
+  RoiCalculationResult,
+  RoiCalculatorState,
+} from "./types";
 
-export function calculateRoi(inputs: RoiInputs): RoiCalculationResult {
-  const metrics = calculateRoiMetrics(inputs);
-  const level = getRoiResultLevel(metrics.estimatedRoi);
+export function calculateRoi(
+  state: RoiCalculatorState,
+  benchmarks: RoiBenchmarks,
+): RoiCalculationResult {
+  const metrics = calculateIndustryMetrics(state, benchmarks);
+  const estimatedRoi = metrics.estimatedRoi;
+  const level = getRoiResultLevel(estimatedRoi);
 
   return {
-    ...metrics,
+    industry: state.industry,
+    estimatedRoi,
+    metrics,
     resultLevel: level.id,
     resultLevelLabel: level.label,
     resultSummary: level.summary,
-    recommendations: buildRoiRecommendations(level.id, metrics.estimatedRoi),
+    recommendations: buildRoiRecommendations(level.id, estimatedRoi),
   };
 }

@@ -1,31 +1,41 @@
+import { ROI_BUDGET, ROI_VALIDATION } from "./currency";
+import { createDefaultRoiState } from "./defaults";
 import { resolveIndustryId } from "./industry";
-import { ROI_VALIDATION } from "./currency";
-import type { RoiInputs, RoiLeadInput } from "./types";
+import type {
+  RoiBenchmarks,
+  RoiCalculatorState,
+  RoiInputs,
+  RoiLeadInput,
+} from "./types";
 import { AppError } from "@/lib/shared/errors";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
-  const monthlyBudget = Number(raw.monthlyBudget);
-  const averageLeadValue = Number(raw.averageLeadValue);
+function num(value: unknown, field: string): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    throw new AppError(`El campo ${field} no es válido.`, {
+      statusCode: 400,
+      code: "INVALID_NUMBER",
+    });
+  }
+  return n;
+}
+
+export function validateRoiCalculatorState(
+  raw: Record<string, unknown>,
+): RoiCalculatorState {
   const industry = raw.industry
     ? resolveIndustryId(String(raw.industry))
-    : "saas";
-  const leadsToCloseSale =
-    raw.leadsToCloseSale === undefined || raw.leadsToCloseSale === null
-      ? undefined
-      : Number(raw.leadsToCloseSale);
-  const conversionRate =
-    raw.conversionRate === undefined || raw.conversionRate === null
-      ? undefined
-      : Number(raw.conversionRate);
-  const costPerLead =
-    raw.costPerLead === undefined || raw.costPerLead === null
-      ? undefined
-      : Number(raw.costPerLead);
+    : "ecommerce";
+  const defaults = createDefaultRoiState({}, industry);
+
+  const monthlyBudget = num(
+    raw.monthlyBudget ?? raw.presupuestoMensual ?? defaults.monthlyBudget,
+    "presupuesto mensual",
+  );
 
   if (
-    !Number.isFinite(monthlyBudget) ||
     monthlyBudget < ROI_VALIDATION.monthlyBudgetMin ||
     monthlyBudget > ROI_VALIDATION.monthlyBudgetMax
   ) {
@@ -35,62 +45,90 @@ export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
     );
   }
 
-  if (
-    !Number.isFinite(averageLeadValue) ||
-    averageLeadValue < ROI_VALIDATION.averageLeadValueMin ||
-    averageLeadValue > ROI_VALIDATION.averageLeadValueMax
-  ) {
-    throw new AppError(
-      "El ticket promedio debe estar entre 200 y 18,000,000 MXN.",
-      { statusCode: 400, code: "INVALID_LEAD_VALUE" },
-    );
-  }
-
-  if (leadsToCloseSale !== undefined) {
-    if (
-      !Number.isFinite(leadsToCloseSale) ||
-      leadsToCloseSale < 1 ||
-      leadsToCloseSale > 100
-    ) {
-      throw new AppError(
-        "Los leads para cerrar venta deben estar entre 1 y 100.",
-        { statusCode: 400, code: "INVALID_LEADS_TO_CLOSE" },
-      );
-    }
-  }
-
-  if (conversionRate !== undefined) {
-    if (
-      !Number.isFinite(conversionRate) ||
-      conversionRate < 0.5 ||
-      conversionRate > 80
-    ) {
-      throw new AppError(
-        "La tasa de conversión debe estar entre 0.5% y 80%.",
-        { statusCode: 400, code: "INVALID_CONVERSION" },
-      );
-    }
-  }
-
-  if (
-    costPerLead !== undefined &&
-    (!Number.isFinite(costPerLead) ||
-      costPerLead < ROI_VALIDATION.costPerLeadMin ||
-      costPerLead > ROI_VALIDATION.costPerLeadMax)
-  ) {
-    throw new AppError(
-      "El costo por lead debe estar entre 90 y 180,000 MXN.",
-      { statusCode: 400, code: "INVALID_CPL" },
-    );
-  }
-
   return {
-    monthlyBudget,
-    averageLeadValue,
     industry,
-    leadsToCloseSale,
-    conversionRate,
-    costPerLead,
+    monthlyBudget,
+    ticketPromedio: num(
+      raw.ticketPromedio ?? defaults.ticketPromedio,
+      "ticket promedio",
+    ),
+    tasaConversion: num(
+      raw.tasaConversion ?? defaults.tasaConversion,
+      "tasa de conversión",
+    ),
+    mesesCampana: num(raw.mesesCampana ?? defaults.mesesCampana, "meses de campaña"),
+    valorPropiedad: num(
+      raw.valorPropiedad ?? defaults.valorPropiedad,
+      "valor de propiedad",
+    ),
+    porcentajeComision: num(
+      raw.porcentajeComision ?? defaults.porcentajeComision,
+      "porcentaje de comisión",
+    ),
+    tasaCierre: num(raw.tasaCierre ?? defaults.tasaCierre, "tasa de cierre"),
+    suscripcionMensualUsd: num(
+      raw.suscripcionMensualUsd ?? defaults.suscripcionMensualUsd,
+      "suscripción mensual",
+    ),
+    mesesPermanencia: num(
+      raw.mesesPermanencia ?? defaults.mesesPermanencia,
+      "meses de permanencia",
+    ),
+    leadsParaCierre: num(
+      raw.leadsParaCierre ?? defaults.leadsParaCierre,
+      "leads para cierre",
+    ),
+    averageLeadValue: num(
+      raw.averageLeadValue ?? raw.ticketPromedio ?? defaults.averageLeadValue,
+      "ticket promedio",
+    ),
+    leadsToCloseSale: num(
+      raw.leadsToCloseSale ?? raw.leadsParaCierre ?? defaults.leadsToCloseSale,
+      "leads para cerrar venta",
+    ),
+  };
+}
+
+export function validateRoiBenchmarks(
+  raw: Record<string, unknown> | undefined,
+): Partial<RoiBenchmarks> | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  const out: Partial<RoiBenchmarks> = {};
+  if (raw.ecommerceCpcMxn !== undefined) {
+    out.ecommerceCpcMxn = num(raw.ecommerceCpcMxn, "CPC e-commerce");
+  }
+  if (raw.realEstateCplMxn !== undefined) {
+    out.realEstateCplMxn = num(raw.realEstateCplMxn, "CPL inmobiliario");
+  }
+  if (raw.realEstateSeriousLeadRate !== undefined) {
+    out.realEstateSeriousLeadRate = num(
+      raw.realEstateSeriousLeadRate,
+      "tasa leads serios",
+    );
+  }
+  if (raw.saasCplUsd !== undefined) {
+    out.saasCplUsd = num(raw.saasCplUsd, "CPL SaaS");
+  }
+  if (raw.usdToMxn !== undefined) {
+    out.usdToMxn = num(raw.usdToMxn, "tipo de cambio USD/MXN");
+  }
+  if (raw.b2bCplMxn !== undefined) {
+    out.b2bCplMxn = num(raw.b2bCplMxn, "CPL B2B");
+  }
+  return out;
+}
+
+/** Compatibilidad con payloads API antiguos. */
+export function validateRoiInputs(raw: Partial<RoiInputs>): RoiInputs {
+  const state = validateRoiCalculatorState(raw as Record<string, unknown>);
+  return {
+    monthlyBudget: state.monthlyBudget,
+    averageLeadValue: state.averageLeadValue,
+    industry: state.industry,
+    leadsToCloseSale: state.leadsToCloseSale,
   };
 }
 

@@ -39,3 +39,20 @@ export function formatMxn(value: number): string {
   }).format(value);
   return `${formatted} MXN`;
 }
+
+export function formatUsd(value: number): string {
+  const formatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+  return `${formatted} USD`;
+}
+
+export function formatMultiplier(value: number): string {
+  const rounded =
+    Math.abs(value - Math.round(value)) < 0.05
+      ? String(Math.round(value))
+      : value.toFixed(1);
+  return `${rounded}x`;
+}

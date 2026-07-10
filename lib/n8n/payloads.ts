@@ -2,7 +2,7 @@ import type { BookingRecord } from "@/lib/calendar/types";
 import type { QuizLeadInput, QuizScoreResult } from "@/lib/quiz/types";
 import type {
   RoiCalculationResult,
-  RoiInputs,
+  RoiCalculatorState,
   RoiLeadInput,
 } from "@/lib/roi/types";
 
@@ -42,7 +42,7 @@ export function buildCalendarN8nPayload(input: {
 
 export function buildRoiN8nPayload(input: {
   leadId: string;
-  inputs: RoiInputs;
+  state: RoiCalculatorState;
   result: RoiCalculationResult;
   lead?: RoiLeadInput;
 }) {
@@ -50,8 +50,15 @@ export function buildRoiN8nPayload(input: {
     event: "roi.submitted",
     leadId: input.leadId,
     lead: input.lead,
-    inputs: input.inputs,
-    result: input.result,
+    industry: input.result.industry,
+    inputs: input.state,
+    metrics: input.result.metrics,
+    roi: {
+      percentage: input.result.estimatedRoi,
+      level: input.result.resultLevel,
+      levelLabel: input.result.resultLevelLabel,
+    },
+    recommendations: input.result.recommendations,
     submittedAt: new Date().toISOString(),
   };
 }

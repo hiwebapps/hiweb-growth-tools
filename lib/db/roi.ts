@@ -1,15 +1,21 @@
-import type { RoiCalculationResult, RoiInputs, RoiLeadInput } from "@/lib/roi/types";
+import type {
+  RoiCalculationResult,
+  RoiCalculatorState,
+  RoiLeadInput,
+} from "@/lib/roi/types";
+import { resultToDbFields } from "@/lib/roi/db-map";
 import { createId } from "@/lib/shared/utils";
 import { isSqliteAvailable, getDb } from "./client";
 import { d1Run, getD1 } from "./d1";
 
 export async function insertRoiLead(
-  inputs: RoiInputs,
+  state: RoiCalculatorState,
   result: RoiCalculationResult,
   lead?: RoiLeadInput,
 ): Promise<string | null> {
   const id = createId();
   const createdAt = new Date().toISOString();
+  const dbFields = resultToDbFields(result, state.monthlyBudget);
 
   const d1 = await getD1();
   if (d1) {
@@ -26,12 +32,12 @@ export async function insertRoiLead(
       lead?.company ?? null,
       lead?.email ?? null,
       lead?.phone ?? null,
-      result.monthlyBudget,
-      result.estimatedLeads,
-      result.estimatedSales,
-      result.estimatedRevenue,
-      result.estimatedRoi,
-      JSON.stringify(inputs),
+      dbFields.monthlyBudget,
+      dbFields.estimatedLeads,
+      dbFields.estimatedSales,
+      dbFields.estimatedRevenue,
+      dbFields.estimatedRoi,
+      JSON.stringify(state),
       JSON.stringify(result.recommendations),
       createdAt,
     );
@@ -57,12 +63,12 @@ export async function insertRoiLead(
       lead?.company ?? null,
       lead?.email ?? null,
       lead?.phone ?? null,
-      result.monthlyBudget,
-      result.estimatedLeads,
-      result.estimatedSales,
-      result.estimatedRevenue,
-      result.estimatedRoi,
-      JSON.stringify(inputs),
+      dbFields.monthlyBudget,
+      dbFields.estimatedLeads,
+      dbFields.estimatedSales,
+      dbFields.estimatedRevenue,
+      dbFields.estimatedRoi,
+      JSON.stringify(state),
       JSON.stringify(result.recommendations),
       createdAt,
     );
