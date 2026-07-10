@@ -1,11 +1,19 @@
-import { Badge, Card } from "@/components/shared";
+"use client";
+
+import { getServiceLabel } from "@/lib/calendar/calendar-rules";
 import type { BookingRecord } from "@/lib/calendar/types";
 
 type BookingConfirmationProps = {
   booking: BookingRecord;
+  title?: string;
+  message?: string;
 };
 
-export function BookingConfirmation({ booking }: BookingConfirmationProps) {
+export function BookingConfirmation({
+  booking,
+  title = "Cita confirmada",
+  message = "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
+}: BookingConfirmationProps) {
   const dateLabel = new Date(
     `${booking.selectedDate}T12:00:00`,
   ).toLocaleDateString("es-MX", {
@@ -16,31 +24,41 @@ export function BookingConfirmation({ booking }: BookingConfirmationProps) {
   });
 
   return (
-    <Card padding="md" elevated={false}>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Badge variant="success">Confirmada</Badge>
-        <span className="text-xs text-muted">ID: {booking.id.slice(0, 8)}…</span>
-      </div>
-      <dl className="grid gap-3 text-sm">
+    <div className="cal-success-panel">
+      <span className="cal-success-badge">Confirmada</span>
+      <h3
+        style={{
+          margin: "0 0 0.5rem",
+          fontSize: "1.25rem",
+          fontWeight: 600,
+          color: "var(--cal-primary)",
+        }}
+      >
+        {title}
+      </h3>
+      <p style={{ margin: "0 0 1.25rem", fontSize: "0.9375rem", color: "var(--cal-muted)" }}>
+        {message}
+      </p>
+      <dl className="cal-summary">
         <div>
-          <dt className="text-muted">Servicio</dt>
-          <dd className="font-medium">{booking.service}</dd>
+          <dt>Servicio</dt>
+          <dd>{getServiceLabel(booking.service)}</dd>
         </div>
         <div>
-          <dt className="text-muted">Fecha</dt>
-          <dd className="font-medium capitalize">{dateLabel}</dd>
+          <dt>Fecha</dt>
+          <dd style={{ textTransform: "capitalize" }}>{dateLabel}</dd>
         </div>
         <div>
-          <dt className="text-muted">Hora</dt>
-          <dd className="font-medium tabular-nums">{booking.selectedTime}</dd>
+          <dt>Hora</dt>
+          <dd>{booking.selectedTime}</dd>
         </div>
         <div>
-          <dt className="text-muted">Contacto</dt>
-          <dd className="font-medium">
+          <dt>Contacto</dt>
+          <dd>
             {booking.name} — {booking.email}
           </dd>
         </div>
       </dl>
-    </Card>
+    </div>
   );
 }

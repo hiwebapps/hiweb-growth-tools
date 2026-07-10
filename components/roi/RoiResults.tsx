@@ -1,6 +1,10 @@
 "use client";
 
-import { formatMxn } from "@/lib/roi/currency";
+import {
+  formatMxn,
+  formatMultiplier,
+  formatUsd,
+} from "@/lib/roi/currency";
 import type { RoiCalculationResult } from "@/lib/roi/types";
 import { RoiProgressRing } from "./RoiProgressRing";
 
@@ -14,12 +18,84 @@ type RoiResultsProps = {
   isLoading?: boolean;
 };
 
+type MetricRow = {
+  label: string;
+  value: string;
+  accent?: boolean;
+};
+
 function formatCount(value: number): string {
   const rounded =
     Math.abs(value - Math.round(value)) < 0.01
       ? Math.round(value)
       : Math.round(value * 10) / 10;
   return rounded.toLocaleString("es-MX");
+}
+
+function metricsForResult(result: RoiCalculationResult): MetricRow[] {
+  const m = result.metrics;
+
+  switch (m.industry) {
+    case "ecommerce":
+      return [
+        { label: "Visitas generadas", value: formatCount(m.visitasGeneradas) },
+        { label: "Ventas estimadas", value: formatCount(m.ventasEstimadas) },
+        { label: "CAC", value: formatMxn(m.cac) },
+        {
+          label: "Ingresos proyectados",
+          value: formatMxn(m.ingresosProyectados),
+          accent: true,
+        },
+        { label: "ROAS", value: formatMultiplier(m.roas) },
+      ];
+    case "real-estate":
+      return [
+        {
+          label: "Inversión acumulada",
+          value: formatMxn(m.inversionAcumulada),
+        },
+        { label: "Leads totales", value: formatCount(m.leadsTotales) },
+        { label: "Citas generadas", value: formatCount(m.citasGeneradas) },
+        { label: "Cierres totales", value: formatCount(m.cierresTotales) },
+        {
+          label: "Ingresos generados",
+          value: formatMxn(m.ingresosGenerados),
+          accent: true,
+        },
+      ];
+    case "saas":
+      return [
+        {
+          label: "Clientes nuevos de pago",
+          value: formatCount(m.clientesNuevos),
+        },
+        { label: "CAC", value: formatMxn(m.cac) },
+        { label: "LTV por cliente", value: formatUsd(m.ltv) },
+        {
+          label: "Ingreso total proyectado",
+          value: formatUsd(m.ingresoTotalProyectado),
+          accent: true,
+        },
+        {
+          label: "Relación LTV:CAC",
+          value: formatMultiplier(m.relacionLtvCac),
+        },
+      ];
+    case "b2b-services":
+      return [
+        { label: "CPL estimado", value: formatMxn(m.costPerLead) },
+        { label: "Leads totales", value: formatCount(m.estimatedLeads) },
+        { label: "Ventas estimadas", value: formatCount(m.estimatedSales) },
+        {
+          label: "Ingresos estimados",
+          value: formatMxn(m.estimatedRevenue),
+          accent: true,
+        },
+        { label: "ROAS", value: formatMultiplier(m.estimatedRoas) },
+      ];
+    default:
+      return [];
+  }
 }
 
 export function RoiResults({
@@ -33,29 +109,7 @@ export function RoiResults({
 }: RoiResultsProps) {
   const roiDisplay = Math.round(result.estimatedRoi);
   const roiPositive = roiDisplay >= 0;
-
-  const metrics = [
-    {
-      label: "CPL estimado",
-      value: formatMxn(result.costPerLead),
-      accent: false,
-    },
-    {
-      label: "Leads totales",
-      value: formatCount(result.estimatedLeads),
-      accent: false,
-    },
-    {
-      label: "Ventas estimadas",
-      value: formatCount(result.estimatedSales),
-      accent: false,
-    },
-    {
-      label: "Ingresos estimados",
-      value: formatMxn(result.estimatedRevenue),
-      accent: true,
-    },
-  ];
+  const metrics = metricsForResult(result);
 
   return (
     <div className="roi-step roi-step-results">
@@ -63,7 +117,7 @@ export function RoiResults({
         <div className="roi-panel-glow" aria-hidden />
         <div className="roi-panel-body">
           <RoiProgressRing roi={result.estimatedRoi}>
-            <p className="roi-ring-kicker">ROI estimado</p>
+            <p className="roi-ring-kicker">ROI proyectado</p>
             <p className="roi-ring-value">
               {roiPositive ? "" : "-"}
               {Math.abs(roiDisplay)}

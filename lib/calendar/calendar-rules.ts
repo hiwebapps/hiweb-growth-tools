@@ -60,17 +60,53 @@ export function parseDateIso(iso: string): Date {
   return new Date(y, m - 1, d, 12, 0, 0);
 }
 
-export function getBookableDates(): { iso: string; label: string }[] {
-  const dates: { iso: string; label: string }[] = [];
+export const WEEKDAY_LABELS_SHORT = [
+  "Lun",
+  "Mar",
+  "Mié",
+  "Jue",
+  "Vie",
+  "Sáb",
+  "Dom",
+] as const;
+
+export type CalendarMonthCell = {
+  iso: string;
+  day: number;
+  inCurrentMonth: boolean;
+  bookable: boolean;
+};
+
+export function getTodayAtNoon(): Date {
   const today = new Date();
   today.setHours(12, 0, 0, 0);
+  return today;
+}
+
+export function isBookableDate(date: Date): boolean {
+  const today = getTodayAtNoon();
+  const cursor = new Date(date);
+  cursor.setHours(12, 0, 0, 0);
+
+  if (!isWeekday(cursor) || cursor < today) {
+    return false;
+  }
+
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + BOOKING_HORIZON_DAYS);
+  return cursor <= maxDate;
+}
+
+export function getBookableDates(): { iso: string; label: string }[] {
+  const dates: { iso: string; label: string }[] = [];
+  const today = getTodayAtNoon();
 
   let cursor = new Date(today);
   let added = 0;
   let guard = 0;
 
   while (added < 10 && guard < BOOKING_HORIZON_DAYS + 14) {
-    if (isWeekday(cursor) && cursor >= today) {
+    if (isBookableDate(cursor)) {
       const iso = formatDateIso(cursor);
       dates.push({
         iso,
@@ -88,4 +124,82 @@ export function getBookableDates(): { iso: string; label: string }[] {
   }
 
   return dates;
+}
+
+export function getMonthCells(year: number, month: number): CalendarMonthCell[] {
+  const first = new Date(year, month, 1, 12);
+  const firstDayOfWeek = (first.getDay() + 6) % 7;
+  const gridStart = new Date(first);
+  gridStart.setDate(gridStart.getDate() - firstDayOfWeek);
+
+  const cells: CalendarMonthCell[] = [];
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + i);
+    cells.push({
+      iso: formatDateIso(date),
+      day: date.getDate(),
+      inCurrentMonth: date.getMonth() === month,
+      bookable: isBookableDate(date),
+    });
+  }
+
+  return cells;
+}
+
+export function formatMonthYear(year: number, month: number): string {
+  const label = new Date(year, month, 1, 12).toLocaleDateString("es-MX", {
+    month: "long",
+    year: "numeric",
+  });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+export function formatTime12h(time24: string): string {
+  const [h, m] = time24.split(":").map(Number);
+  const period = h >= 12 ? "p. m." : "a. m.";
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+export function formatScheduleSummary(dateIso: string, time?: string): string {
+  const datePart = parseDateIso(dateIso).toLocaleDateString("es-MX", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  if (!time) {
+    return datePart;
+  }
+  return `${datePart} ${formatTime12h(time)}`;
+}
+
+export function getBookableMonthBounds(): {
+  minYear: number;
+  minMonth: number;
+  maxYear: number;
+  maxMonth: number;
+} {
+  const today = getTodayAtNoon();
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + BOOKING_HORIZON_DAYS);
+
+  return {
+    minYear: today.getFullYear(),
+    minMonth: today.getMonth(),
+    maxYear: maxDate.getFullYear(),
+    maxMonth: maxDate.getMonth(),
+  };
+}
+
+export function canNavigateMonth(
+  year: number,
+  month: number,
+  direction: -1 | 1,
+): boolean {
+  const bounds = getBookableMonthBounds();
+  const target = new Date(year, month + direction, 1, 12);
+  const min = new Date(bounds.minYear, bounds.minMonth, 1, 12);
+  const max = new Date(bounds.maxYear, bounds.maxMonth, 1, 12);
+  return target >= min && target <= max;
 }

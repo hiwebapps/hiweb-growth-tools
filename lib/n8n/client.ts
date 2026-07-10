@@ -21,8 +21,9 @@ export function dispatchN8nWebhook(
     method: "POST",
     headers,
     body: JSON.stringify(payload),
-  }).catch(() => {
+  }).catch((error) => {
     // Fire-and-forget: n8n failures must not break user flow.
+    console.error("[n8n] webhook dispatch failed:", error);
   });
 }
 

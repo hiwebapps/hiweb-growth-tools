@@ -1,14 +1,24 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { calculateRoi } from "@/lib/roi/calculator";
 import { ROI_BUDGET } from "@/lib/roi/currency";
-import { createDefaultRoiState, stateToRoiInputs } from "@/lib/roi/state";
-import type { RoiCalculatorState } from "@/lib/roi/types";
+import {
+  createDefaultRoiState,
+  DEFAULT_BENCHMARKS,
+  type RoiDefaultInputs,
+} from "@/lib/roi/defaults";
+import type { RoiBenchmarks, RoiCalculatorState } from "@/lib/roi/types";
 import { RoiHero } from "./RoiHero";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiNativeStyles } from "./RoiNativeStyles";
 import { RoiResults } from "./RoiResults";
+
+const CalendarBookingModalLazy = lazy(() =>
+  import("@/components/calendar/CalendarBookingModal").then((m) => ({
+    default: m.CalendarBookingModal,
+  })),
+);
 
 export type RoiCalculatorLayout = "page" | "card";
 export type RoiCalculatorStep = "inputs" | "results";
@@ -17,18 +27,22 @@ const DEFAULT_DISCLAIMER =
   "Esta calculadora ofrece estimaciones orientativas. Los resultados reales pueden variar según tu mercado, canal y ejecución.";
 
 export type RoiCalculatorProps = {
-  /** `card` = solo el panel (Webflow). `page` = hero + card (ruta /calculadora-roi). */
   layout?: RoiCalculatorLayout;
   title?: string;
   description?: string;
-  defaultMonthlyBudget: number;
   minMonthlyBudget?: number;
-  defaultLeadValue: number;
-  defaultLeadsToClose?: number;
+  benchmarks?: Partial<RoiBenchmarks>;
+  defaultInputs?: Partial<RoiDefaultInputs>;
   resultsButtonLabel?: string;
   retryButtonLabel?: string;
   ctaLabel: string;
-  ctaUrl: string;
+  ctaUrl?: string;
+  calendarService?: string;
+  calendarModalTitle?: string;
+  calendarContinueLabel?: string;
+  calendarSubmitLabel?: string;
+  calendarSuccessTitle?: string;
+  calendarSuccessMessage?: string;
   disclaimer?: string;
   onError?: (message: string) => void;
 };
@@ -48,34 +62,45 @@ export function RoiCalculator({
   layout = "page",
   title,
   description,
-  defaultMonthlyBudget,
   minMonthlyBudget = ROI_BUDGET.min,
-  defaultLeadValue,
-  defaultLeadsToClose = 15,
+  benchmarks: benchmarkOverrides,
+  defaultInputs,
   resultsButtonLabel = "Ver resultados",
   retryButtonLabel = "Volver a intentar",
   ctaLabel,
   ctaUrl,
+  calendarService = "seo-audit",
+  calendarModalTitle,
+  calendarContinueLabel = "Continuar",
+  calendarSubmitLabel = "Confirmar cita",
+  calendarSuccessTitle = "Cita confirmada",
+  calendarSuccessMessage =
+    "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
   disclaimer = DEFAULT_DISCLAIMER,
   onError,
 }: RoiCalculatorProps) {
+  const benchmarks = useMemo(
+    (): RoiBenchmarks => ({
+      ...DEFAULT_BENCHMARKS,
+      ...benchmarkOverrides,
+    }),
+    [benchmarkOverrides],
+  );
+
   const [step, setStep] = useState<RoiCalculatorStep>("inputs");
   const [state, setState] = useState<RoiCalculatorState>(() => {
-    const initial = createDefaultRoiState(
-      defaultMonthlyBudget,
-      defaultLeadValue,
-      defaultLeadsToClose,
-    );
+    const initial = createDefaultRoiState(defaultInputs);
     return {
       ...initial,
       monthlyBudget: clampBudget(initial.monthlyBudget, minMonthlyBudget),
     };
   });
   const [error, setError] = useState<string | null>(null);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   const result = useMemo(
-    () => calculateRoi(stateToRoiInputs(state)),
-    [state],
+    () => calculateRoi(state, benchmarks),
+    [state, benchmarks],
   );
 
   const handleStateChange = <K extends keyof RoiCalculatorState>(
@@ -103,14 +128,17 @@ export function RoiCalculator({
   }, []);
 
   const handleCtaClick = useCallback(() => {
-    if (!ctaUrl) {
-      const message = "No hay URL configurada para el CTA.";
-      setError(message);
-      onError?.(message);
+    if (ctaUrl) {
+      navigateToUrl(ctaUrl);
       return;
     }
-    navigateToUrl(ctaUrl);
-  }, [ctaUrl, onError]);
+    setBookingModalOpen(true);
+    setError(null);
+  }, [ctaUrl]);
+
+  const handleCloseBookingModal = useCallback(() => {
+    setBookingModalOpen(false);
+  }, []);
 
   const rootClass =
     layout === "card" ? "roi-root roi-root--card" : "roi-root roi-root--page";
@@ -151,6 +179,21 @@ export function RoiCalculator({
           )}
         </div>
       </div>
+
+      {bookingModalOpen ? (
+        <Suspense fallback={null}>
+          <CalendarBookingModalLazy
+            open={bookingModalOpen}
+            onClose={handleCloseBookingModal}
+            defaultService={calendarService}
+            title={calendarModalTitle ?? ctaLabel}
+            continueLabel={calendarContinueLabel}
+            submitLabel={calendarSubmitLabel}
+            successTitle={calendarSuccessTitle}
+            successMessage={calendarSuccessMessage}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }
