@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { calculateRoi } from "@/lib/roi/calculator";
 import { ROI_BUDGET } from "@/lib/roi/currency";
 import {
@@ -13,6 +13,12 @@ import { RoiHero } from "./RoiHero";
 import { RoiInputForm } from "./RoiInputForm";
 import { RoiNativeStyles } from "./RoiNativeStyles";
 import { RoiResults } from "./RoiResults";
+
+const CalendarBookingModalLazy = lazy(() =>
+  import("@/components/calendar/CalendarBookingModal").then((m) => ({
+    default: m.CalendarBookingModal,
+  })),
+);
 
 export type RoiCalculatorLayout = "page" | "card";
 export type RoiCalculatorStep = "inputs" | "results";
@@ -30,7 +36,13 @@ export type RoiCalculatorProps = {
   resultsButtonLabel?: string;
   retryButtonLabel?: string;
   ctaLabel: string;
-  ctaUrl: string;
+  ctaUrl?: string;
+  calendarService?: string;
+  calendarModalTitle?: string;
+  calendarContinueLabel?: string;
+  calendarSubmitLabel?: string;
+  calendarSuccessTitle?: string;
+  calendarSuccessMessage?: string;
   disclaimer?: string;
   onError?: (message: string) => void;
 };
@@ -57,6 +69,13 @@ export function RoiCalculator({
   retryButtonLabel = "Volver a intentar",
   ctaLabel,
   ctaUrl,
+  calendarService = "seo-audit",
+  calendarModalTitle,
+  calendarContinueLabel = "Continuar",
+  calendarSubmitLabel = "Confirmar cita",
+  calendarSuccessTitle = "Cita confirmada",
+  calendarSuccessMessage =
+    "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
   disclaimer = DEFAULT_DISCLAIMER,
   onError,
 }: RoiCalculatorProps) {
@@ -77,6 +96,7 @@ export function RoiCalculator({
     };
   });
   const [error, setError] = useState<string | null>(null);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   const result = useMemo(
     () => calculateRoi(state, benchmarks),
@@ -108,14 +128,17 @@ export function RoiCalculator({
   }, []);
 
   const handleCtaClick = useCallback(() => {
-    if (!ctaUrl) {
-      const message = "No hay URL configurada para el CTA.";
-      setError(message);
-      onError?.(message);
+    if (ctaUrl) {
+      navigateToUrl(ctaUrl);
       return;
     }
-    navigateToUrl(ctaUrl);
-  }, [ctaUrl, onError]);
+    setBookingModalOpen(true);
+    setError(null);
+  }, [ctaUrl]);
+
+  const handleCloseBookingModal = useCallback(() => {
+    setBookingModalOpen(false);
+  }, []);
 
   const rootClass =
     layout === "card" ? "roi-root roi-root--card" : "roi-root roi-root--page";
@@ -156,6 +179,21 @@ export function RoiCalculator({
           )}
         </div>
       </div>
+
+      {bookingModalOpen ? (
+        <Suspense fallback={null}>
+          <CalendarBookingModalLazy
+            open={bookingModalOpen}
+            onClose={handleCloseBookingModal}
+            defaultService={calendarService}
+            title={calendarModalTitle ?? ctaLabel}
+            continueLabel={calendarContinueLabel}
+            submitLabel={calendarSubmitLabel}
+            successTitle={calendarSuccessTitle}
+            successMessage={calendarSuccessMessage}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

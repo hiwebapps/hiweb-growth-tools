@@ -9,9 +9,8 @@ import {
 import { bookAppointment, fetchAvailability } from "@/lib/calendar/client";
 import type { BookingInput, BookingRecord, TimeSlot } from "@/lib/calendar/types";
 import { BookingForm } from "./BookingForm";
-import { DateSelector } from "./DateSelector";
+import { SchedulePicker } from "./SchedulePicker";
 import { ServiceSelector } from "./ServiceSelector";
-import { TimeSlotSelector } from "./TimeSlotSelector";
 
 export type CalendarStep = "schedule" | "details";
 
@@ -175,42 +174,32 @@ export function CalendarTool({
             hint="Elige el tipo de sesión que quieres agendar."
             onChange={setService}
           />
-          <DateSelector
-            value={selectedDate}
-            hint="Solo días hábiles. Los horarios se actualizan al elegir fecha."
-            onChange={(date) => {
+          <SchedulePicker
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            slots={slots}
+            isLoading={slotsLoading}
+            continueLabel={continueButtonLabel}
+            onDateChange={(date) => {
               setSelectedDate(date);
               setSelectedTime(undefined);
               setFormError(null);
             }}
-          />
-          <TimeSlotSelector
-            slots={slots}
-            value={selectedTime}
-            hint="Horarios en zona Ciudad de México."
-            onChange={(time) => {
+            onTimeChange={(time) => {
               setSelectedTime(time);
               setFormError(null);
             }}
-            isLoading={slotsLoading}
+            onCancel={() => {
+              setSelectedTime(undefined);
+              setFormError(null);
+            }}
+            onContinue={handleContinue}
           />
           {formError ? (
             <p className="cal-error" role="alert">
               {formError}
             </p>
           ) : null}
-          <div className="cal-nav">
-            <span />
-            <button
-              type="button"
-              className="cal-btn-primary"
-              disabled={!selectedDate || !selectedTime || slotsLoading}
-              onClick={handleContinue}
-            >
-              {continueButtonLabel}
-              <span aria-hidden> →</span>
-            </button>
-          </div>
         </>
       ) : (
         <>

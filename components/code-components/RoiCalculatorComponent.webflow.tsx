@@ -83,8 +83,33 @@ export default declareComponent(RoiCalculatorComponent, {
       defaultValue: "Agenda tu auditoría gratuita",
     }),
     ctaUrl: props.Text({
-      name: "URL CTA auditoría",
-      defaultValue: "/tools/calendario",
+      name: "URL CTA externa (opcional)",
+      defaultValue: "",
+    }),
+    calendarService: props.Text({
+      name: "Servicio del calendario",
+      defaultValue: "seo-audit",
+    }),
+    calendarModalTitle: props.Text({
+      name: "Título del popup",
+      defaultValue: "Agenda tu auditoría gratuita",
+    }),
+    calendarContinueLabel: props.Text({
+      name: "Texto botón continuar (calendario)",
+      defaultValue: "Continuar",
+    }),
+    calendarSubmitLabel: props.Text({
+      name: "Texto botón confirmar cita",
+      defaultValue: "Confirmar cita",
+    }),
+    calendarSuccessTitle: props.Text({
+      name: "Título cita confirmada",
+      defaultValue: "Cita confirmada",
+    }),
+    calendarSuccessMessage: props.Text({
+      name: "Mensaje cita confirmada",
+      defaultValue:
+        "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
     }),
   },
   options: {

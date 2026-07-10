@@ -32,6 +32,12 @@ export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   retryButtonLabel?: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  calendarService?: string;
+  calendarModalTitle?: string;
+  calendarContinueLabel?: string;
+  calendarSubmitLabel?: string;
+  calendarSuccessTitle?: string;
+  calendarSuccessMessage?: string;
 };
 
 const DEFAULTS: RoiCalculatorComponentProps = {
@@ -48,7 +54,13 @@ const DEFAULTS: RoiCalculatorComponentProps = {
   resultsButtonLabel: "Ver resultados",
   retryButtonLabel: "Volver a intentar",
   ctaLabel: "Agenda tu auditoría gratuita",
-  ctaUrl: "/tools/calendario",
+  calendarService: "seo-audit",
+  calendarModalTitle: "Agenda tu auditoría gratuita",
+  calendarContinueLabel: "Continuar",
+  calendarSubmitLabel: "Confirmar cita",
+  calendarSuccessTitle: "Cita confirmada",
+  calendarSuccessMessage:
+    "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
 };
 
 export function RoiCalculatorComponent(
@@ -72,6 +84,12 @@ export function RoiCalculatorComponent(
     retryButtonLabel,
     ctaLabel,
     ctaUrl,
+    calendarService,
+    calendarModalTitle,
+    calendarContinueLabel,
+    calendarSubmitLabel,
+    calendarSuccessTitle,
+    calendarSuccessMessage,
   } = props;
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -107,7 +125,16 @@ export function RoiCalculatorComponent(
     resultsButtonLabel: resultsButtonLabel ?? DEFAULTS.resultsButtonLabel!,
     retryButtonLabel: retryButtonLabel ?? DEFAULTS.retryButtonLabel!,
     ctaLabel: ctaLabel ?? DEFAULTS.ctaLabel!,
-    ctaUrl: ctaUrl ?? DEFAULTS.ctaUrl!,
+    ctaUrl: ctaUrl || undefined,
+    calendarService: calendarService ?? DEFAULTS.calendarService!,
+    calendarModalTitle: calendarModalTitle ?? DEFAULTS.calendarModalTitle!,
+    calendarContinueLabel:
+      calendarContinueLabel ?? DEFAULTS.calendarContinueLabel!,
+    calendarSubmitLabel: calendarSubmitLabel ?? DEFAULTS.calendarSubmitLabel!,
+    calendarSuccessTitle:
+      calendarSuccessTitle ?? DEFAULTS.calendarSuccessTitle!,
+    calendarSuccessMessage:
+      calendarSuccessMessage ?? DEFAULTS.calendarSuccessMessage!,
   };
 
   const shellClass = `roi-stitch ${className ?? ""}`.trim();
