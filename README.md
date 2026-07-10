@@ -122,3 +122,5 @@ Code Components: [`docs/WEBFLOW_CODE_COMPONENTS.md`](docs/WEBFLOW_CODE_COMPONENT
 ## n8n
 
 Los webhooks se disparan desde el servidor (fire-and-forget) tras validar y guardar en SQLite. El frontend nunca llama a n8n directamente.
+
+**Calendario → Slack (Fase A):** ver [docs/N8N_CALENDAR_SLACK.md](docs/N8N_CALENDAR_SLACK.md) y workflow importable en `n8n/workflows/`.

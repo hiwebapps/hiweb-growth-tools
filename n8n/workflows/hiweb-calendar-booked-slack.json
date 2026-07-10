@@ -1,0 +1,143 @@
+{
+  "name": "Hiweb — Calendario → Slack (#leads-landing-page)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hiweb-calendar-booked",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook Calendario",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "hiweb-calendar-booked"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst secret =\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid X-Webhook-Secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.slack?.text) {\n  throw new Error('Invalid payload: missing event or slack.text');\n}\n\nreturn [{ json: payload }];"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Validar secreto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "evt-booked",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.booked",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "evt-cancelled",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "¿Reserva o cancelación?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "leads-landing-page",
+          "mode": "name"
+        },
+        "text": "={{ $json.slack.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Slack — leads-landing-page",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [720, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack Hiweb"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Calendario": {
+      "main": [
+        [
+          {
+            "node": "Validar secreto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar secreto": {
+      "main": [
+        [
+          {
+            "node": "¿Reserva o cancelación?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Reserva o cancelación?": {
+      "main": [
+        [
+          {
+            "node": "Slack — leads-landing-page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "hiweb-growth-tools"
+    },
+    {
+      "name": "calendar"
+    }
+  ]
+}
