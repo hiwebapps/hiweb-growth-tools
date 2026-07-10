@@ -1,29 +1,35 @@
 "use client";
 
 import { CALENDAR_SERVICES } from "@/lib/calendar/calendar-rules";
-import { cn } from "@/lib/shared/utils";
 
 type ServiceSelectorProps = {
   value: string;
+  hint?: string;
   onChange: (serviceId: string) => void;
-  className?: string;
 };
 
 export function ServiceSelector({
   value,
+  hint,
   onChange,
-  className,
 }: ServiceSelectorProps) {
+  const label =
+    CALENDAR_SERVICES.find((s) => s.id === value)?.label ?? value;
+
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor="calendar-service" className="text-sm font-medium text-foreground">
-        Servicio
+    <div className="cal-field">
+      <label className="cal-field-head" htmlFor="calendar-service">
+        <span>Servicio</span>
+        <span style={{ color: "var(--cal-cyan)", fontWeight: 500, fontSize: "0.875rem" }}>
+          {label.length > 28 ? `${label.slice(0, 28)}…` : label}
+        </span>
       </label>
+      {hint ? <p className="cal-field-hint">{hint}</p> : null}
       <select
         id="calendar-service"
+        className="cal-select"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="focus-ring h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
       >
         {CALENDAR_SERVICES.map((service) => (
           <option key={service.id} value={service.id}>

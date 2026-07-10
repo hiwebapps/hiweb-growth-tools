@@ -1,21 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge, Button } from "@/components/shared";
-import {
-  BookingConfirmation,
-  CalendarTool,
-} from "@/components/calendar";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { CalendarDesignerPreview } from "@/components/calendar/CalendarDesignerPreview";
+import { CalendarNativeStyles } from "@/components/calendar/CalendarNativeStyles";
+import { BookingConfirmation } from "@/components/calendar/BookingConfirmation";
 import type { BookingRecord } from "@/lib/calendar/types";
-import {
-  CodeComponentFrame,
-  PlaceholderPanel,
-} from "./CodeComponentFrame";
 import type { CodeComponentBaseProps, ToolViewState } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
+import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
+
+const CalendarToolLazy = lazy(() =>
+  import("@/components/calendar/CalendarTool").then((m) => ({
+    default: m.CalendarTool,
+  })),
+);
 
 export type CalendarToolComponentProps = CodeComponentBaseProps & {
   defaultService?: string;
+  startButtonLabel?: string;
+  continueButtonLabel?: string;
   submitButtonLabel?: string;
   successTitle?: string;
   successMessage?: string;
@@ -26,68 +29,28 @@ const DEFAULTS: CalendarToolComponentProps = {
   title: "Reserva una llamada con Hiweb",
   description:
     "Elige servicio, fecha y horario disponible. Te confirmaremos por correo.",
-  themeVariant: "light",
   defaultService: "consulting",
+  startButtonLabel: "Ver disponibilidad",
+  continueButtonLabel: "Continuar",
   submitButtonLabel: "Confirmar cita",
   successTitle: "Cita confirmada",
   successMessage:
     "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
 };
 
-function CalendarPreviewMock({
-  props,
-  resolvedView,
-  themeVariant,
-  submitButtonLabel,
-  onMockError,
-  onMockSubmit,
-}: {
-  props: CalendarToolComponentProps;
-  resolvedView: ToolViewState;
-  themeVariant: CalendarToolComponentProps["themeVariant"];
-  submitButtonLabel?: string;
-  onMockError: () => void;
-  onMockSubmit: () => void;
-}) {
-  return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      footer={
-        resolvedView === "intro" ? (
-          <Button type="button" onClick={onMockSubmit} fullWidth>
-            Ver disponibilidad
-          </Button>
-        ) : resolvedView === "active" ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" variant="secondary" onClick={onMockError}>
-              Simular error
-            </Button>
-            <Button type="button" onClick={onMockSubmit} fullWidth>
-              {submitButtonLabel}
-            </Button>
-          </div>
-        ) : null
-      }
-    >
-      {resolvedView === "intro" ? (
-        <Badge variant="info">Preview</Badge>
-      ) : null}
-      {resolvedView === "active" ? (
-        <PlaceholderPanel title="Calendario" themeVariant={themeVariant}>
-          <p className="text-sm text-muted">Vista previa del design system.</p>
-        </PlaceholderPanel>
-      ) : null}
-    </CodeComponentFrame>
-  );
-}
-
-export function CalendarToolComponent(rawProps: CalendarToolComponentProps = {}) {
+export function CalendarToolComponent(
+  rawProps: CalendarToolComponentProps = {},
+) {
   const props = mergeProps(DEFAULTS, rawProps);
   const {
     previewState,
     className,
+    eyebrow,
+    title,
+    description,
     defaultService,
+    startButtonLabel,
+    continueButtonLabel,
     submitButtonLabel,
     successTitle,
     successMessage,
@@ -96,9 +59,9 @@ export function CalendarToolComponent(rawProps: CalendarToolComponentProps = {})
   const [viewState, setViewState] = useState<ToolViewState>("intro");
   const [booking, setBooking] = useState<BookingRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const submitRef = useRef<(() => Promise<void>) | null>(null);
 
   const resolvedView = previewState ?? viewState;
+  const service = defaultService ?? DEFAULTS.defaultService!;
 
   useEffect(() => {
     if (previewState) {
@@ -106,103 +69,136 @@ export function CalendarToolComponent(rawProps: CalendarToolComponentProps = {})
     }
   }, [previewState]);
 
-  const handleLoading = useCallback(
-    (loading: boolean) => {
-      if (!previewState && loading) {
-        setViewState("loading");
+  const handleStart = useCallback(() => {
+    if (previewState) {
+      return;
+    }
+    setViewState("active");
+    setErrorMessage(undefined);
+  }, [previewState]);
+
+  const handleBooked = useCallback(
+    (record: BookingRecord) => {
+      if (previewState) {
+        return;
       }
+      setBooking(record);
+      setViewState("success");
     },
     [previewState],
   );
 
-  const handleError = useCallback((message: string) => {
-    setErrorMessage(message);
-    setViewState("error");
-  }, []);
+  const shellClass = `cal-stitch cal-root ${className ?? ""}`.trim();
 
-  const handleBooked = useCallback((record: BookingRecord) => {
-    setBooking(record);
-    setViewState("success");
-  }, []);
-
-  if (previewState) {
+  if (isWebflowDesignerCanvas() && !previewState) {
     return (
-      <CalendarPreviewMock
-        props={props}
-        resolvedView={previewState}
-        themeVariant={props.themeVariant}
-        submitButtonLabel={submitButtonLabel}
-        onMockError={() => setViewState("error")}
-        onMockSubmit={() =>
-          setViewState(previewState === "intro" ? "active" : "success")
-        }
-      />
+      <div className={shellClass}>
+        <CalendarDesignerPreview defaultService={service} />
+      </div>
     );
   }
 
   return (
-    <CodeComponentFrame
-      {...props}
-      viewState={resolvedView}
-      successTitle={successTitle}
-      successMessage={successMessage}
-      errorMessage={
-        errorMessage ??
-        "No pudimos confirmar la cita. Revisa los datos e inténtalo de nuevo."
-      }
-      className={className}
-      footer={
-        resolvedView === "intro" ? (
-          <Button type="button" onClick={() => setViewState("active")} fullWidth>
-            Ver disponibilidad
-          </Button>
-        ) : resolvedView === "active" ? (
-          <Button
+    <div className={shellClass}>
+      <CalendarNativeStyles />
+      <div className="cal-ambient cal-ambient-violet" aria-hidden />
+      <div className="cal-ambient cal-ambient-cyan" aria-hidden />
+
+      {resolvedView === "loading" ? (
+        <p className="cal-loading-page">Confirmando tu cita…</p>
+      ) : null}
+
+      {resolvedView === "error" ? (
+        <div className="cal-inner">
+          <p className="cal-error" role="alert" style={{ marginBottom: "1rem" }}>
+            {errorMessage ??
+              "No pudimos confirmar la cita. Revisa los datos e inténtalo de nuevo."}
+          </p>
+          <button
             type="button"
-            fullWidth
-            onClick={() => void submitRef.current?.()}
-          >
-            {submitButtonLabel}
-          </Button>
-        ) : resolvedView === "error" ? (
-          <Button
-            type="button"
-            variant="secondary"
-            fullWidth
+            className="cal-btn-primary"
             onClick={() => {
               setViewState("active");
               setErrorMessage(undefined);
             }}
           >
             Reintentar
-          </Button>
-        ) : null
-      }
-    >
+          </button>
+        </div>
+      ) : null}
+
       {resolvedView === "intro" ? (
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="brand">Lun–vie</Badge>
-          <Badge variant="neutral">9:00 – 17:00</Badge>
-          <Badge variant="neutral">Confirmación por email</Badge>
+        <div className="cal-inner">
+          <section className="cal-intro">
+            {eyebrow ? <span className="cal-eyebrow">{eyebrow}</span> : null}
+            {title ? <h1 className="cal-intro-title">{title}</h1> : null}
+            {description ? (
+              <p className="cal-intro-desc">{description}</p>
+            ) : null}
+            <div className="cal-badges">
+              <span className="cal-badge">Lun–vie</span>
+              <span className="cal-badge">9:00 – 17:00</span>
+              <span className="cal-badge">Confirmación por email</span>
+            </div>
+            <button
+              type="button"
+              className="cal-btn-primary"
+              onClick={handleStart}
+            >
+              {startButtonLabel}
+              <span aria-hidden> →</span>
+            </button>
+          </section>
         </div>
       ) : null}
 
       {resolvedView === "active" ? (
-        <CalendarTool
-          defaultService={defaultService ?? DEFAULTS.defaultService!}
-          onLoading={handleLoading}
-          onError={handleError}
-          onBooked={handleBooked}
-          onRegisterSubmit={(fn) => {
-            submitRef.current = fn;
-          }}
-        />
+        <div className="cal-inner">
+          <div className="cal-card">
+            <div className="cal-glow-dot" aria-hidden />
+            <div className="cal-card-pad">
+              <Suspense
+                fallback={
+                  <CalendarDesignerPreview defaultService={service} />
+                }
+              >
+                <CalendarToolLazy
+                  defaultService={service}
+                  continueButtonLabel={continueButtonLabel}
+                  submitButtonLabel={submitButtonLabel}
+                  onLoading={(loading) => {
+                    if (loading) {
+                      setViewState("loading");
+                    }
+                  }}
+                  onError={(message) => {
+                    setErrorMessage(message);
+                    setViewState("error");
+                  }}
+                  onBooked={handleBooked}
+                />
+              </Suspense>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {resolvedView === "success" && booking ? (
-        <BookingConfirmation booking={booking} />
+        <div className="cal-inner">
+          <BookingConfirmation
+            booking={booking}
+            title={successTitle}
+            message={successMessage}
+          />
+        </div>
       ) : null}
-    </CodeComponentFrame>
+
+      {resolvedView === "success" && previewState && !booking ? (
+        <div className="cal-inner">
+          <p className="cal-intro-desc">Vista previa: cita confirmada.</p>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

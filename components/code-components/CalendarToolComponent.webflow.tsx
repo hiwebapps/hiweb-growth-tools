@@ -6,7 +6,7 @@ import CalendarToolComponent from "./CalendarToolComponent";
 export default declareComponent(CalendarToolComponent, {
   name: "Calendario Agendar llamada",
   description:
-    "Calendario para consultar disponibilidad y reservar una llamada con Hiweb.",
+    "Agenda en dos pasos: horario dinámico y confirmación con datos de contacto.",
   group: "Hiweb Growth Tools",
   props: {
     ...contentProps({
@@ -24,6 +24,14 @@ export default declareComponent(CalendarToolComponent, {
         "paid-ads",
       ],
       defaultValue: "consulting",
+    }),
+    startButtonLabel: props.Text({
+      name: "Texto botón inicio",
+      defaultValue: "Ver disponibilidad",
+    }),
+    continueButtonLabel: props.Text({
+      name: "Texto botón continuar",
+      defaultValue: "Continuar",
     }),
     submitButtonLabel: props.Text({
       name: "Texto botón confirmar",
