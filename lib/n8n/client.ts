@@ -24,10 +24,15 @@ export function dispatchN8nWebhook(
   secret?: string,
 ): void {
   if (!url.trim()) {
+    console.warn("[n8n] webhook skipped: empty URL");
     return;
   }
 
   const targetUrl = buildN8nWebhookUrl(url, secret);
+
+  if (!secret?.trim()) {
+    console.warn("[n8n] webhook dispatch without secret configured");
+  }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
