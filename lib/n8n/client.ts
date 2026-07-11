@@ -18,11 +18,12 @@ export function buildN8nWebhookUrl(url: string, secret?: string): string {
   }
 }
 
-export function dispatchN8nWebhook(
+/** Envía el webhook y espera respuesta (necesario en Cloudflare Workers). */
+export async function sendN8nWebhook(
   url: string,
   payload: unknown,
   secret?: string,
-): void {
+): Promise<void> {
   if (!url.trim()) {
     console.warn("[n8n] webhook skipped: empty URL");
     return;
@@ -42,12 +43,28 @@ export function dispatchN8nWebhook(
     headers["X-Webhook-Secret"] = secret;
   }
 
-  void fetch(targetUrl, {
+  const response = await fetch(targetUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
-  }).catch((error) => {
-    // Fire-and-forget: n8n failures must not break user flow.
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    console.error(
+      "[n8n] webhook HTTP error:",
+      response.status,
+      body.slice(0, 200),
+    );
+  }
+}
+
+export function dispatchN8nWebhook(
+  url: string,
+  payload: unknown,
+  secret?: string,
+): void {
+  void sendN8nWebhook(url, payload, secret).catch((error) => {
     console.error("[n8n] webhook dispatch failed:", error);
   });
 }
@@ -61,9 +78,9 @@ export function dispatchQuizWebhook(payload: unknown): void {
   );
 }
 
-export function dispatchCalendarWebhook(payload: unknown): void {
+export async function dispatchCalendarWebhook(payload: unknown): Promise<void> {
   const env = getServerEnv();
-  dispatchN8nWebhook(
+  await sendN8nWebhook(
     env.n8nWebhookCalendarUrl,
     payload,
     env.n8nWebhookSecret,

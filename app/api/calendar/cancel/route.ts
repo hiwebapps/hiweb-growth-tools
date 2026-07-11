@@ -19,9 +19,13 @@ export async function POST(request: Request) {
       });
     }
 
-    dispatchCalendarWebhook(
-      buildCalendarN8nPayload({ event: "calendar.cancelled", booking }),
-    );
+    try {
+      await dispatchCalendarWebhook(
+        buildCalendarN8nPayload({ event: "calendar.cancelled", booking }),
+      );
+    } catch (webhookError) {
+      console.error("[calendar/cancel] n8n dispatch failed:", webhookError);
+    }
 
     return NextResponse.json({ booking });
   } catch (error) {
