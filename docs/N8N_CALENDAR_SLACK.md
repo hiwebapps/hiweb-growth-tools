@@ -95,8 +95,8 @@ En el panel de **Webflow Cloud → Environment variables**:
 
 | Variable | Valor |
 |----------|--------|
-| `N8N_WEBHOOK_CALENDAR_URL` | URL del webhook de n8n (paso 4) |
-| `N8N_WEBHOOK_SECRET` | **El mismo** valor que `HIWEB_WEBHOOK_SECRET` |
+| `N8N_WEBHOOK_CALENDAR_URL` | URL base del webhook (sin `?secret=`): `https://n8n.hiweb.mx/webhook/hiweb-calendar-booked` |
+| `N8N_WEBHOOK_SECRET` | **El mismo** valor que `HIWEB_WEBHOOK_SECRET`. La app lo envía en header y en `?secret=` automáticamente. |
 
 Redeploy la app tras guardar.
 
