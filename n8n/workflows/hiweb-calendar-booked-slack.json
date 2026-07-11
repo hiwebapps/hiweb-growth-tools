@@ -17,7 +17,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst secret =\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid X-Webhook-Secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.slack?.text) {\n  throw new Error('Invalid payload: missing event or slack.text');\n}\n\nreturn [{ json: payload }];"
+        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst query = item.query ?? {};\nconst secret =\n  query.secret ??\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid webhook secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.slack?.text) {\n  throw new Error('Invalid payload: missing event or slack.text');\n}\n\nreturn [{ json: payload }];"
       },
       "id": "a1b2c3d4-0002-4000-8000-000000000002",
       "name": "Validar secreto",

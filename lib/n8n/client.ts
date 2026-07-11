@@ -1,5 +1,23 @@
 import { getServerEnv } from "@/lib/shared/env";
 
+/** Añade ?secret= si falta — compatible con webhooks n8n que validan query string. */
+export function buildN8nWebhookUrl(url: string, secret?: string): string {
+  const trimmed = url.trim();
+  if (!trimmed || !secret?.trim()) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    if (!parsed.searchParams.has("secret")) {
+      parsed.searchParams.set("secret", secret.trim());
+    }
+    return parsed.toString();
+  } catch {
+    return trimmed;
+  }
+}
+
 export function dispatchN8nWebhook(
   url: string,
   payload: unknown,
@@ -9,6 +27,8 @@ export function dispatchN8nWebhook(
     return;
   }
 
+  const targetUrl = buildN8nWebhookUrl(url, secret);
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -17,7 +37,7 @@ export function dispatchN8nWebhook(
     headers["X-Webhook-Secret"] = secret;
   }
 
-  void fetch(url, {
+  void fetch(targetUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
