@@ -10,9 +10,13 @@ export async function POST(request: Request) {
     const body = (await request.json()) as BookingInput;
     const booking = await createBooking(body);
 
-    dispatchCalendarWebhook(
-      buildCalendarN8nPayload({ event: "calendar.booked", booking }),
-    );
+    try {
+      await dispatchCalendarWebhook(
+        buildCalendarN8nPayload({ event: "calendar.booked", booking }),
+      );
+    } catch (webhookError) {
+      console.error("[calendar/book] n8n dispatch failed:", webhookError);
+    }
 
     return NextResponse.json({ booking });
   } catch (error) {
