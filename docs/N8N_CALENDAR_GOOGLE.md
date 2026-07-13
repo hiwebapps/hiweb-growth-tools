@@ -4,6 +4,8 @@ Guía para extender el flujo de reservas con **Google Calendar** y envío autom�
 
 Requiere tener funcionando la Fase A (Slack). Ver [N8N_CALENDAR_SLACK.md](./N8N_CALENDAR_SLACK.md).
 
+> **HubSpot:** para registrar leads en Contacts (+ reunión en timeline), ver [N8N_CALENDAR_HUBSPOT.md](./N8N_CALENDAR_HUBSPOT.md). El workflow `hiweb-calendar-booked-full.json` incluye Slack, GCal y HubSpot.
+
 ## Flujo
 
 ```txt
@@ -14,6 +16,7 @@ Usuario confirma cita
   → n8n valida secreto
   → Slack #leads-landing-page
   → Google Calendar: evento + Meet + invitación al cliente
+  → HubSpot: lead en Contacts + reunión (ver guía HubSpot)
 ```
 
 El frontend **nunca** llama a n8n ni a Google directamente.
@@ -134,6 +137,27 @@ Al confirmar una cita (`calendar.booked`), la app incluye el bloque `calendar`:
     "attendeeEmail": "juan@empresa.com",
     "durationMinutes": 30
   },
+  "hubspot": {
+    "contact": {
+      "email": "juan@empresa.com",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "phone": "+52 55 1234 5678",
+      "company": "Empresa SA"
+    },
+    "meeting": {
+      "title": "Auditoría SEO — Juan Pérez",
+      "body": "Reserva ID: clx...",
+      "start": "2026-07-14T10:00:00-06:00",
+      "end": "2026-07-14T10:30:00-06:00"
+    },
+    "properties": {
+      "leadSource": "Calendario Hiweb",
+      "bookingId": "clx...",
+      "serviceLabel": "Auditoría SEO",
+      "scheduleLabel": "14 jul 2026 10:00 a. m."
+    }
+  },
   "slack": {
     "channel": "leads-landing-page",
     "text": "📅 *Nueva cita agendada*\n..."
@@ -220,6 +244,7 @@ Verifica:
 |---------|-----|
 | `lib/n8n/payloads.ts` | Bloque `calendar` + texto Slack |
 | `lib/calendar/calendar-rules.ts` | Helpers ISO start/end |
-| `n8n/workflows/hiweb-calendar-booked-full.json` | Workflow Slack + GCal |
+| `n8n/workflows/hiweb-calendar-booked-full.json` | Workflow Slack + GCal + HubSpot |
 | `n8n/workflows/hiweb-calendar-booked-slack.json` | Workflow anterior (solo Slack) |
 | `docs/N8N_CALENDAR_SLACK.md` | Guía Fase A |
+| `docs/N8N_CALENDAR_HUBSPOT.md` | Guía HubSpot CRM |

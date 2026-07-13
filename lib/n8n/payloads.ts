@@ -6,6 +6,7 @@ import {
   formatTime12h,
   getServiceLabel,
   SLOT_INTERVAL_MINUTES,
+  splitPersonName,
 } from "@/lib/calendar/calendar-rules";
 import type { BookingRecord } from "@/lib/calendar/types";
 import type { QuizLeadInput, QuizScoreResult } from "@/lib/quiz/types";
@@ -129,6 +130,29 @@ export function buildCalendarN8nPayload(input: {
       attendeeEmail: string;
       durationMinutes: number;
     };
+    hubspot?: {
+      contact: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        phone: string | null;
+        company: string | null;
+      };
+      meeting: {
+        title: string;
+        body: string;
+        start: string;
+        end: string;
+        startTimeMs: number;
+        endTimeMs: number;
+      };
+      properties: {
+        leadSource: string;
+        bookingId: string;
+        serviceLabel: string;
+        scheduleLabel: string;
+      };
+    };
     submittedAt: string;
   } = {
     event,
@@ -160,14 +184,50 @@ export function buildCalendarN8nPayload(input: {
   };
 
   if (event === "calendar.booked") {
+    const calendarTitle = `${serviceLabel} — ${booking.name}`;
+    const calendarDescription = buildCalendarEventDescription(booking);
+    const startIso = buildBookingStartIso(
+      booking.selectedDate,
+      booking.selectedTime,
+    );
+    const endIso = buildBookingEndIso(
+      booking.selectedDate,
+      booking.selectedTime,
+    );
+    const { firstName, lastName } = splitPersonName(booking.name);
+
     payload.calendar = {
-      title: `${serviceLabel} — ${booking.name}`,
-      description: buildCalendarEventDescription(booking),
-      start: buildBookingStartIso(booking.selectedDate, booking.selectedTime),
-      end: buildBookingEndIso(booking.selectedDate, booking.selectedTime),
+      title: calendarTitle,
+      description: calendarDescription,
+      start: startIso,
+      end: endIso,
       timeZone: BOOKING_TIMEZONE,
       attendeeEmail: booking.email,
       durationMinutes: SLOT_INTERVAL_MINUTES,
+    };
+
+    payload.hubspot = {
+      contact: {
+        email: booking.email,
+        firstName,
+        lastName,
+        phone: booking.phone ?? null,
+        company: booking.company ?? null,
+      },
+      meeting: {
+        title: calendarTitle,
+        body: calendarDescription,
+        start: startIso,
+        end: endIso,
+        startTimeMs: Date.parse(startIso),
+        endTimeMs: Date.parse(endIso),
+      },
+      properties: {
+        leadSource: "Calendario Hiweb",
+        bookingId: booking.id,
+        serviceLabel,
+        scheduleLabel,
+      },
     };
   }
 
