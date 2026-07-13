@@ -7,7 +7,10 @@ import {
   buildBookingEndIso,
   buildBookingStartIso,
 } from "./calendar-rules";
-import { getGoogleAccessToken } from "@/lib/google/service-account-auth";
+import {
+  getGoogleCalendarAccessToken,
+  getGoogleCalendarId,
+} from "./google-calendar-api";
 
 type BusyPeriod = {
   start: string;
@@ -15,7 +18,7 @@ type BusyPeriod = {
 };
 
 function getCalendarId(): string {
-  return process.env.GOOGLE_CALENDAR_ID?.trim() || "primary";
+  return getGoogleCalendarId();
 }
 
 function slotOverlapsBusy(
@@ -58,9 +61,7 @@ export function busyPeriodsToSlotTimes(
 export async function getGoogleCalendarBusySlotTimes(
   dateIso: string,
 ): Promise<Set<string>> {
-  const accessToken = await getGoogleAccessToken([
-    "https://www.googleapis.com/auth/calendar.readonly",
-  ]);
+  const accessToken = await getGoogleCalendarAccessToken();
 
   if (!accessToken) {
     return new Set();

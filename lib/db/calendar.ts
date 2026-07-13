@@ -33,15 +33,24 @@ function mapBookingRow(row: BookingDbRow): BookingRecord {
 }
 
 export async function getBookedTimesForDate(dateIso: string): Promise<string[]> {
+  const rows = await getConfirmedBookingsForDate(dateIso);
+  return rows.map((booking) => booking.selectedTime);
+}
+
+export async function getConfirmedBookingsForDate(
+  dateIso: string,
+): Promise<BookingRecord[]> {
   const d1 = await getD1();
   if (d1) {
-    const rows = await d1All<{ selected_time: string }>(
+    const rows = await d1All<BookingDbRow>(
       d1,
-      `SELECT selected_time FROM calendar_bookings
+      `SELECT id, name, company, email, phone, service,
+              selected_date, selected_time, status, created_at
+       FROM calendar_bookings
        WHERE selected_date = ? AND status = 'confirmed'`,
       dateIso,
     );
-    return rows.map((r) => r.selected_time);
+    return rows.map(mapBookingRow);
   }
 
   if (!isSqliteAvailable()) {
@@ -50,12 +59,29 @@ export async function getBookedTimesForDate(dateIso: string): Promise<string[]> 
 
   const rows = getDb()
     .prepare(
-      `SELECT selected_time FROM calendar_bookings
+      `SELECT id, name, company, email, phone, service,
+              selected_date, selected_time, status, created_at
+       FROM calendar_bookings
        WHERE selected_date = ? AND status = 'confirmed'`,
     )
-    .all(dateIso) as Array<{ selected_time: string }>;
+    .all(dateIso) as BookingDbRow[];
 
-  return rows.map((r) => r.selected_time);
+  return rows.map(mapBookingRow);
+}
+
+export async function purgeAllCalendarBookings(): Promise<number> {
+  const d1 = await getD1();
+  if (d1) {
+    const result = await d1Run(d1, `DELETE FROM calendar_bookings`);
+    return result.meta.changes ?? 0;
+  }
+
+  if (!isSqliteAvailable()) {
+    return 0;
+  }
+
+  const result = getDb().prepare(`DELETE FROM calendar_bookings`).run();
+  return result.changes;
 }
 
 export async function insertBooking(
