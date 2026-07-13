@@ -8,6 +8,7 @@ Guía para publicar e insertar los tres módulos interactivos en Webflow Designe
 |------------------------|---------------|--------|
 | Quiz — Diagnóstico marketing | `QuizToolComponent` | Hiweb Growth Tools |
 | Calendario — Agendar llamada | `CalendarToolComponent` | Hiweb Growth Tools |
+| Calendario — Botón agendar | `CalendarBookingButtonComponent` | Hiweb Growth Tools |
 | Calculadora — ROI marketing | `RoiCalculatorComponent` | Hiweb Growth Tools |
 | Quiz resultado — Score y desglose / Fortalezas y mejoras / Prioridades | `QuizResultOverviewComponent`, `QuizResultInsightsComponent`, `QuizResultPrioritiesComponent` | Hiweb Growth Tools |
 

@@ -10,6 +10,10 @@ export default declareComponent(RoiCalculatorComponent, {
     "Calculadora por industria (E-commerce, Inmobiliario, SaaS, B2B) en dos pasos.",
   group: "Hiweb Growth Tools",
   props: {
+    cardTitle: props.Text({
+      name: "Título de la card",
+      defaultValue: "Calculadora de ROI",
+    }),
     minMonthlyBudget: props.Number({
       name: "Mínimo presupuesto mensual (MXN)",
       defaultValue: ROI_BUDGET.min,

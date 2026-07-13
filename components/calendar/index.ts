@@ -1,5 +1,6 @@
 export { BookingConfirmation } from "./BookingConfirmation";
 export { BookingForm } from "./BookingForm";
+export { CalendarBookingButton } from "./CalendarBookingButton";
 export { CalendarBookingModal } from "./CalendarBookingModal";
 export { CalendarDesignerPreview } from "./CalendarDesignerPreview";
 export { CalendarNativeStyles } from "./CalendarNativeStyles";
