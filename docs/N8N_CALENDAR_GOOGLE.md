@@ -256,6 +256,7 @@ La service account debe tener acceso de lectura al calendario donde n8n crea eve
 - El usuario puede cancelar desde la pantalla de confirmación.
 - La API marca la reserva como `cancelled` en D1 → el slot vuelve a estar disponible.
 - n8n recibe `calendar.cancelled` con bloque `calendar` y **elimina el evento en Google Calendar**.
+- Si cancelas en Google Calendar, D1 se sincroniza al consultar disponibilidad. Ver [CALENDAR_ADMIN.md](./CALENDAR_ADMIN.md).
 
 ---
 

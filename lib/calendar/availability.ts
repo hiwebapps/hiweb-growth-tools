@@ -7,6 +7,7 @@ import {
 } from "./calendar-rules";
 import { getBookingNowParts } from "./booking-time";
 import { getGoogleCalendarBusySlotTimes } from "./google-busy";
+import { reconcileBookingsWithGoogleCalendar } from "./reconcile-google";
 import { getBookedTimesForDate } from "@/lib/db/calendar";
 import type { TimeSlot } from "./types";
 
@@ -35,6 +36,8 @@ export async function getAvailabilityForDate(
   if (!isWeekday(date)) {
     return [];
   }
+
+  await reconcileBookingsWithGoogleCalendar(dateIso);
 
   const [bookedD1, bookedGCal] = await Promise.all([
     getBookedTimesForDate(dateIso),
