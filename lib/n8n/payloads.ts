@@ -1,7 +1,11 @@
 import {
   BOOKING_TIMEZONE,
+  buildBookingEndIso,
+  buildBookingStartIso,
   formatScheduleSummary,
   formatTime12h,
+  getServiceLabel,
+  SLOT_INTERVAL_MINUTES,
 } from "@/lib/calendar/calendar-rules";
 import type { BookingRecord } from "@/lib/calendar/types";
 import type { QuizLeadInput, QuizScoreResult } from "@/lib/quiz/types";
@@ -37,11 +41,12 @@ function buildCalendarSlackText(
   event: "calendar.booked" | "calendar.cancelled",
   booking: BookingRecord,
   scheduleLabel: string,
+  serviceLabel: string,
 ): string {
   if (event === "calendar.cancelled") {
     return [
       "❌ *Cita cancelada*",
-      `• Servicio: ${booking.service}`,
+      `• Servicio: ${serviceLabel}`,
       `• Horario: ${scheduleLabel}`,
       `• Nombre: ${booking.name}`,
       `• Email: ${booking.email}`,
@@ -51,7 +56,7 @@ function buildCalendarSlackText(
 
   const lines = [
     "📅 *Nueva cita agendada*",
-    `• Servicio: ${booking.service}`,
+    `• Servicio: ${serviceLabel}`,
     `• Horario: ${scheduleLabel}`,
     `• Nombre: ${booking.name}`,
     `• Email: ${booking.email}`,
@@ -68,22 +73,70 @@ function buildCalendarSlackText(
   return lines.join("\n");
 }
 
+function buildCalendarEventDescription(booking: BookingRecord): string {
+  const lines = [
+    `Reserva ID: ${booking.id}`,
+    `Cliente: ${booking.name}`,
+    `Email: ${booking.email}`,
+  ];
+  if (booking.company) {
+    lines.push(`Empresa: ${booking.company}`);
+  }
+  if (booking.phone) {
+    lines.push(`Teléfono: ${booking.phone}`);
+  }
+  return lines.join("\n");
+}
+
 export function buildCalendarN8nPayload(input: {
   event: "calendar.booked" | "calendar.cancelled";
   booking: BookingRecord;
 }) {
   const { booking, event } = input;
+  const serviceLabel = getServiceLabel(booking.service);
   const scheduleLabel = formatScheduleSummary(
     booking.selectedDate,
     booking.selectedTime,
   );
 
-  return {
+  const payload: {
+    event: typeof event;
+    bookingId: string;
+    booking: BookingRecord;
+    summary: {
+      service: string;
+      serviceLabel: string;
+      scheduleLabel: string;
+      date: string;
+      time: string;
+      timeLabel: string;
+      timezone: string;
+      name: string;
+      email: string;
+      company: string | null;
+      phone: string | null;
+    };
+    slack: {
+      channel: string;
+      text: string;
+    };
+    calendar?: {
+      title: string;
+      description: string;
+      start: string;
+      end: string;
+      timeZone: string;
+      attendeeEmail: string;
+      durationMinutes: number;
+    };
+    submittedAt: string;
+  } = {
     event,
     bookingId: booking.id,
     booking,
     summary: {
       service: booking.service,
+      serviceLabel,
       scheduleLabel,
       date: booking.selectedDate,
       time: booking.selectedTime,
@@ -96,10 +149,29 @@ export function buildCalendarN8nPayload(input: {
     },
     slack: {
       channel: "leads-landing-page",
-      text: buildCalendarSlackText(event, booking, scheduleLabel),
+      text: buildCalendarSlackText(
+        event,
+        booking,
+        scheduleLabel,
+        serviceLabel,
+      ),
     },
     submittedAt: new Date().toISOString(),
   };
+
+  if (event === "calendar.booked") {
+    payload.calendar = {
+      title: `${serviceLabel} — ${booking.name}`,
+      description: buildCalendarEventDescription(booking),
+      start: buildBookingStartIso(booking.selectedDate, booking.selectedTime),
+      end: buildBookingEndIso(booking.selectedDate, booking.selectedTime),
+      timeZone: BOOKING_TIMEZONE,
+      attendeeEmail: booking.email,
+      durationMinutes: SLOT_INTERVAL_MINUTES,
+    };
+  }
+
+  return payload;
 }
 
 export function buildRoiN8nPayload(input: {

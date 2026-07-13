@@ -2,6 +2,8 @@
 
 Guía para conectar las reservas del calendario con **n8n** (VPS) y notificar el canal **`#leads-landing-page`** en Slack.
 
+> **Workflow recomendado:** para Google Calendar + invitación Meet al cliente, usa el workflow extendido y la guía [N8N_CALENDAR_GOOGLE.md](./N8N_CALENDAR_GOOGLE.md) (`hiweb-calendar-booked-full.json`). Este documento describe la Fase A (solo Slack).
+
 ## Flujo
 
 ```txt
@@ -132,7 +134,8 @@ Ejemplo al confirmar una cita:
     "createdAt": "2026-07-10T19:00:00.000Z"
   },
   "summary": {
-    "service": "Auditoría SEO",
+    "service": "seo-audit",
+    "serviceLabel": "Auditoría SEO",
     "scheduleLabel": "14 jul 2026 10:00 a. m.",
     "date": "2026-07-14",
     "time": "10:00",
@@ -227,4 +230,6 @@ Cuando el Portal esté listo, se agrega un nodo **HTTP Request** después de Sla
 | `app/api/calendar/book/route.ts` | Guarda + dispara webhook |
 | `lib/n8n/client.ts` | Envío async a n8n |
 | `lib/n8n/payloads.ts` | Payload + texto Slack |
-| `n8n/workflows/hiweb-calendar-booked-slack.json` | Workflow importable |
+| `n8n/workflows/hiweb-calendar-booked-slack.json` | Workflow importable (solo Slack) |
+| `n8n/workflows/hiweb-calendar-booked-full.json` | Workflow Slack + Google Calendar |
+| `docs/N8N_CALENDAR_GOOGLE.md` | Guía Google Calendar + Meet |

@@ -29,10 +29,6 @@ export default declareComponent(CalendarToolComponent, {
       name: "Texto botón inicio",
       defaultValue: "Ver disponibilidad",
     }),
-    continueButtonLabel: props.Text({
-      name: "Texto botón continuar",
-      defaultValue: "Continuar",
-    }),
     submitButtonLabel: props.Text({
       name: "Texto botón confirmar",
       defaultValue: "Confirmar cita",

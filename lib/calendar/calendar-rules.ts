@@ -162,6 +162,23 @@ export function formatTime12h(time24: string): string {
   return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
 }
 
+/** ISO 8601 con offset fijo CDMX (sin DST desde 2022). */
+export function buildBookingStartIso(date: string, time: string): string {
+  return `${date}T${time}:00-06:00`;
+}
+
+export function buildBookingEndIso(
+  date: string,
+  time: string,
+  durationMinutes: number = SLOT_INTERVAL_MINUTES,
+): string {
+  const [h, m] = time.split(":").map(Number);
+  const totalMinutes = h * 60 + m + durationMinutes;
+  const endH = Math.floor(totalMinutes / 60);
+  const endM = totalMinutes % 60;
+  return `${date}T${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}:00-06:00`;
+}
+
 export function formatScheduleSummary(dateIso: string, time?: string): string {
   const datePart = parseDateIso(dateIso).toLocaleDateString("es-MX", {
     day: "numeric",

@@ -16,7 +16,6 @@ export type CalendarStep = "schedule" | "details";
 
 type CalendarToolProps = {
   defaultService: string;
-  continueButtonLabel?: string;
   submitButtonLabel?: string;
   onLoading?: (loading: boolean) => void;
   onError?: (message: string) => void;
@@ -25,7 +24,6 @@ type CalendarToolProps = {
 
 export function CalendarTool({
   defaultService,
-  continueButtonLabel = "Continuar",
   submitButtonLabel = "Confirmar cita",
   onLoading,
   onError,
@@ -90,15 +88,6 @@ export function CalendarTool({
     }
     void loadSlots(selectedDate, service);
   }, [selectedDate, service, loadSlots]);
-
-  const handleContinue = () => {
-    if (!selectedDate || !selectedTime) {
-      setFormError("Selecciona fecha y hora disponibles.");
-      return;
-    }
-    setFormError(null);
-    setStep("details");
-  };
 
   const handleSubmit = useCallback(async () => {
     if (!selectedDate || !selectedTime) {
@@ -179,7 +168,6 @@ export function CalendarTool({
             selectedTime={selectedTime}
             slots={slots}
             isLoading={slotsLoading}
-            continueLabel={continueButtonLabel}
             onDateChange={(date) => {
               setSelectedDate(date);
               setSelectedTime(undefined);
@@ -188,12 +176,14 @@ export function CalendarTool({
             onTimeChange={(time) => {
               setSelectedTime(time);
               setFormError(null);
+              if (selectedDate) {
+                setStep("details");
+              }
             }}
             onCancel={() => {
               setSelectedTime(undefined);
               setFormError(null);
             }}
-            onContinue={handleContinue}
           />
           {formError ? (
             <p className="cal-error" role="alert">

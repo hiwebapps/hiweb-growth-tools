@@ -34,7 +34,6 @@ export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
   ctaUrl?: string;
   calendarService?: string;
   calendarModalTitle?: string;
-  calendarContinueLabel?: string;
   calendarSubmitLabel?: string;
   calendarSuccessTitle?: string;
   calendarSuccessMessage?: string;
@@ -56,7 +55,6 @@ const DEFAULTS: RoiCalculatorComponentProps = {
   ctaLabel: "Agenda tu auditoría gratuita",
   calendarService: "seo-audit",
   calendarModalTitle: "Agenda tu auditoría gratuita",
-  calendarContinueLabel: "Continuar",
   calendarSubmitLabel: "Confirmar cita",
   calendarSuccessTitle: "Cita confirmada",
   calendarSuccessMessage:
@@ -86,7 +84,6 @@ export function RoiCalculatorComponent(
     ctaUrl,
     calendarService,
     calendarModalTitle,
-    calendarContinueLabel,
     calendarSubmitLabel,
     calendarSuccessTitle,
     calendarSuccessMessage,
@@ -128,8 +125,6 @@ export function RoiCalculatorComponent(
     ctaUrl: ctaUrl || undefined,
     calendarService: calendarService ?? DEFAULTS.calendarService!,
     calendarModalTitle: calendarModalTitle ?? DEFAULTS.calendarModalTitle!,
-    calendarContinueLabel:
-      calendarContinueLabel ?? DEFAULTS.calendarContinueLabel!,
     calendarSubmitLabel: calendarSubmitLabel ?? DEFAULTS.calendarSubmitLabel!,
     calendarSuccessTitle:
       calendarSuccessTitle ?? DEFAULTS.calendarSuccessTitle!,

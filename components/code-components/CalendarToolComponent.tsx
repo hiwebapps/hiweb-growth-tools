@@ -18,7 +18,6 @@ const CalendarToolLazy = lazy(() =>
 export type CalendarToolComponentProps = CodeComponentBaseProps & {
   defaultService?: string;
   startButtonLabel?: string;
-  continueButtonLabel?: string;
   submitButtonLabel?: string;
   successTitle?: string;
   successMessage?: string;
@@ -31,7 +30,6 @@ const DEFAULTS: CalendarToolComponentProps = {
     "Elige servicio, fecha y horario disponible. Te confirmaremos por correo.",
   defaultService: "consulting",
   startButtonLabel: "Ver disponibilidad",
-  continueButtonLabel: "Continuar",
   submitButtonLabel: "Confirmar cita",
   successTitle: "Cita confirmada",
   successMessage:
@@ -50,7 +48,6 @@ export function CalendarToolComponent(
     description,
     defaultService,
     startButtonLabel,
-    continueButtonLabel,
     submitButtonLabel,
     successTitle,
     successMessage,
@@ -164,7 +161,6 @@ export function CalendarToolComponent(
               >
                 <CalendarToolLazy
                   defaultService={service}
-                  continueButtonLabel={continueButtonLabel}
                   submitButtonLabel={submitButtonLabel}
                   onLoading={(loading) => {
                     if (loading) {

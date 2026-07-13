@@ -17,11 +17,9 @@ type SchedulePickerProps = {
   selectedTime?: string;
   slots: TimeSlot[];
   isLoading?: boolean;
-  continueLabel?: string;
   onDateChange: (dateIso: string) => void;
   onTimeChange: (time: string) => void;
   onCancel?: () => void;
-  onContinue?: () => void;
 };
 
 function ChevronIcon({ direction }: { direction: "left" | "right" }) {
@@ -49,11 +47,9 @@ export function SchedulePicker({
   selectedTime,
   slots,
   isLoading,
-  continueLabel = "Continuar",
   onDateChange,
   onTimeChange,
   onCancel,
-  onContinue,
 }: SchedulePickerProps) {
   const initialMonth = selectedDate
     ? parseDateIso(selectedDate)
@@ -209,14 +205,6 @@ export function SchedulePicker({
             ? formatScheduleSummary(selectedDate, selectedTime)
             : "Selecciona fecha y hora"}
         </div>
-        <button
-          type="button"
-          className="cal-btn-schedule"
-          disabled={!selectedDate || !selectedTime || isLoading}
-          onClick={() => onContinue?.()}
-        >
-          {continueLabel}
-        </button>
       </div>
     </div>
   );
