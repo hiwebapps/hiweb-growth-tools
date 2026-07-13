@@ -156,42 +156,30 @@
     },
     {
       "parameters": {
-        "authentication": "appToken",
-        "resource": "contact",
-        "operation": "upsert",
-        "email": "={{ $json.hubspot.contact.email }}",
-        "additionalFields": {
-          "firstName": "={{ $json.hubspot.contact.firstName }}",
-          "lastName": "={{ $json.hubspot.contact.lastName }}",
-          "phoneNumber": "={{ $json.hubspot.contact.phone }}",
-          "companyName": "={{ $json.hubspot.contact.company }}",
-          "customPropertiesUi": {
-            "customPropertiesValues": [
-              {
-                "property": "hiweb_booking_id",
-                "value": "={{ $json.hubspot.properties.bookingId }}"
-              },
-              {
-                "property": "hiweb_service",
-                "value": "={{ $json.hubspot.properties.serviceLabel }}"
-              },
-              {
-                "property": "hiweb_schedule_label",
-                "value": "={{ $json.hubspot.properties.scheduleLabel }}"
-              },
-              {
-                "property": "lead_source",
-                "value": "={{ $json.hubspot.properties.leadSource }}"
-              }
-            ]
-          }
-        }
+        "jsCode": "const payload = $input.first().json;\nconst contact = payload.hubspot.contact;\nconst props = payload.hubspot.properties;\n\nconst properties = {\n  firstname: contact.firstName || '',\n  lastname: contact.lastName || '',\n  hiweb_booking_id: props.bookingId,\n  hiweb_service: props.serviceLabel,\n  hiweb_schedule_label: props.scheduleLabel,\n  lead_source: props.leadSource,\n};\n\nif (contact.phone) {\n  properties.phone = String(contact.phone).trim();\n}\nif (contact.company) {\n  properties.company = String(contact.company).trim();\n}\n\nreturn [{\n  json: {\n    ...payload,\n    hubspotUpsertBody: {\n      inputs: [{\n        idProperty: 'email',\n        id: contact.email,\n        properties,\n      }],\n    },\n  },\n}];"
+      },
+      "id": "b1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Preparar HubSpot contacto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.hubspotUpsertBody) }}",
+        "options": {}
       },
       "id": "b1b2c3d4-0007-4000-8000-000000000007",
       "name": "HubSpot — Contacto",
-      "type": "n8n-nodes-base.hubspot",
-      "typeVersion": 2.2,
-      "position": [960, 280],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1080, 280],
       "credentials": {
         "hubspotAppToken": {
           "id": "REPLACE_WITH_YOUR_HUBSPOT_CREDENTIAL_ID",
@@ -213,7 +201,7 @@
         },
         "additionalFields": {
           "associations": {
-            "contactIds": "={{ $('HubSpot — Contacto').item.json.id }}"
+            "contactIds": "={{ $('HubSpot — Contacto').item.json.results[0].id }}"
           }
         }
       },
@@ -221,7 +209,7 @@
       "name": "HubSpot — Reunión",
       "type": "n8n-nodes-base.hubspot",
       "typeVersion": 2.2,
-      "position": [1200, 280],
+      "position": [1320, 280],
       "credentials": {
         "hubspotAppToken": {
           "id": "REPLACE_WITH_YOUR_HUBSPOT_CREDENTIAL_ID",
@@ -279,12 +267,23 @@
             "index": 0
           },
           {
-            "node": "HubSpot — Contacto",
+            "node": "Preparar HubSpot contacto",
             "type": "main",
             "index": 0
           }
         ],
         []
+      ]
+    },
+    "Preparar HubSpot contacto": {
+      "main": [
+        [
+          {
+            "node": "HubSpot — Contacto",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "HubSpot — Contacto": {

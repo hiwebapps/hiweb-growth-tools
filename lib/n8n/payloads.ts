@@ -135,8 +135,8 @@ export function buildCalendarN8nPayload(input: {
         email: string;
         firstName: string;
         lastName: string;
-        phone: string | null;
-        company: string | null;
+        phone?: string;
+        company?: string;
       };
       meeting: {
         title: string;
@@ -211,8 +211,8 @@ export function buildCalendarN8nPayload(input: {
         email: booking.email,
         firstName,
         lastName,
-        phone: booking.phone ?? null,
-        company: booking.company ?? null,
+        ...(booking.phone ? { phone: booking.phone } : {}),
+        ...(booking.company ? { company: booking.company } : {}),
       },
       meeting: {
         title: calendarTitle,
