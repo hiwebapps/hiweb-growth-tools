@@ -179,6 +179,24 @@ export function buildBookingEndIso(
   return `${date}T${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}:00-06:00`;
 }
 
+export function splitPersonName(fullName: string): {
+  firstName: string;
+  lastName: string;
+} {
+  const trimmed = fullName.trim();
+  if (!trimmed) {
+    return { firstName: "", lastName: "" };
+  }
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
 export function formatScheduleSummary(dateIso: string, time?: string): string {
   const datePart = parseDateIso(dateIso).toLocaleDateString("es-MX", {
     day: "numeric",

@@ -110,6 +110,10 @@ export const CALENDAR_NATIVE_CSS = `
 .cal-btn-primary { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border: none; border-radius: 9999px; background: var(--cal-primary); color: var(--cal-bg); font-size: 1rem; font-weight: 600; cursor: pointer; }
 .cal-btn-primary:hover { background: #e2e2e2; }
 .cal-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.cal-booking-trigger-root { width: 100%; }
+.cal-booking-trigger { display: inline-flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border: none; border-radius: 9999px; background: var(--cal-primary); color: var(--cal-bg); font-size: 1rem; font-weight: 600; cursor: pointer; }
+.cal-booking-trigger:hover:not(:disabled) { background: #e2e2e2; }
+.cal-booking-trigger:disabled { opacity: 0.55; cursor: not-allowed; }
 .cal-btn-back { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 0.35rem; border: none; background: transparent; color: var(--cal-muted); font-size: 1rem; font-weight: 600; cursor: pointer; }
 .cal-btn-back:hover { color: var(--cal-primary); }
 .cal-error { margin: 0; font-size: 0.875rem; color: var(--cal-error); }

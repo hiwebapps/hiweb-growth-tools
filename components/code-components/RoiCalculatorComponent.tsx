@@ -18,6 +18,7 @@ const RoiCalculatorLazy = lazy(() =>
 );
 
 export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
+  cardTitle?: string;
   minMonthlyBudget?: number;
   defaultMonthlyBudget?: number;
   defaultLeadValue?: number;
@@ -40,6 +41,7 @@ export type RoiCalculatorComponentProps = CodeComponentBaseProps & {
 };
 
 const DEFAULTS: RoiCalculatorComponentProps = {
+  cardTitle: "Calculadora de ROI",
   minMonthlyBudget: ROI_BUDGET.min,
   defaultMonthlyBudget: ROI_BUDGET.default,
   defaultLeadValue: ROI_TICKET.default,
@@ -68,6 +70,7 @@ export function RoiCalculatorComponent(
   const {
     previewState,
     className,
+    cardTitle,
     minMonthlyBudget,
     defaultMonthlyBudget,
     defaultLeadValue,
@@ -112,6 +115,7 @@ export function RoiCalculatorComponent(
   );
 
   const calculatorProps = {
+    cardTitle: cardTitle ?? DEFAULTS.cardTitle!,
     minMonthlyBudget: minMonthlyBudget ?? DEFAULTS.minMonthlyBudget!,
     benchmarks,
     defaultInputs: {
@@ -171,6 +175,7 @@ export function RoiCalculatorComponent(
     return (
       <div className={shellClass}>
         <RoiDesignerPreview
+          cardTitle={calculatorProps.cardTitle}
           defaultMonthlyBudget={calculatorProps.defaultInputs.monthlyBudget!}
           minMonthlyBudget={calculatorProps.minMonthlyBudget}
         />
@@ -186,12 +191,14 @@ export function RoiCalculatorComponent(
         </p>
       ) : null}
       <RoiErrorBoundary
+        cardTitle={calculatorProps.cardTitle}
         defaultMonthlyBudget={calculatorProps.defaultInputs.monthlyBudget!}
         minMonthlyBudget={calculatorProps.minMonthlyBudget}
       >
         <Suspense
           fallback={
             <RoiDesignerPreview
+              cardTitle={calculatorProps.cardTitle}
               defaultMonthlyBudget={calculatorProps.defaultInputs.monthlyBudget!}
               minMonthlyBudget={calculatorProps.minMonthlyBudget}
             />

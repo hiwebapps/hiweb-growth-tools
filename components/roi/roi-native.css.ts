@@ -29,6 +29,7 @@ export const ROI_NATIVE_CSS = `
 .roi-hero-desc { margin: 0; font-size: 1.125rem; line-height: 1.6; color: var(--roi-muted); }
 .roi-card { position: relative; overflow: hidden; border: 1px solid var(--roi-border); border-radius: 1rem; background: var(--roi-surface); box-shadow: 0 0 50px rgba(43, 167, 246, 0.05); }
 .roi-card-pad { position: relative; z-index: 1; padding: 1.25rem 1.5rem; }
+.roi-card-title { margin: 0 0 1.25rem; font-size: 1.25rem; font-weight: 600; line-height: 1.25; color: #fff; }
 .roi-glow-dot { position: absolute; top: 0; right: 0; width: 16rem; height: 16rem; border-radius: 9999px; background: rgba(43, 167, 246, 0.1); filter: blur(80px); pointer-events: none; }
 .roi-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
 @media (min-width: 1024px) { .roi-grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }

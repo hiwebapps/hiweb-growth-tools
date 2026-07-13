@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarBookingButtonComponent,
   CalendarToolComponent,
   QuizToolComponent,
   RoiCalculatorComponent,
@@ -66,6 +67,13 @@ export function CodeComponentsShowcase() {
         </h3>
         <StateTabs value={calendarState} onChange={setCalendarState} />
         <CalendarToolComponent previewState={calendarState} />
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h3 className="text-sm font-semibold tracking-wide text-muted uppercase">
+          CalendarBookingButtonComponent
+        </h3>
+        <CalendarBookingButtonComponent />
       </section>
 
       <section className="flex flex-col gap-4">

@@ -1,4 +1,8 @@
 export {
+  CalendarBookingButtonComponent,
+  type CalendarBookingButtonComponentProps,
+} from "./CalendarBookingButtonComponent";
+export {
   CalendarToolComponent,
   type CalendarToolComponentProps,
 } from "./CalendarToolComponent";

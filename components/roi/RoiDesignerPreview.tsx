@@ -9,11 +9,13 @@ import { RoiNativeStyles } from "./RoiNativeStyles";
 export type RoiDesignerPreviewProps = {
   defaultMonthlyBudget: number;
   minMonthlyBudget: number;
+  cardTitle?: string;
 };
 
 export function RoiDesignerPreview({
   defaultMonthlyBudget,
   minMonthlyBudget,
+  cardTitle = "Calculadora de ROI",
 }: RoiDesignerPreviewProps) {
   const state = createDefaultRoiState(
     { monthlyBudget: Math.max(minMonthlyBudget, defaultMonthlyBudget) },
@@ -34,6 +36,7 @@ export function RoiDesignerPreview({
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">
+          <h2 className="roi-card-title">{cardTitle}</h2>
           <div className="roi-step roi-step-inputs">
             <div className="roi-stack">
               <div className="roi-field">

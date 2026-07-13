@@ -29,6 +29,7 @@ const DEFAULT_DISCLAIMER =
 export type RoiCalculatorProps = {
   layout?: RoiCalculatorLayout;
   title?: string;
+  cardTitle?: string;
   description?: string;
   minMonthlyBudget?: number;
   benchmarks?: Partial<RoiBenchmarks>;
@@ -60,6 +61,7 @@ function navigateToUrl(url: string) {
 export function RoiCalculator({
   layout = "page",
   title,
+  cardTitle = "Calculadora de ROI",
   description,
   minMonthlyBudget = ROI_BUDGET.min,
   benchmarks: benchmarkOverrides,
@@ -156,6 +158,9 @@ export function RoiCalculator({
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">
+          {layout === "card" && cardTitle ? (
+            <h2 className="roi-card-title">{cardTitle}</h2>
+          ) : null}
           {step === "inputs" ? (
             <RoiInputForm
               state={state}
