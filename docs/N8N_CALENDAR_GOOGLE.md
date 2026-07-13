@@ -230,10 +230,38 @@ Verifica:
 
 ---
 
-## 8. Siguiente fase (opcional)
+## 8. Disponibilidad y cancelación
 
-- Guardar `googleEventId` en D1 al crear el evento.
-- Al cancelar (`calendar.cancelled`), borrar o actualizar el evento en Google Calendar.
+### Horarios ocupados en el calendario
+
+La app combina dos fuentes al calcular disponibilidad:
+
+1. **D1** — reservas `confirmed` en `calendar_bookings`
+2. **Google Calendar** — eventos busy del calendario (freeBusy API), si hay credenciales
+
+Variables en **Webflow Cloud** (opcionales; sin ellas solo usa D1):
+
+| Variable | Descripción |
+|----------|-------------|
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Email de la service account |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Clave privada PEM (`\n` escapados) |
+| `GOOGLE_CALENDAR_ID` | ID del calendario (default: `primary`) |
+
+**Guía paso a paso:** [GOOGLE_CALENDAR_SERVICE_ACCOUNT.md](./GOOGLE_CALENDAR_SERVICE_ACCOUNT.md)
+
+La service account debe tener acceso de lectura al calendario donde n8n crea eventos (compartir calendario con el email de la SA).
+
+### Cancelar citas
+
+- El usuario puede cancelar desde la pantalla de confirmación.
+- La API marca la reserva como `cancelled` en D1 → el slot vuelve a estar disponible.
+- n8n recibe `calendar.cancelled` con bloque `calendar` y **elimina el evento en Google Calendar**.
+
+---
+
+## 9. Siguiente fase (opcional)
+
+- Guardar `googleEventId` en D1 al crear el evento (evita búsqueda por `bookingId`).
 - Correo HTML con branding Hiweb además de la invitación nativa de Google.
 
 ---

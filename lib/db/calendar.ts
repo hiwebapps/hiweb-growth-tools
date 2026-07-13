@@ -65,6 +65,11 @@ export async function insertBooking(
   const createdAt = new Date().toISOString();
   const serviceLabel = getServiceLabel(input.service);
 
+  const bookedTimes = await getBookedTimesForDate(input.selectedDate);
+  if (bookedTimes.includes(input.selectedTime)) {
+    return null;
+  }
+
   const d1 = await getD1();
   if (d1) {
     await d1Run(

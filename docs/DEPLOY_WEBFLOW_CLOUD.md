@@ -60,6 +60,9 @@ Copia desde `.env.example` y completa en el panel de Webflow Cloud:
 | `N8N_WEBHOOK_CALENDAR_URL` | Para reservas | Solo servidor |
 | `N8N_WEBHOOK_ROI_URL` | Para ROI | Solo servidor |
 | `N8N_WEBHOOK_SECRET` | Recomendada | Header compartido con n8n |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Opcional | Lectura GCal — ver [GOOGLE_CALENDAR_SERVICE_ACCOUNT.md](./GOOGLE_CALENDAR_SERVICE_ACCOUNT.md) |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Opcional | Clave PEM de la service account |
+| `GOOGLE_CALENDAR_ID` | Opcional | Email o ID del calendario compartido con la SA |
 
 **No** subas `WEBFLOW_API_TOKEN` al entorno Cloud (solo sirve para CLI local / import).
 
