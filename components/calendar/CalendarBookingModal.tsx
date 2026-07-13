@@ -17,7 +17,6 @@ export type CalendarBookingModalProps = {
   onClose: () => void;
   defaultService: string;
   title?: string;
-  continueLabel?: string;
   submitLabel?: string;
   successTitle?: string;
   successMessage?: string;
@@ -28,7 +27,6 @@ export function CalendarBookingModal({
   onClose,
   defaultService,
   title = "Agenda tu auditoría gratuita",
-  continueLabel = "Continuar",
   submitLabel = "Confirmar cita",
   successTitle = "Cita confirmada",
   successMessage =
@@ -121,7 +119,6 @@ export function CalendarBookingModal({
               >
                 <CalendarToolLazy
                   defaultService={defaultService}
-                  continueButtonLabel={continueLabel}
                   submitButtonLabel={submitLabel}
                   onError={(message) => setErrorMessage(message)}
                   onBooked={(record) => {

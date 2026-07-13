@@ -94,10 +94,6 @@ export default declareComponent(RoiCalculatorComponent, {
       name: "Título del popup",
       defaultValue: "Agenda tu auditoría gratuita",
     }),
-    calendarContinueLabel: props.Text({
-      name: "Texto botón continuar (calendario)",
-      defaultValue: "Continuar",
-    }),
     calendarSubmitLabel: props.Text({
       name: "Texto botón confirmar cita",
       defaultValue: "Confirmar cita",

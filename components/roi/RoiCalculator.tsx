@@ -39,7 +39,6 @@ export type RoiCalculatorProps = {
   ctaUrl?: string;
   calendarService?: string;
   calendarModalTitle?: string;
-  calendarContinueLabel?: string;
   calendarSubmitLabel?: string;
   calendarSuccessTitle?: string;
   calendarSuccessMessage?: string;
@@ -71,7 +70,6 @@ export function RoiCalculator({
   ctaUrl,
   calendarService = "seo-audit",
   calendarModalTitle,
-  calendarContinueLabel = "Continuar",
   calendarSubmitLabel = "Confirmar cita",
   calendarSuccessTitle = "Cita confirmada",
   calendarSuccessMessage =
@@ -187,7 +185,6 @@ export function RoiCalculator({
             onClose={handleCloseBookingModal}
             defaultService={calendarService}
             title={calendarModalTitle ?? ctaLabel}
-            continueLabel={calendarContinueLabel}
             submitLabel={calendarSubmitLabel}
             successTitle={calendarSuccessTitle}
             successMessage={calendarSuccessMessage}

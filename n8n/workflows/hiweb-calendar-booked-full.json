@@ -1,0 +1,229 @@
+{
+  "name": "Hiweb — Calendario → Slack + Google Calendar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hiweb-calendar-booked",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook Calendario",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "hiweb-calendar-booked"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst query = item.query ?? {};\nconst secret =\n  query.secret ??\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid webhook secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.bookingId) {\n  throw new Error('Invalid payload: missing event or bookingId');\n}\n\nif (payload.event === 'calendar.booked') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for booked event');\n  }\n  if (!payload.calendar?.start || !payload.calendar?.end) {\n    throw new Error('Invalid payload: missing calendar.start/end for booked event');\n  }\n} else if (payload.event === 'calendar.cancelled') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for cancelled event');\n  }\n} else {\n  throw new Error(`Invalid payload: unknown event ${payload.event}`);\n}\n\nreturn [{ json: payload }];"
+      },
+      "id": "b1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Validar secreto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "evt-booked",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.booked",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "evt-cancelled",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0003-4000-8000-000000000003",
+      "name": "¿Reserva o cancelación?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "evt-booked-only",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.booked",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0005-4000-8000-000000000005",
+      "name": "¿Solo reserva?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 160]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "leads-landing-page",
+          "mode": "name"
+        },
+        "text": "={{ $json.slack.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "b1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Slack — leads-landing-page",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [720, -120],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack Hiweb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "primary"
+        },
+        "start": "={{ $json.calendar.start }}",
+        "end": "={{ $json.calendar.end }}",
+        "useDefaultReminders": true,
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.calendar.attendeeEmail }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "={{ $json.calendar.description }}",
+          "sendUpdates": "all",
+          "summary": "={{ $json.calendar.title }}"
+        }
+      },
+      "id": "b1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Google Calendar — Crear evento",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [960, 160],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_CREDENTIAL_ID",
+          "name": "Google Calendar Hiweb"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Calendario": {
+      "main": [
+        [
+          {
+            "node": "Validar secreto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar secreto": {
+      "main": [
+        [
+          {
+            "node": "¿Reserva o cancelación?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Reserva o cancelación?": {
+      "main": [
+        [
+          {
+            "node": "Slack — leads-landing-page",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Solo reserva?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "¿Solo reserva?": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar — Crear evento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "hiweb-growth-tools"
+    },
+    {
+      "name": "calendar"
+    },
+    {
+      "name": "google-calendar"
+    }
+  ]
+}
