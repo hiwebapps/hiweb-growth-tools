@@ -38,6 +38,7 @@ export function CalendarTool({
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -52,6 +53,7 @@ export function CalendarTool({
   const loadSlots = useCallback(
     async (date: string, serviceId: string) => {
       setSlotsLoading(true);
+      setSlotsError(null);
       setFormError(null);
       try {
         const data = await fetchAvailability(date, serviceId);
@@ -65,17 +67,15 @@ export function CalendarTool({
           }
           return undefined;
         });
-      } catch (error) {
-        onError?.(
-          error instanceof Error
-            ? error.message
-            : "No pudimos cargar disponibilidad.",
+      } catch {
+        setSlotsError(
+          "No pudimos cargar los horarios disponibles. Inténtalo de nuevo.",
         );
       } finally {
         setSlotsLoading(false);
       }
     },
-    [onError],
+    [],
   );
 
   useEffect(() => {
@@ -172,6 +172,7 @@ export function CalendarTool({
               setSelectedDate(date);
               setSelectedTime(undefined);
               setFormError(null);
+              setSlotsError(null);
             }}
             onTimeChange={(time) => {
               setSelectedTime(time);
@@ -185,6 +186,11 @@ export function CalendarTool({
               setFormError(null);
             }}
           />
+          {slotsError ? (
+            <p className="cal-error" role="alert">
+              {slotsError}
+            </p>
+          ) : null}
           {formError ? (
             <p className="cal-error" role="alert">
               {formError}

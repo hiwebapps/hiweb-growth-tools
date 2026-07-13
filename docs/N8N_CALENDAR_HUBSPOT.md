@@ -82,8 +82,11 @@ Si **no** creas estas propiedades, elimina el bloque `customPropertiesUi` del no
 
 | Nodo | Acción |
 |------|--------|
-| **HubSpot — Contacto** | Upsert por email → lead en Contacts |
+| **Preparar HubSpot contacto** | Arma el body del upsert; `phone` y `company` solo si el usuario los llenó |
+| **HubSpot — Contacto** | HTTP `batch/upsert` por email → lead en Contacts |
 | **HubSpot — Reunión** | Cita en timeline del contacto (fecha, servicio, notas) |
+
+Solo **nombre** y **email** son obligatorios en el formulario. Si empresa o teléfono van vacíos, el workflow no falla.
 
 Slack y Google Calendar corren en **paralelo** con HubSpot.
 
@@ -118,6 +121,8 @@ Tras deploy, cada `calendar.booked` incluye:
   }
 }
 ```
+
+`phone` y `company` se omiten del payload cuando el usuario no los completa.
 
 ---
 

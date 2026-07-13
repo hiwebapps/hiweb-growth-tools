@@ -1,19 +1,8 @@
-import { apiUrl } from "@/lib/shared/api-url";
+import { apiRequest } from "@/lib/shared/api-request";
 import type { QuizAnswers, QuizLeadInput, QuizSubmitResponse } from "./types";
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(url), init);
-  const data = (await response.json()) as T & { error?: string };
-
-  if (!response.ok) {
-    throw new Error(data.error ?? "Error en la solicitud.");
-  }
-
-  return data;
-}
-
 export async function createQuizSession() {
-  return request<{
+  return apiRequest<{
     sessionId: string;
     currentStep: number;
     totalSteps: number;
@@ -31,7 +20,7 @@ export async function updateQuizSession(input: {
   optionId: string;
   currentStep: number;
 }) {
-  return request<{
+  return apiRequest<{
     sessionId: string;
     currentStep: number;
     totalSteps: number;
@@ -54,7 +43,7 @@ export async function submitQuiz(input: {
   lead: QuizLeadInput;
   answers: QuizAnswers;
 }) {
-  return request<QuizSubmitResponse>("/api/quiz/submit", {
+  return apiRequest<QuizSubmitResponse>("/api/quiz/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),

@@ -17,6 +17,10 @@ function normalizeBasePath(base: string): string {
   return base.endsWith("/") ? base.slice(0, -1) : base;
 }
 
+function isCodeIslandBundle(): boolean {
+  return typeof window !== "undefined" && typeof process === "undefined";
+}
+
 function inferBasePathFromWindow(): string {
   if (typeof window === "undefined") {
     return "";
@@ -35,6 +39,11 @@ function inferBasePathFromWindow(): string {
 
   // Code component embebido en páginas del sitio Webflow; APIs en Cloud mount.
   if (hostname.endsWith(".webflow.io") || hostname.endsWith(".webflow.com")) {
+    return DEFAULT_WEBFLOW_MOUNT;
+  }
+
+  // Code Components en dominio propio (ej. hiwebmar.com): APIs siguen en /tools.
+  if (isCodeIslandBundle()) {
     return DEFAULT_WEBFLOW_MOUNT;
   }
 
