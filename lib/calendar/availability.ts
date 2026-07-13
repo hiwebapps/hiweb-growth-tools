@@ -1,17 +1,17 @@
 import {
   ALL_SLOT_TIMES,
-  formatDateIso,
   isWeekday,
   parseDateIso,
   SLOT_END_HOUR,
   SLOT_START_HOUR,
 } from "./calendar-rules";
+import { getBookingNowParts } from "./booking-time";
+import { getGoogleCalendarBusySlotTimes } from "./google-busy";
 import { getBookedTimesForDate } from "@/lib/db/calendar";
 import type { TimeSlot } from "./types";
 
 function isPastSlot(dateIso: string, time: string): boolean {
-  const now = new Date();
-  const todayIso = formatDateIso(now);
+  const { dateIso: todayIso, hour, minute } = getBookingNowParts();
 
   if (dateIso < todayIso) {
     return true;
@@ -21,9 +21,9 @@ function isPastSlot(dateIso: string, time: string): boolean {
     return false;
   }
 
-  const [h, m] = time.split(":").map(Number);
-  const slotMinutes = h * 60 + m;
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const [slotHour, slotMinute] = time.split(":").map(Number);
+  const slotMinutes = slotHour * 60 + slotMinute;
+  const nowMinutes = hour * 60 + minute;
   return slotMinutes <= nowMinutes;
 }
 
@@ -36,14 +36,19 @@ export async function getAvailabilityForDate(
     return [];
   }
 
-  const booked = new Set(await getBookedTimesForDate(dateIso));
+  const [bookedD1, bookedGCal] = await Promise.all([
+    getBookedTimesForDate(dateIso),
+    getGoogleCalendarBusySlotTimes(dateIso),
+  ]);
+
+  const occupied = new Set([...bookedD1, ...bookedGCal]);
 
   return ALL_SLOT_TIMES.filter((time) => {
     const [h] = time.split(":").map(Number);
     return h >= SLOT_START_HOUR && h < SLOT_END_HOUR;
   }).map((time) => ({
     time,
-    available: !booked.has(time) && !isPastSlot(dateIso, time),
+    available: !occupied.has(time) && !isPastSlot(dateIso, time),
   }));
 }
 

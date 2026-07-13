@@ -183,28 +183,29 @@ export function buildCalendarN8nPayload(input: {
     submittedAt: new Date().toISOString(),
   };
 
-  if (event === "calendar.booked") {
-    const calendarTitle = `${serviceLabel} — ${booking.name}`;
-    const calendarDescription = buildCalendarEventDescription(booking);
-    const startIso = buildBookingStartIso(
-      booking.selectedDate,
-      booking.selectedTime,
-    );
-    const endIso = buildBookingEndIso(
-      booking.selectedDate,
-      booking.selectedTime,
-    );
-    const { firstName, lastName } = splitPersonName(booking.name);
+  const calendarTitle = `${serviceLabel} — ${booking.name}`;
+  const calendarDescription = buildCalendarEventDescription(booking);
+  const startIso = buildBookingStartIso(
+    booking.selectedDate,
+    booking.selectedTime,
+  );
+  const endIso = buildBookingEndIso(
+    booking.selectedDate,
+    booking.selectedTime,
+  );
 
-    payload.calendar = {
-      title: calendarTitle,
-      description: calendarDescription,
-      start: startIso,
-      end: endIso,
-      timeZone: BOOKING_TIMEZONE,
-      attendeeEmail: booking.email,
-      durationMinutes: SLOT_INTERVAL_MINUTES,
-    };
+  payload.calendar = {
+    title: calendarTitle,
+    description: calendarDescription,
+    start: startIso,
+    end: endIso,
+    timeZone: BOOKING_TIMEZONE,
+    attendeeEmail: booking.email,
+    durationMinutes: SLOT_INTERVAL_MINUTES,
+  };
+
+  if (event === "calendar.booked") {
+    const { firstName, lastName } = splitPersonName(booking.name);
 
     payload.hubspot = {
       contact: {

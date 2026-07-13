@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS calendar_bookings (
 
 CREATE INDEX IF NOT EXISTS idx_calendar_bookings_email ON calendar_bookings(email);
 CREATE INDEX IF NOT EXISTS idx_calendar_bookings_selected_date ON calendar_bookings(selected_date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_calendar_bookings_confirmed_slot
+ON calendar_bookings(selected_date, selected_time)
+WHERE status = 'confirmed';
 
 CREATE TABLE IF NOT EXISTS roi_leads (
   id TEXT PRIMARY KEY,

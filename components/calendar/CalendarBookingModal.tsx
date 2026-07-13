@@ -35,6 +35,7 @@ export function CalendarBookingModal({
   const [booking, setBooking] = useState<BookingRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const isCancelled = booking?.status === "cancelled";
 
   useEffect(() => {
     setMounted(true);
@@ -84,7 +85,11 @@ export function CalendarBookingModal({
         >
           <div className="cal-modal-header">
             <h2 id="cal-modal-title" className="cal-modal-title">
-              {booking ? successTitle : title}
+              {booking
+                ? isCancelled
+                  ? "Cita cancelada"
+                  : successTitle
+                : title}
             </h2>
             <button
               type="button"
@@ -108,6 +113,10 @@ export function CalendarBookingModal({
                 booking={booking}
                 title={successTitle}
                 message={successMessage}
+                onCancelled={(cancelled) => {
+                  setBooking(cancelled);
+                  setErrorMessage(null);
+                }}
               />
             ) : (
               <Suspense

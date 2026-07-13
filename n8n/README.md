@@ -12,3 +12,4 @@ Guías paso a paso:
 - [docs/N8N_CALENDAR_SLACK.md](../docs/N8N_CALENDAR_SLACK.md) — Fase A (Slack)
 - [docs/N8N_CALENDAR_GOOGLE.md](../docs/N8N_CALENDAR_GOOGLE.md) — Google Calendar + Meet
 - [docs/N8N_CALENDAR_HUBSPOT.md](../docs/N8N_CALENDAR_HUBSPOT.md) — HubSpot CRM
+- [docs/GOOGLE_CALENDAR_SERVICE_ACCOUNT.md](../docs/GOOGLE_CALENDAR_SERVICE_ACCOUNT.md) — Service Account (horarios ocupados en la app)

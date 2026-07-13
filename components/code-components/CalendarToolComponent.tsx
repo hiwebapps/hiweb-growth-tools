@@ -185,6 +185,9 @@ export function CalendarToolComponent(
             booking={booking}
             title={successTitle}
             message={successMessage}
+            onCancelled={(cancelled) => {
+              setBooking(cancelled);
+            }}
           />
         </div>
       ) : null}

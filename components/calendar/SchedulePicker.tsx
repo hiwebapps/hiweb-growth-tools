@@ -73,6 +73,7 @@ export function SchedulePicker({
   );
 
   const availableSlots = slots.filter((slot) => slot.available);
+  const hasAnySlots = slots.length > 0;
   const canGoPrev = canNavigateMonth(viewYear, viewMonth, -1);
   const canGoNext = canNavigateMonth(viewYear, viewMonth, 1);
 
@@ -162,28 +163,48 @@ export function SchedulePicker({
               <span className="cal-spinner" aria-hidden />
               Cargando horarios…
             </div>
-          ) : availableSlots.length === 0 ? (
+          ) : !hasAnySlots ? (
             <p className="cal-empty">
               No hay horarios disponibles este día. Elige otra fecha.
+            </p>
+          ) : availableSlots.length === 0 ? (
+            <p className="cal-empty">
+              Todos los horarios están ocupados este día. Elige otra fecha.
             </p>
           ) : (
             <div
               className="cal-time-list"
               role="listbox"
-              aria-label="Horarios disponibles"
+              aria-label="Horarios"
             >
-              {availableSlots.map((slot) => {
+              {slots.map((slot) => {
                 const selected = selectedTime === slot.time;
+                const occupied = !slot.available;
                 return (
                   <button
                     key={slot.time}
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    className={`cal-time-item${selected ? " is-selected" : ""}`}
-                    onClick={() => onTimeChange(slot.time)}
+                    aria-disabled={occupied}
+                    disabled={occupied}
+                    className={[
+                      "cal-time-item",
+                      selected ? "is-selected" : "",
+                      occupied ? "is-unavailable" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => {
+                      if (!occupied) {
+                        onTimeChange(slot.time);
+                      }
+                    }}
                   >
-                    {formatTime12h(slot.time)}
+                    <span>{formatTime12h(slot.time)}</span>
+                    {occupied ? (
+                      <span className="cal-time-status">Ocupado</span>
+                    ) : null}
                   </button>
                 );
               })}

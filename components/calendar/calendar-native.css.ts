@@ -62,9 +62,11 @@ export const CALENDAR_NATIVE_CSS = `
 @media (min-width: 768px) { .cal-picker-times { border-top: none; padding: 1.25rem 1rem 1rem; max-width: 11rem; } }
 .cal-time-list { display: flex; flex-direction: column; gap: 0.375rem; max-height: 16rem; overflow-y: auto; padding-right: 0.25rem; scrollbar-width: thin; }
 @media (min-width: 768px) { .cal-time-list { max-height: 100%; height: 100%; } }
-.cal-time-item { width: 100%; padding: 0.625rem 0.75rem; border: 1px solid transparent; border-radius: 0.625rem; background: transparent; color: var(--cal-on); font-size: 0.875rem; font-weight: 500; text-align: left; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-.cal-time-item:hover { border-color: var(--cal-border); background: rgba(255,255,255,0.03); }
+.cal-time-item { width: 100%; padding: 0.625rem 0.75rem; border: 1px solid transparent; border-radius: 0.625rem; background: transparent; color: var(--cal-on); font-size: 0.875rem; font-weight: 500; text-align: left; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.cal-time-item:hover:not(:disabled) { border-color: var(--cal-border); background: rgba(255,255,255,0.03); }
 .cal-time-item.is-selected { border-color: var(--cal-border); background: var(--cal-surface-high); color: var(--cal-primary); }
+.cal-time-item.is-unavailable { opacity: 0.45; cursor: not-allowed; color: var(--cal-muted); }
+.cal-time-status { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cal-muted); }
 .cal-picker-footer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-top: 1px solid var(--cal-border); background: var(--cal-surface); }
 @media (max-width: 639px) { .cal-picker-footer { grid-template-columns: 1fr; } .cal-picker-summary { order: -1; } }
 .cal-picker-summary { padding: 0.5rem 0.875rem; border: 1px solid var(--cal-border); border-radius: 0.625rem; background: var(--cal-surface-low); color: var(--cal-muted); font-size: 0.8125rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

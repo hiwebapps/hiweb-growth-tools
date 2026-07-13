@@ -17,7 +17,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst query = item.query ?? {};\nconst secret =\n  query.secret ??\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid webhook secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.bookingId) {\n  throw new Error('Invalid payload: missing event or bookingId');\n}\n\nif (payload.event === 'calendar.booked') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for booked event');\n  }\n  if (!payload.calendar?.start || !payload.calendar?.end) {\n    throw new Error('Invalid payload: missing calendar.start/end for booked event');\n  }\n  if (!payload.hubspot?.contact?.email) {\n    throw new Error('Invalid payload: missing hubspot.contact.email for booked event');\n  }\n} else if (payload.event === 'calendar.cancelled') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for cancelled event');\n  }\n} else {\n  throw new Error(`Invalid payload: unknown event ${payload.event}`);\n}\n\nreturn [{ json: payload }];"
+        "jsCode": "const item = $input.first().json;\nconst headers = item.headers ?? {};\nconst query = item.query ?? {};\nconst secret =\n  query.secret ??\n  headers['x-webhook-secret'] ??\n  headers['X-Webhook-Secret'] ??\n  '';\n\nconst expected = $env.HIWEB_WEBHOOK_SECRET;\nif (!expected || secret !== expected) {\n  throw new Error('Unauthorized: invalid webhook secret');\n}\n\nconst payload = item.body && typeof item.body === 'object' ? item.body : item;\n\nif (!payload.event || !payload.bookingId) {\n  throw new Error('Invalid payload: missing event or bookingId');\n}\n\nif (payload.event === 'calendar.booked') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for booked event');\n  }\n  if (!payload.calendar?.start || !payload.calendar?.end) {\n    throw new Error('Invalid payload: missing calendar.start/end for booked event');\n  }\n  if (!payload.hubspot?.contact?.email) {\n    throw new Error('Invalid payload: missing hubspot.contact.email for booked event');\n  }\n} else if (payload.event === 'calendar.cancelled') {\n  if (!payload.slack?.text) {\n    throw new Error('Invalid payload: missing slack.text for cancelled event');\n  }\n  if (!payload.calendar?.start || !payload.calendar?.end) {\n    throw new Error('Invalid payload: missing calendar.start/end for cancelled event');\n  }\n} else {\n  throw new Error(`Invalid payload: unknown event ${payload.event}`);\n}\n\nreturn [{ json: payload }];"
       },
       "id": "b1b2c3d4-0002-4000-8000-000000000002",
       "name": "Validar secreto",
@@ -216,6 +216,130 @@
           "name": "HubSpot Hiweb"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "evt-cancelled-only",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "calendar.cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0010-4000-8000-000000000010",
+      "name": "¿Es cancelación?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [960, 400]
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "primary"
+        },
+        "returnAll": true,
+        "options": {
+          "timeMin": "={{ $('Validar secreto').item.json.calendar.start }}",
+          "timeMax": "={{ $('Validar secreto').item.json.calendar.end }}",
+          "query": "={{ $('Validar secreto').item.json.bookingId }}"
+        }
+      },
+      "id": "b1b2c3d4-0011-4000-8000-000000000011",
+      "name": "Google Calendar — Buscar evento",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1200, 400],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_CREDENTIAL_ID",
+          "name": "Google Calendar Hiweb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bookingId = $('Validar secreto').first().json.bookingId;\nconst items = $input.all();\n\nfor (const item of items) {\n  const event = item.json;\n  const haystack = `${event.summary || ''}\\n${event.description || ''}`;\n  if (haystack.includes(bookingId)) {\n    return [{ json: { eventId: event.id, summary: event.summary } }];\n  }\n}\n\nreturn [{ json: { eventId: null, skipped: true } }];"
+      },
+      "id": "b1b2c3d4-0012-4000-8000-000000000012",
+      "name": "Resolver evento GCal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-event-id",
+              "leftValue": "={{ $json.eventId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-0013-4000-8000-000000000013",
+      "name": "¿Hay evento?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1680, 400]
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "primary"
+        },
+        "eventId": "={{ $json.eventId }}",
+        "options": {
+          "sendUpdates": "all"
+        }
+      },
+      "id": "b1b2c3d4-0014-4000-8000-000000000014",
+      "name": "Google Calendar — Eliminar evento",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1920, 400],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_CREDENTIAL_ID",
+          "name": "Google Calendar Hiweb"
+        }
+      }
     }
   ],
   "connections": {
@@ -268,6 +392,58 @@
           },
           {
             "node": "Preparar HubSpot contacto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Es cancelación?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es cancelación?": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar — Buscar evento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Google Calendar — Buscar evento": {
+      "main": [
+        [
+          {
+            "node": "Resolver evento GCal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolver evento GCal": {
+      "main": [
+        [
+          {
+            "node": "¿Hay evento?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay evento?": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar — Eliminar evento",
             "type": "main",
             "index": 0
           }
