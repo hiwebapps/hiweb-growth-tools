@@ -4,6 +4,8 @@ import {
   getBookableDates,
   isWeekday,
   parseDateIso,
+  resolveServiceId,
+  serviceRequiresWebsite,
 } from "./calendar-rules";
 import { isSlotAvailable } from "./availability";
 import type { BookingInput } from "./types";
@@ -12,6 +14,30 @@ import { AppError } from "@/lib/shared/errors";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function normalizeWebsiteInput(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+}
+
+function isValidWebsiteInput(value: string): boolean {
+  const normalized = normalizeWebsiteInput(value);
+  if (!normalized) {
+    return false;
+  }
+  try {
+    const url = new URL(normalized);
+    return Boolean(url.hostname) && url.hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
 
 export async function validateBookingInput(
   input: BookingInput,
@@ -83,18 +109,33 @@ export async function validateBookingInput(
   }
 
   const phone = input.phone?.trim();
-  if (phone && phone.length < 7) {
-    throw new AppError("El teléfono no parece válido.", {
+  if (!phone || phone.length < 7) {
+    throw new AppError("El teléfono es obligatorio.", {
       statusCode: 400,
       code: "INVALID_PHONE",
     });
+  }
+
+  const serviceId = resolveServiceId(service);
+  let website: string | undefined;
+
+  if (serviceRequiresWebsite(serviceId)) {
+    const websiteInput = input.website?.trim();
+    if (!websiteInput || !isValidWebsiteInput(websiteInput)) {
+      throw new AppError("Introduce la URL de tu sitio web actual.", {
+        statusCode: 400,
+        code: "INVALID_WEBSITE",
+      });
+    }
+    website = normalizeWebsiteInput(websiteInput);
   }
 
   return {
     name,
     email,
     company: input.company?.trim() || undefined,
-    phone: phone || undefined,
+    phone,
+    website,
     service,
     selectedDate,
     selectedTime,

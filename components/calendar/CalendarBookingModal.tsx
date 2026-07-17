@@ -3,6 +3,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { BookingRecord } from "@/lib/calendar/types";
+import { navigateToUrl } from "@/lib/shared/utils";
 import { BookingConfirmation } from "./BookingConfirmation";
 import { CalendarNativeStyles } from "./CalendarNativeStyles";
 
@@ -20,6 +21,7 @@ export type CalendarBookingModalProps = {
   submitLabel?: string;
   successTitle?: string;
   successMessage?: string;
+  successRedirectUrl?: string;
 };
 
 export function CalendarBookingModal({
@@ -31,6 +33,7 @@ export function CalendarBookingModal({
   successTitle = "Cita confirmada",
   successMessage =
     "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
+  successRedirectUrl,
 }: CalendarBookingModalProps) {
   const [booking, setBooking] = useState<BookingRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -131,6 +134,11 @@ export function CalendarBookingModal({
                   submitButtonLabel={submitLabel}
                   onError={(message) => setErrorMessage(message)}
                   onBooked={(record) => {
+                    const redirectUrl = successRedirectUrl?.trim();
+                    if (redirectUrl) {
+                      navigateToUrl(redirectUrl);
+                      return;
+                    }
                     setBooking(record);
                     setErrorMessage(null);
                   }}

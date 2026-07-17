@@ -13,6 +13,7 @@ export type CalendarBookingButtonComponentProps = CodeComponentBaseProps & {
   submitLabel?: string;
   successTitle?: string;
   successMessage?: string;
+  successRedirectUrl?: string;
 };
 
 const DEFAULTS: CalendarBookingButtonComponentProps = {
@@ -37,6 +38,7 @@ export function CalendarBookingButtonComponent(
     submitLabel,
     successTitle,
     successMessage,
+    successRedirectUrl,
   } = props;
 
   const label = buttonLabel ?? DEFAULTS.buttonLabel!;
@@ -67,6 +69,7 @@ export function CalendarBookingButtonComponent(
       submitLabel={submitLabel ?? DEFAULTS.submitLabel}
       successTitle={successTitle ?? DEFAULTS.successTitle}
       successMessage={successMessage ?? DEFAULTS.successMessage}
+      successRedirectUrl={successRedirectUrl}
     />
   );
 }

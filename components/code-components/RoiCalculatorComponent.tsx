@@ -126,7 +126,7 @@ export function RoiCalculatorComponent(
     resultsButtonLabel: resultsButtonLabel ?? DEFAULTS.resultsButtonLabel!,
     retryButtonLabel: retryButtonLabel ?? DEFAULTS.retryButtonLabel!,
     ctaLabel: ctaLabel ?? DEFAULTS.ctaLabel!,
-    ctaUrl: ctaUrl || undefined,
+    ctaUrl: ctaUrl?.trim() || undefined,
     calendarService: calendarService ?? DEFAULTS.calendarService!,
     calendarModalTitle: calendarModalTitle ?? DEFAULTS.calendarModalTitle!,
     calendarSubmitLabel: calendarSubmitLabel ?? DEFAULTS.calendarSubmitLabel!,
@@ -190,18 +190,12 @@ export function RoiCalculatorComponent(
           {errorMessage}
         </p>
       ) : null}
-      <RoiErrorBoundary
-        cardTitle={calculatorProps.cardTitle}
-        defaultMonthlyBudget={calculatorProps.defaultInputs.monthlyBudget!}
-        minMonthlyBudget={calculatorProps.minMonthlyBudget}
-      >
+      <RoiErrorBoundary>
         <Suspense
           fallback={
-            <RoiDesignerPreview
-              cardTitle={calculatorProps.cardTitle}
-              defaultMonthlyBudget={calculatorProps.defaultInputs.monthlyBudget!}
-              minMonthlyBudget={calculatorProps.minMonthlyBudget}
-            />
+            <p className="roi-text-muted" style={{ textAlign: "center", padding: "2rem" }}>
+              Cargando…
+            </p>
           }
         >
           <RoiCalculatorLazy

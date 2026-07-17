@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS calendar_bookings (
   company TEXT,
   email TEXT NOT NULL,
   phone TEXT,
+  website TEXT,
   service TEXT NOT NULL,
   selected_date TEXT NOT NULL,
   selected_time TEXT NOT NULL,

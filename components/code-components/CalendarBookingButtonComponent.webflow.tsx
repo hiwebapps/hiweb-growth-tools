@@ -17,6 +17,7 @@ export default declareComponent(CalendarBookingButtonComponent, {
       options: [
         "consulting",
         "seo-audit",
+        "website-audit",
         "content-strategy",
         "paid-ads",
       ],
@@ -38,6 +39,10 @@ export default declareComponent(CalendarBookingButtonComponent, {
       name: "Mensaje cita confirmada",
       defaultValue:
         "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
+    }),
+    successRedirectUrl: props.Text({
+      name: "URL redirección al confirmar (opcional)",
+      defaultValue: "",
     }),
   },
   options: {

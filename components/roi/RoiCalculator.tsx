@@ -37,6 +37,7 @@ export type RoiCalculatorProps = {
   resultsButtonLabel?: string;
   retryButtonLabel?: string;
   ctaLabel: string;
+  /** Redirección opcional tras confirmar cita en el popup del calendario. */
   ctaUrl?: string;
   calendarService?: string;
   calendarModalTitle?: string;
@@ -49,13 +50,6 @@ export type RoiCalculatorProps = {
 
 function clampBudget(value: number, min: number): number {
   return Math.max(min, Math.min(ROI_BUDGET.max, value));
-}
-
-function navigateToUrl(url: string) {
-  if (typeof window === "undefined" || !url) {
-    return;
-  }
-  window.location.href = url;
 }
 
 export function RoiCalculator({
@@ -128,13 +122,9 @@ export function RoiCalculator({
   }, []);
 
   const handleCtaClick = useCallback(() => {
-    if (ctaUrl) {
-      navigateToUrl(ctaUrl);
-      return;
-    }
     setBookingModalOpen(true);
     setError(null);
-  }, [ctaUrl]);
+  }, []);
 
   const handleCloseBookingModal = useCallback(() => {
     setBookingModalOpen(false);
@@ -193,6 +183,7 @@ export function RoiCalculator({
             submitLabel={calendarSubmitLabel}
             successTitle={calendarSuccessTitle}
             successMessage={calendarSuccessMessage}
+            successRedirectUrl={ctaUrl}
           />
         </Suspense>
       ) : null}

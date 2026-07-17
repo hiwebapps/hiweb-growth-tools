@@ -3,6 +3,7 @@ export type BookingStatus = "confirmed" | "cancelled";
 export type CalendarServiceId =
   | "consulting"
   | "seo-audit"
+  | "website-audit"
   | "content-strategy"
   | "paid-ads";
 
@@ -27,6 +28,7 @@ export type BookingInput = {
   email: string;
   company?: string;
   phone?: string;
+  website?: string;
   service: string;
   selectedDate: string;
   selectedTime: string;
@@ -38,6 +40,7 @@ export type BookingRecord = {
   company?: string;
   email: string;
   phone?: string;
+  website?: string;
   service: string;
   selectedDate: string;
   selectedTime: string;
