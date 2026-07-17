@@ -113,6 +113,12 @@ export function BookingConfirmation({
             {booking.name} — {booking.email}
           </dd>
         </div>
+        {booking.website ? (
+          <div>
+            <dt>Sitio web</dt>
+            <dd>{booking.website}</dd>
+          </div>
+        ) : null}
       </dl>
 
       {cancelError ? (

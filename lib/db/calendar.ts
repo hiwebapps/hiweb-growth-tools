@@ -10,6 +10,7 @@ type BookingDbRow = {
   company: string | null;
   email: string;
   phone: string | null;
+  website: string | null;
   service: string;
   selected_date: string;
   selected_time: string;
@@ -24,6 +25,7 @@ function mapBookingRow(row: BookingDbRow): BookingRecord {
     company: row.company ?? undefined,
     email: row.email,
     phone: row.phone ?? undefined,
+    website: row.website ?? undefined,
     service: row.service,
     selectedDate: row.selected_date,
     selectedTime: row.selected_time,
@@ -44,7 +46,7 @@ export async function getConfirmedBookingsForDate(
   if (d1) {
     const rows = await d1All<BookingDbRow>(
       d1,
-      `SELECT id, name, company, email, phone, service,
+      `SELECT id, name, company, email, phone, website, service,
               selected_date, selected_time, status, created_at
        FROM calendar_bookings
        WHERE selected_date = ? AND status = 'confirmed'`,
@@ -59,7 +61,7 @@ export async function getConfirmedBookingsForDate(
 
   const rows = getDb()
     .prepare(
-      `SELECT id, name, company, email, phone, service,
+      `SELECT id, name, company, email, phone, website, service,
               selected_date, selected_time, status, created_at
        FROM calendar_bookings
        WHERE selected_date = ? AND status = 'confirmed'`,
@@ -101,14 +103,15 @@ export async function insertBooking(
     await d1Run(
       d1,
       `INSERT INTO calendar_bookings (
-        id, name, company, email, phone, service,
+        id, name, company, email, phone, website, service,
         selected_date, selected_time, status, pending_sync, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', 1, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', 1, ?)`,
       id,
       input.name,
       input.company ?? null,
       input.email,
       input.phone ?? null,
+      input.website ?? null,
       serviceLabel,
       input.selectedDate,
       input.selectedTime,
@@ -120,6 +123,7 @@ export async function insertBooking(
       company: input.company,
       email: input.email,
       phone: input.phone,
+      website: input.website,
       service: serviceLabel,
       selectedDate: input.selectedDate,
       selectedTime: input.selectedTime,
@@ -135,9 +139,9 @@ export async function insertBooking(
   getDb()
     .prepare(
       `INSERT INTO calendar_bookings (
-        id, name, company, email, phone, service,
+        id, name, company, email, phone, website, service,
         selected_date, selected_time, status, pending_sync, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', 1, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed', 1, ?)`,
     )
     .run(
       id,
@@ -145,6 +149,7 @@ export async function insertBooking(
       input.company ?? null,
       input.email,
       input.phone ?? null,
+      input.website ?? null,
       serviceLabel,
       input.selectedDate,
       input.selectedTime,
@@ -157,6 +162,7 @@ export async function insertBooking(
     company: input.company,
     email: input.email,
     phone: input.phone,
+    website: input.website,
     service: serviceLabel,
     selectedDate: input.selectedDate,
     selectedTime: input.selectedTime,
@@ -170,7 +176,7 @@ export async function getBookingById(id: string): Promise<BookingRecord | null> 
   if (d1) {
     const row = await d1First<BookingDbRow>(
       d1,
-      `SELECT id, name, company, email, phone, service,
+      `SELECT id, name, company, email, phone, website, service,
               selected_date, selected_time, status, created_at
        FROM calendar_bookings WHERE id = ?`,
       id,
@@ -184,7 +190,7 @@ export async function getBookingById(id: string): Promise<BookingRecord | null> 
 
   const row = getDb()
     .prepare(
-      `SELECT id, name, company, email, phone, service,
+      `SELECT id, name, company, email, phone, website, service,
               selected_date, selected_time, status, created_at
        FROM calendar_bookings WHERE id = ?`,
     )

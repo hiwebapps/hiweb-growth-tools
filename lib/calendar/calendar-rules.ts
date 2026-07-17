@@ -3,6 +3,7 @@ import type { CalendarService } from "./types";
 export const CALENDAR_SERVICES: CalendarService[] = [
   { id: "consulting", label: "Consultoría de marketing digital" },
   { id: "seo-audit", label: "Auditoría SEO" },
+  { id: "website-audit", label: "Auditoría de sitio web" },
   { id: "content-strategy", label: "Estrategia de contenidos" },
   { id: "paid-ads", label: "Publicidad digital (Ads)" },
 ];
@@ -13,6 +14,9 @@ export const BOOKING_TIMEZONE = "America/Mexico_City";
 export const SLOT_START_HOUR = 9;
 export const SLOT_END_HOUR = 17;
 export const SLOT_INTERVAL_MINUTES = 30;
+
+/** Horarios visibles en la columna de tiempos antes de scroll interno. */
+export const TIME_LIST_VISIBLE_SLOTS = 8;
 
 /** Días hábiles disponibles hacia adelante (sin contar hoy si ya pasó horario). */
 export const BOOKING_HORIZON_DAYS = 21;
@@ -41,6 +45,12 @@ export function resolveServiceId(serviceIdOrLabel: string): string {
     (s) => s.id === serviceIdOrLabel || s.label === serviceIdOrLabel,
   );
   return match?.id ?? serviceIdOrLabel;
+}
+
+export const WEBSITE_AUDIT_SERVICE_ID = "website-audit" as const;
+
+export function serviceRequiresWebsite(serviceIdOrLabel: string): boolean {
+  return resolveServiceId(serviceIdOrLabel) === WEBSITE_AUDIT_SERVICE_ID;
 }
 
 export function isWeekday(date: Date): boolean {

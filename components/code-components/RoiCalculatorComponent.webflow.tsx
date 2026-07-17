@@ -87,7 +87,7 @@ export default declareComponent(RoiCalculatorComponent, {
       defaultValue: "Agenda tu auditoría gratuita",
     }),
     ctaUrl: props.Text({
-      name: "URL CTA externa (opcional)",
+      name: "URL redirección tras confirmar cita (opcional)",
       defaultValue: "",
     }),
     calendarService: props.Text({

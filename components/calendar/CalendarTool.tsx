@@ -5,6 +5,7 @@ import {
   getBookableDates,
   getServiceLabel,
   resolveServiceId,
+  serviceRequiresWebsite,
 } from "@/lib/calendar/calendar-rules";
 import { bookAppointment, fetchAvailability } from "@/lib/calendar/client";
 import type { BookingInput, BookingRecord, TimeSlot } from "@/lib/calendar/types";
@@ -45,6 +46,7 @@ export function CalendarTool({
     email: "",
     company: "",
     phone: "",
+    website: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -101,6 +103,20 @@ export function CalendarTool({
       return;
     }
 
+    const phone = form.phone.trim();
+    if (!phone || phone.length < 7) {
+      setFormError("El teléfono es obligatorio.");
+      return;
+    }
+
+    if (serviceRequiresWebsite(service)) {
+      const website = form.website.trim();
+      if (!website) {
+        setFormError("Introduce la URL de tu sitio web actual.");
+        return;
+      }
+    }
+
     onLoading?.(true);
     setIsSubmitting(true);
     setFormError(null);
@@ -109,7 +125,10 @@ export function CalendarTool({
       name: form.name,
       email: form.email,
       company: form.company || undefined,
-      phone: form.phone || undefined,
+      phone: phone,
+      website: serviceRequiresWebsite(service)
+        ? form.website.trim() || undefined
+        : undefined,
       service,
       selectedDate,
       selectedTime,
@@ -138,7 +157,7 @@ export function CalendarTool({
   ]);
 
   return (
-    <div className="cal-step">
+    <div className={`cal-step cal-step-${step}`}>
       <div className="cal-progress">
         <div className="cal-progress-head">
           <span className="cal-progress-label">
@@ -161,7 +180,12 @@ export function CalendarTool({
           <ServiceSelector
             value={service}
             hint="Elige el tipo de sesión que quieres agendar."
-            onChange={setService}
+            onChange={(nextService) => {
+              setService(nextService);
+              if (!serviceRequiresWebsite(nextService)) {
+                setForm((prev) => ({ ...prev, website: "" }));
+              }
+            }}
           />
           <SchedulePicker
             selectedDate={selectedDate}
@@ -203,6 +227,7 @@ export function CalendarTool({
             {getServiceLabel(service)} · {selectedDate} · {selectedTime}
           </p>
           <BookingForm
+            service={service}
             value={form}
             error={formError ?? undefined}
             onChange={(field, value) => {

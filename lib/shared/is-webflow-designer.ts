@@ -24,7 +24,8 @@ export function isWebflowDesignerCanvas(): boolean {
       }
     }
   } catch {
-    return true;
+    // Iframe cross-origin en sitio publicado: no asumir Designer.
+    return false;
   }
 
   return false;

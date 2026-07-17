@@ -11,3 +11,16 @@ export function createId(): string {
 
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
+
+export function navigateToUrl(url: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return;
+  }
+
+  window.location.href = trimmed;
+}

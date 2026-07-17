@@ -69,6 +69,9 @@ function buildCalendarSlackText(
   if (booking.phone) {
     lines.push(`• Teléfono: ${booking.phone}`);
   }
+  if (booking.website) {
+    lines.push(`• Sitio web: ${booking.website}`);
+  }
 
   lines.push(`• ID: ${booking.id}`);
   return lines.join("\n");
@@ -85,6 +88,9 @@ function buildCalendarEventDescription(booking: BookingRecord): string {
   }
   if (booking.phone) {
     lines.push(`Teléfono: ${booking.phone}`);
+  }
+  if (booking.website) {
+    lines.push(`Sitio web: ${booking.website}`);
   }
   return lines.join("\n");
 }
@@ -116,6 +122,7 @@ export function buildCalendarN8nPayload(input: {
       email: string;
       company: string | null;
       phone: string | null;
+      website: string | null;
     };
     slack: {
       channel: string;
@@ -170,6 +177,7 @@ export function buildCalendarN8nPayload(input: {
       email: booking.email,
       company: booking.company ?? null,
       phone: booking.phone ?? null,
+      website: booking.website ?? null,
     },
     slack: {
       channel: "leads-landing-page",
@@ -214,6 +222,7 @@ export function buildCalendarN8nPayload(input: {
         lastName,
         ...(booking.phone ? { phone: booking.phone } : {}),
         ...(booking.company ? { company: booking.company } : {}),
+        ...(booking.website ? { website: booking.website } : {}),
       },
       meeting: {
         title: calendarTitle,

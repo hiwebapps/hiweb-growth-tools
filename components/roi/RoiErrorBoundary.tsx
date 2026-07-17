@@ -1,9 +1,9 @@
 "use client";
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { RoiDesignerPreview, type RoiDesignerPreviewProps } from "./RoiDesignerPreview";
+import { RoiNativeStyles } from "./RoiNativeStyles";
 
-type RoiErrorBoundaryProps = RoiDesignerPreviewProps & {
+type RoiErrorBoundaryProps = {
   children: ReactNode;
 };
 
@@ -22,7 +22,14 @@ export class RoiErrorBoundary extends Component<RoiErrorBoundaryProps, State> {
 
   render() {
     if (this.state.hasError) {
-      return <RoiDesignerPreview {...this.props} />;
+      return (
+        <>
+          <RoiNativeStyles />
+          <p className="roi-error" style={{ textAlign: "center", padding: "2rem" }}>
+            No pudimos cargar la calculadora. Recarga la página e inténtalo de nuevo.
+          </p>
+        </>
+      );
     }
     return this.props.children;
   }

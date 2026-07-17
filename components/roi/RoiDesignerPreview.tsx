@@ -30,9 +30,6 @@ export function RoiDesignerPreview({
   return (
     <div className="roi-root roi-root--card">
       <RoiNativeStyles />
-      <p className="roi-designer-badge">
-        Vista previa en Designer — en el sitio publicado la calculadora es interactiva.
-      </p>
       <div className="roi-card">
         <div className="roi-glow-dot" aria-hidden />
         <div className="roi-card-pad">

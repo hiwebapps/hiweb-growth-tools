@@ -16,6 +16,7 @@ export type CalendarBookingButtonProps = {
   submitLabel?: string;
   successTitle?: string;
   successMessage?: string;
+  successRedirectUrl?: string;
   className?: string;
   disabled?: boolean;
 };
@@ -28,6 +29,7 @@ export function CalendarBookingButton({
   successTitle = "Cita confirmada",
   successMessage =
     "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
+  successRedirectUrl,
   className,
   disabled = false,
 }: CalendarBookingButtonProps) {
@@ -71,6 +73,7 @@ export function CalendarBookingButton({
             submitLabel={submitLabel}
             successTitle={successTitle}
             successMessage={successMessage}
+            successRedirectUrl={successRedirectUrl}
           />
         </Suspense>
       ) : null}

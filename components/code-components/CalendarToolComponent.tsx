@@ -8,6 +8,7 @@ import type { BookingRecord } from "@/lib/calendar/types";
 import type { CodeComponentBaseProps, ToolViewState } from "@/lib/shared/code-component";
 import { mergeProps } from "@/lib/shared/code-component";
 import { isWebflowDesignerCanvas } from "@/lib/shared/is-webflow-designer";
+import { navigateToUrl } from "@/lib/shared/utils";
 
 const CalendarToolLazy = lazy(() =>
   import("@/components/calendar/CalendarTool").then((m) => ({
@@ -21,6 +22,7 @@ export type CalendarToolComponentProps = CodeComponentBaseProps & {
   submitButtonLabel?: string;
   successTitle?: string;
   successMessage?: string;
+  successRedirectUrl?: string;
 };
 
 const DEFAULTS: CalendarToolComponentProps = {
@@ -51,6 +53,7 @@ export function CalendarToolComponent(
     submitButtonLabel,
     successTitle,
     successMessage,
+    successRedirectUrl,
   } = props;
 
   const [viewState, setViewState] = useState<ToolViewState>("intro");
@@ -79,10 +82,15 @@ export function CalendarToolComponent(
       if (previewState) {
         return;
       }
+      const redirectUrl = successRedirectUrl?.trim();
+      if (redirectUrl) {
+        navigateToUrl(redirectUrl);
+        return;
+      }
       setBooking(record);
       setViewState("success");
     },
-    [previewState],
+    [previewState, successRedirectUrl],
   );
 
   const shellClass = `cal-stitch cal-root ${className ?? ""}`.trim();

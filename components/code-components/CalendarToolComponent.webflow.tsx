@@ -20,6 +20,7 @@ export default declareComponent(CalendarToolComponent, {
       options: [
         "consulting",
         "seo-audit",
+        "website-audit",
         "content-strategy",
         "paid-ads",
       ],
@@ -41,6 +42,10 @@ export default declareComponent(CalendarToolComponent, {
       name: "Mensaje éxito",
       defaultValue:
         "Hemos registrado tu solicitud. Recibirás un correo con los detalles.",
+    }),
+    successRedirectUrl: props.Text({
+      name: "URL redirección al confirmar (opcional)",
+      defaultValue: "",
     }),
   },
   options: {
